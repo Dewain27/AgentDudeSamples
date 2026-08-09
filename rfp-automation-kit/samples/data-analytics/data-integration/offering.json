@@ -1,0 +1,70 @@
+{
+  "offering": {
+    "id": "data-integration",
+    "line": "data-analytics",
+    "name": "Data Integration & Pipelines",
+    "tagline": "Move data reliably between the systems that need it.",
+    "summary": "design and delivery of reliable, monitored data pipelines that move and transform data between systems, eliminating manual exports and dual entry",
+    "target_industries": [
+      "healthcare",
+      "financial services",
+      "manufacturing",
+      "retail",
+      "education",
+      "government"
+    ],
+    "capabilities": [
+      "Automated extract, transform, and load (ETL/ELT) pipelines",
+      "Scheduled and event-driven data movement",
+      "Data validation and reconciliation",
+      "Error handling, retries, and alerting",
+      "Data lineage and processing audit trail",
+      "Secure handling of sensitive fields"
+    ],
+    "typical_requirements": [
+      "Eliminate manual data exports and dual entry",
+      "Move data automatically between systems on a schedule or event",
+      "Validate and reconcile data in flight",
+      "Alert on failures with clear diagnostics",
+      "Maintain lineage and an audit trail",
+      "Handle sensitive fields securely"
+    ],
+    "integrations": [
+      "each source and destination system",
+      "the identity provider (SSO)",
+      "monitoring/alerting channels"
+    ],
+    "compliance": [
+      "SOC 2",
+      "data-governance and retention policies"
+    ],
+    "differentiators": [
+      "Reconciliation built in \u2014 you know the data arrived intact",
+      "Observable pipelines with lineage and clear failure alerts"
+    ],
+    "pricing_model": "Fixed price by workstream, invoiced on milestones",
+    "price_low": 160000,
+    "price_high": 450000,
+    "timeline_months": 6,
+    "success_metrics": [
+      "manual exports and dual entry eliminated",
+      "data moved reliably with reconciliation",
+      "failures surfaced and resolved via alerting"
+    ],
+    "snippets": {
+      "understanding": "Your teams manually export and re-key data between systems, and errors slip through unnoticed. You need automated, monitored pipelines you can trust.",
+      "solution": "We will build automated ETL/ELT pipelines \u2014 scheduled or event-driven \u2014 that move and transform data between your systems with validation, reconciliation, lineage, and clear failure alerting, so manual exports and dual entry go away."
+    }
+  },
+  "product_line": {
+    "name": "Data & Analytics",
+    "summary": "Data platforms, pipelines, and analytics that turn scattered data into decisions."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-DATA809",
+    "buyer_name": "Cascade Family Medicine",
+    "industry": "healthcare",
+    "issued_date": "2026-07-16",
+    "proposals_due": "2026-08-15"
+  }
+}

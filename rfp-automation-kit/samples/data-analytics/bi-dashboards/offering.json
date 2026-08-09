@@ -1,0 +1,71 @@
+{
+  "offering": {
+    "id": "bi-dashboards",
+    "line": "data-analytics",
+    "name": "Business Intelligence & Dashboards",
+    "tagline": "Self-service dashboards your business teams actually use.",
+    "summary": "design and delivery of governed, self-service dashboards and reporting that give business users answers without waiting on IT",
+    "target_industries": [
+      "retail",
+      "financial services",
+      "manufacturing",
+      "healthcare",
+      "education",
+      "government",
+      "nonprofit"
+    ],
+    "capabilities": [
+      "Executive and operational dashboards",
+      "Self-service reporting for business users",
+      "Governed metric definitions everyone shares",
+      "Scheduled and ad-hoc report export",
+      "Drill-down from summary to detail",
+      "Role-based access to sensitive views"
+    ],
+    "typical_requirements": [
+      "Replace static reports with interactive dashboards",
+      "Let business users answer their own questions",
+      "Agree on shared, governed metric definitions",
+      "Support scheduled and ad-hoc exports",
+      "Enforce role-based access to sensitive data",
+      "Connect to existing data sources"
+    ],
+    "integrations": [
+      "the data warehouse or source systems",
+      "the identity provider (SSO)",
+      "email/scheduling for report delivery"
+    ],
+    "compliance": [
+      "SOC 2",
+      "WCAG 2.1 AA"
+    ],
+    "differentiators": [
+      "Governed metrics prevent duplicate, conflicting definitions",
+      "Designed for adoption \u2014 business users, not just analysts"
+    ],
+    "pricing_model": "Fixed price by workstream, invoiced on milestones",
+    "price_low": 150000,
+    "price_high": 400000,
+    "timeline_months": 5,
+    "success_metrics": [
+      "static reports replaced by interactive dashboards",
+      "self-service adoption by business teams",
+      "a shared, governed set of metric definitions in use"
+    ],
+    "snippets": {
+      "understanding": "Leaders wait on IT for static reports, and different teams define the same metric differently. You want governed, self-service dashboards people trust and actually use.",
+      "solution": "We will deliver executive and operational dashboards on a governed set of metric definitions, with self-service exploration, drill-down, and scheduled exports \u2014 designed for adoption by business users, with role-based access to sensitive views."
+    }
+  },
+  "product_line": {
+    "name": "Data & Analytics",
+    "summary": "Data platforms, pipelines, and analytics that turn scattered data into decisions."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-BI-D620",
+    "buyer_name": "Trailhead Outfitters",
+    "industry": "retail",
+    "issued_date": "2026-06-24",
+    "proposals_due": "2026-07-24"
+  }
+}

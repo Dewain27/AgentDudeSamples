@@ -1,0 +1,70 @@
+{
+  "offering": {
+    "id": "systems-integration",
+    "line": "integration",
+    "name": "Enterprise Systems Integration",
+    "tagline": "Make the systems you already own work together.",
+    "summary": "integration of disparate enterprise systems into coordinated, automated workflows that eliminate manual hand-offs and dual data entry",
+    "target_industries": [
+      "healthcare",
+      "financial services",
+      "manufacturing",
+      "retail",
+      "education",
+      "government"
+    ],
+    "capabilities": [
+      "Point-to-point and hub-based integration",
+      "Automated cross-system workflows",
+      "Data mapping and transformation",
+      "Reliable messaging with retries and dead-letter handling",
+      "Monitoring and reconciliation across systems",
+      "Documentation of every interface"
+    ],
+    "typical_requirements": [
+      "Connect disparate systems into coordinated workflows",
+      "Eliminate manual hand-offs and dual data entry",
+      "Map and transform data between systems",
+      "Guarantee reliable delivery with retries",
+      "Monitor and reconcile cross-system data",
+      "Document all interfaces"
+    ],
+    "integrations": [
+      "each system being connected",
+      "the identity provider (SSO)",
+      "monitoring/alerting channels"
+    ],
+    "compliance": [
+      "SOC 2",
+      "data-governance and retention policies"
+    ],
+    "differentiators": [
+      "Reliable messaging with retries and reconciliation, not fragile scripts",
+      "Every interface documented and monitored"
+    ],
+    "pricing_model": "Fixed price by workstream, invoiced on milestones",
+    "price_low": 190000,
+    "price_high": 550000,
+    "timeline_months": 7,
+    "success_metrics": [
+      "manual hand-offs and dual entry eliminated",
+      "cross-system workflows automated and monitored",
+      "every interface documented and reconciled"
+    ],
+    "snippets": {
+      "understanding": "Your systems don't talk to each other, so staff re-key data and coordinate by email and spreadsheet. You need them integrated into reliable, automated workflows.",
+      "solution": "We will integrate your systems with reliable messaging, data mapping and transformation, and automated cross-system workflows \u2014 with retries, reconciliation, monitoring, and full interface documentation so the integrations stay dependable."
+    }
+  },
+  "product_line": {
+    "name": "Integration & APIs",
+    "summary": "Connecting the systems an organization already runs."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-SYST284",
+    "buyer_name": "Riverside Health Partners",
+    "industry": "healthcare",
+    "issued_date": "2026-06-15",
+    "proposals_due": "2026-07-15"
+  }
+}

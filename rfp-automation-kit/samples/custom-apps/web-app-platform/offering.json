@@ -1,0 +1,69 @@
+{
+  "offering": {
+    "id": "web-app-platform",
+    "line": "custom-apps",
+    "name": "Custom Web Application Platform",
+    "tagline": "A tailored web application built around your workflows.",
+    "summary": "design and delivery of a custom, cloud-hosted web application built around the organization's specific workflows, users, and data",
+    "target_industries": [
+      "financial services",
+      "manufacturing",
+      "nonprofit",
+      "government",
+      "education"
+    ],
+    "capabilities": [
+      "Custom workflow and business-process automation",
+      "Role-based dashboards for staff, managers, and executives",
+      "Configurable forms, records, and approval flows",
+      "Reporting and data export",
+      "Responsive design for desktop and tablet",
+      "Full audit trail of records and changes"
+    ],
+    "typical_requirements": [
+      "Replace manual or spreadsheet-based processes with a single web application",
+      "Role-based access for different user groups",
+      "Configurable approval workflows",
+      "Reporting and export for leadership",
+      "Audit trail of all changes",
+      "Integration with the existing system of record"
+    ],
+    "integrations": [
+      "the existing system of record",
+      "the identity provider (SSO)",
+      "a reporting / BI tool"
+    ],
+    "compliance": [
+      "SOC 2",
+      "WCAG 2.1 AA"
+    ],
+    "differentiators": [
+      "Built around your actual workflows, not a rigid off-the-shelf template",
+      "You own the source code and infrastructure outright"
+    ],
+    "pricing_model": "Fixed price by workstream, invoiced on milestones",
+    "price_low": 220000,
+    "price_high": 550000,
+    "timeline_months": 7,
+    "success_metrics": [
+      "manual/spreadsheet processes replaced by a single application",
+      "reporting cycle time reduced from days to minutes",
+      "adoption by the majority of intended users within one quarter"
+    ],
+    "snippets": {
+      "understanding": "You need a single, purpose-built web application that replaces manual and spreadsheet-based work, gives each role the view it needs, and produces reliable reporting for leadership.",
+      "solution": "We will design and build a custom web application shaped around your workflows: configurable forms and approval flows, role-based dashboards, a complete audit trail, and reporting your team can run without IT. It is cloud-hosted and integrates with your existing system of record."
+    }
+  },
+  "product_line": {
+    "name": "Custom Application Development",
+    "summary": "Bespoke web and mobile applications and modernization of legacy systems."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-WEB-237",
+    "buyer_name": "Harbor Point Bank",
+    "industry": "financial services",
+    "issued_date": "2026-02-20",
+    "proposals_due": "2026-03-22"
+  }
+}

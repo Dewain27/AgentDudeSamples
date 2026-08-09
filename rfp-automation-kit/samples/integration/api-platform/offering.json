@@ -1,0 +1,69 @@
+{
+  "offering": {
+    "id": "api-platform",
+    "line": "integration",
+    "name": "API Development & Management",
+    "tagline": "Turn your systems and data into governed, reusable APIs.",
+    "summary": "design, build, and management of secure, documented APIs that expose the organization's systems and data for internal and partner use",
+    "target_industries": [
+      "financial services",
+      "healthcare",
+      "retail",
+      "government",
+      "manufacturing"
+    ],
+    "capabilities": [
+      "RESTful API design following clear standards",
+      "API gateway, authentication, and rate limiting",
+      "Interactive, versioned API documentation",
+      "Developer onboarding and access management",
+      "Usage monitoring and analytics",
+      "Backward-compatible versioning"
+    ],
+    "typical_requirements": [
+      "Expose internal systems and data through secure APIs",
+      "Govern access with authentication and rate limiting",
+      "Provide clear, versioned documentation",
+      "Onboard internal or partner developers",
+      "Monitor API usage and performance",
+      "Support backward-compatible versioning"
+    ],
+    "integrations": [
+      "the systems of record being exposed",
+      "the identity provider (SSO / OAuth)",
+      "the API gateway and monitoring tools"
+    ],
+    "compliance": [
+      "SOC 2",
+      "data-governance and retention policies"
+    ],
+    "differentiators": [
+      "Standards-based, versioned APIs partners can build on",
+      "Governance and monitoring built into the gateway"
+    ],
+    "pricing_model": "Fixed price by workstream, invoiced on milestones",
+    "price_low": 170000,
+    "price_high": 450000,
+    "timeline_months": 6,
+    "success_metrics": [
+      "systems exposed through secure, documented APIs",
+      "developer onboarding self-service and governed",
+      "API usage monitored and performant"
+    ],
+    "snippets": {
+      "understanding": "You want to unlock the data and functions trapped in your systems \u2014 for internal teams or partners \u2014 through secure, well-governed APIs rather than one-off point integrations.",
+      "solution": "We will design standards-based REST APIs, front them with a gateway that handles authentication, rate limiting, and monitoring, and publish interactive, versioned documentation with self-service developer onboarding."
+    }
+  },
+  "product_line": {
+    "name": "Integration & APIs",
+    "summary": "Connecting the systems an organization already runs."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-API-188",
+    "buyer_name": "Summit Ridge Credit Union",
+    "industry": "financial services",
+    "issued_date": "2026-05-14",
+    "proposals_due": "2026-06-13"
+  }
+}

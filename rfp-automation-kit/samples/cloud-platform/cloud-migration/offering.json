@@ -1,0 +1,70 @@
+{
+  "offering": {
+    "id": "cloud-migration",
+    "line": "cloud-platform",
+    "name": "Cloud Migration",
+    "tagline": "Move to the cloud with a plan, not a leap of faith.",
+    "summary": "assessment, planning, and execution of a migration from on-premises or legacy hosting to a modern, cost-efficient cloud environment",
+    "target_industries": [
+      "financial services",
+      "healthcare",
+      "government",
+      "manufacturing",
+      "education",
+      "retail"
+    ],
+    "capabilities": [
+      "Migration assessment and readiness roadmap",
+      "Landing-zone and network design",
+      "Infrastructure-as-code environment build",
+      "Application migration and validation",
+      "Cost optimization and right-sizing",
+      "Cutover and rollback planning"
+    ],
+    "typical_requirements": [
+      "Move applications off on-premises or legacy hosting",
+      "Design a secure, well-architected cloud landing zone",
+      "Migrate with minimal downtime",
+      "Optimize and forecast cloud cost",
+      "Provide infrastructure-as-code for repeatability",
+      "Plan cutover and rollback"
+    ],
+    "integrations": [
+      "existing on-prem systems during transition",
+      "the identity provider (SSO)",
+      "monitoring and cost-management tooling"
+    ],
+    "compliance": [
+      "SOC 2",
+      "ISO/IEC 27001"
+    ],
+    "differentiators": [
+      "Well-architected landing zone from day one, not retrofitted",
+      "Cost modeling so the cloud bill holds no surprises"
+    ],
+    "pricing_model": "Fixed price per phase, invoiced on milestones",
+    "price_low": 200000,
+    "price_high": 700000,
+    "timeline_months": 8,
+    "success_metrics": [
+      "applications migrated with minimal downtime",
+      "a secure, repeatable landing zone in infrastructure-as-code",
+      "cloud cost forecasted and optimized"
+    ],
+    "snippets": {
+      "understanding": "You are moving off aging on-premises or legacy hosting and need a migration that is secure, low-risk, and cost-predictable \u2014 not a leap of faith.",
+      "solution": "We start with an assessment and readiness roadmap, design a well-architected landing zone, build it as infrastructure-as-code, and migrate applications in planned waves with validation, cost optimization, and rollback plans at each cutover."
+    }
+  },
+  "product_line": {
+    "name": "Cloud & Platform Engineering",
+    "summary": "Cloud migration and the automation that keeps modern platforms reliable."
+  },
+  "rfp_context": {
+    "rfp_id": "RFP-2026-CLOU543",
+    "buyer_name": "Harbor Point Bank",
+    "industry": "financial services",
+    "issued_date": "2026-06-24",
+    "proposals_due": "2026-07-24"
+  }
+}
