@@ -1,0 +1,66 @@
+{
+  "skill_name": "rfp-response",
+  "evals": [
+    {
+      "id": 0,
+      "name": "clean-match-permitting-portal",
+      "prompt": "We're going to bid on this one. Can you put together our proposal? Here's what they sent:\n\n---\nCITY OF WESTBROOK \u2014 REQUEST FOR PROPOSAL\nRFP No. WB-2026-031: Online Permitting and Licensing Portal\nIssued: January 12, 2026 | Questions due: January 22, 2026\nProposals due: February 11, 2026, 5:00 PM | Award: March 4, 2026 | Start: March 18, 2026\n\nThe City of Westbrook (population 96,000) seeks a vendor to deliver a public-facing portal for building permits, business licenses, and code-enforcement service requests. Today residents and contractors must visit the Permit Center in person; staff track applications on paper and in a shared spreadsheet. Average building-permit turnaround is 27 business days.\n\nRequirements:\n1. Online application submission for permits and licenses, with document upload\n2. Applicant status tracking and email/SMS notification of status changes\n3. Configurable staff review and approval routing across departments\n4. Online fee payment with receipts\n5. Public dashboard showing application volumes and average processing times\n6. Integration with our Esri ArcGIS parcel data\n7. Integration with our Tyler Technologies financial system for fee posting\n8. Single sign-on for staff via our existing Okta tenant\n9. Section 508 and WCAG 2.1 AA conformance\n10. Retention of application records per state schedule (7 years)\n\nEstimated budget: $450,000 - $900,000.\n\nEvaluation: Technical approach 30, Relevant municipal experience 25, Cost 20, Team 15, Timeline 10.\n\nSubmit to Ms. Rhonda Pike, Procurement Manager, quoting RFP No. WB-2026-031.\n---",
+      "expected_output": "A complete proposal in Markdown plus a rendered PDF, matched to the constituent-portal offering, addressing all 10 requirements and naming ArcGIS/Tyler/Okta specifically, priced as a fixed fee inside $450k-$900k, quoting RFP No. WB-2026-031 and addressed to Rhonda Pike.",
+      "files": [],
+      "assertions": [
+        "Matches the request to the constituent-portal offering (permitting/licensing portal), not a generic custom web app",
+        "Addresses all 10 numbered requirements from the RFP",
+        "Names the buyer's actual systems by name: Esri ArcGIS, Tyler Technologies, and Okta",
+        "Quotes the buyer's reference number RFP No. WB-2026-031",
+        "Cover letter is addressed to Rhonda Pike",
+        "States a fixed fee that falls inside the stated budget of $450,000-$900,000",
+        "Addresses Section 508 and WCAG 2.1 AA conformance",
+        "Visibly addresses each of the 5 stated evaluation criteria (technical approach, municipal experience, cost, team, timeline)",
+        "A rendered PDF file was produced alongside the Markdown"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "ambiguous-match-uncovered-requirement",
+      "prompt": "Northfield sent over their analytics RFP (it's at .claude/skills/rfp-response/evals/files/hitrust-analytics-rfp.md). Draft our response please. I want to be able to hand this to our proposal reviewer, so be straight with me about anything you weren't sure about.",
+      "expected_output": "A proposal matched primarily to data-warehouse (governed single source of truth) with BI dashboards presented as part of the scope or a second workstream. Critically, the HITRUST CSF certification requirement (4.3.2) must be flagged as not covered by approved answers rather than fabricated, and surfaced in the closing summary. Priced inside $400k-$850k, addressed to Angela Voss, quoting RFP #NRHS-2026-114.",
+      "files": [
+        ".claude/skills/rfp-response/evals/files/hitrust-analytics-rfp.md"
+      ],
+      "assertions": [
+        "Leads with the data-warehouse offering (governed single source of truth), with dashboards/BI included as scope rather than proposing dashboards alone",
+        "Does NOT claim Aventra holds HITRUST CSF certification",
+        "Explicitly flags the HITRUST CSF requirement (4.3.2) as not covered by approved answers / needing confirmation before submission",
+        "The HITRUST gap is surfaced in the closing summary to the user, not only buried in the document body",
+        "Names the actual source systems from the RFP (Epic, Workday, Kronos, Premier, Press Ganey)",
+        "Addresses the conflicting departmental definitions of 'patient encounters' via governed metric definitions",
+        "States a fixed fee inside the stated budget of $400,000-$850,000",
+        "Quotes RFP #NRHS-2026-114 and is addressed to Angela Voss",
+        "Acknowledges the buyer's stated preference for their existing Azure tenancy",
+        "A rendered PDF file was produced alongside the Markdown"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "prescribed-structure-under-budget",
+      "prompt": "Need our tender for the Cedar Valley water district job - the ITT doc is in .claude/skills/rfp-response/evals/files/fieldwork-mobile-rfp.md. Their budget looks tight to me but see what you can do. PDF please.",
+      "expected_output": "A tender following the buyer's mandated Part A-H structure (NOT the skill's default 12-section layout), including a Part B compliance table covering R1-R11. Matched to mobile-app-suite. Because the $180,000 cap is below the offering's indicative floor, the response should propose a reduced or phased scope at a deliverable price rather than silently squeezing the number, and say what is deferred. Rendered as a PDF, quoting ITT 2026-07, addressed to Derek Nowak.",
+      "files": [
+        ".claude/skills/rfp-response/evals/files/fieldwork-mobile-rfp.md"
+      ],
+      "assertions": [
+        "Follows the buyer's mandated Part A through Part H structure rather than the skill's default 12-section layout",
+        "Part B contains a compliance table covering every requirement R1-R11 with a Fully/Partially/Not Compliant status per row",
+        "Matches the request to the mobile-app-suite offering",
+        "Total quoted price is at or below the hard cap of $180,000",
+        "Explicitly acknowledges that the budget is below full delivery scope and proposes a reduced or phased scope rather than silently squeezing the price",
+        "States specifically which functionality is deferred to a later phase",
+        "Treats mandatory offline operation (R2) as a first-class part of the technical solution",
+        "Names the buyer's actual systems: Cityworks and Microsoft/Entra accounts",
+        "Quotes ITT 2026-07 and is addressed to Derek Nowak",
+        "A rendered PDF file was produced",
+        "Respects the 20-page limit"
+      ]
+    }
+  ]
+}

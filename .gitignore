@@ -13,3 +13,6 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Skill eval workspace (regenerate with the skill-creator loop)
+/rfp-response-workspace/
