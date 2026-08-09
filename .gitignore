@@ -16,3 +16,6 @@ venv/
 
 # Skill eval workspace (regenerate with the skill-creator loop)
 /rfp-response-workspace/
+
+# Build output (rebuild: python tools/build_copilot_studio_package.py)
+/dist/
