@@ -268,10 +268,24 @@ HEADER_TEMPLATE = '<div style="font-size:1px; color:transparent;">.</div>'
 # Markdown -> HTML
 # ---------------------------------------------------------------------------
 
-# Body sections are numbered (`## 1. Introduction`, `## 1. Cover letter`).
-# Match only those: responses also use a bare `## <offering>` line as a
-# subtitle, which belongs on the cover, not at the start of the body.
-_SECTION_RE = re.compile(r"^## \d+\. ", re.MULTILINE)
+_H1_RE = re.compile(r"^# .+$", re.MULTILINE)
+_HEADING_RE = re.compile(r"^## .+$", re.MULTILINE)
+
+
+def _find_body_start(md_text):
+    """Return the offset where the cover ends and the body begins.
+
+    Body sections may be numbered (`## 1. Introduction`) or lettered
+    (`## Part A — Tenderer details`) when a buyer mandates their own scheme.
+    An H2 sitting directly under the H1 is the document subtitle and stays on
+    the cover. Returns None if there is no body heading at all.
+    """
+    h1 = _H1_RE.search(md_text)
+    for i, heading in enumerate(_HEADING_RE.finditer(md_text)):
+        if i == 0 and h1 and not md_text[h1.end():heading.start()].strip():
+            continue
+        return heading.start()
+    return None
 
 # The metadata tables are written as headerless Markdown (`| | |`), which the
 # converter turns into a <thead> of empty cells. Left in place it prints as a
@@ -292,10 +306,10 @@ def _split_cover(md_text: str):
 
     The cover is everything before the first numbered `## ` section.
     """
-    match = _SECTION_RE.search(md_text)
-    if not match:
+    split = _find_body_start(md_text)
+    if split is None:
         return md_text, ""
-    return md_text[: match.start()], md_text[match.start():]
+    return md_text[:split], md_text[split:]
 
 
 def _build_html(md_text: str, kind: str) -> str:

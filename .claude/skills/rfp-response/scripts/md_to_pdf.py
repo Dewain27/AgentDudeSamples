@@ -109,9 +109,29 @@ FOOTER = """
 </div>
 """
 
-# Body sections are numbered (`## 1. Cover letter`). Match only those so a bare
-# `## <subtitle>` line under the title stays on the cover page where it belongs.
-SECTION_RE = re.compile(r"^## \d+\.?\s", re.MULTILINE)
+H1_RE = re.compile(r"^# .+$", re.MULTILINE)
+HEADING_RE = re.compile(r"^## .+$", re.MULTILINE)
+
+
+def find_body_start(md_text):
+    """Return the offset where the cover ends and the body begins.
+
+    The cover is the title block: an H1, an optional H2 subtitle directly
+    beneath it, the submitted-by lines, and the metadata table. The body starts
+    at the first real section heading — which may be numbered (`## 1. Cover
+    letter`) or lettered (`## Part A — Tenderer details`), since buyers
+    routinely mandate their own section scheme and a compliant response has to
+    follow it. Returns None when there is no body heading, leaving the whole
+    document on the cover.
+    """
+    h1 = H1_RE.search(md_text)
+    for i, heading in enumerate(HEADING_RE.finditer(md_text)):
+        if i == 0 and h1 and not md_text[h1.end():heading.start()].strip():
+            # An H2 directly under the H1, nothing in between, is the document
+            # subtitle rather than the first section — keep it on the cover.
+            continue
+        return heading.start()
+    return None
 EMPTY_THEAD_RE = re.compile(
     r"<thead>\s*<tr>\s*(?:<th[^>]*>\s*</th>\s*)+</tr>\s*</thead>", re.DOTALL
 )
@@ -125,9 +145,9 @@ def _tidy(html):
 def build_html(md_text, kind):
     import markdown as md
 
-    match = SECTION_RE.search(md_text)
+    split = find_body_start(md_text)
     cover_md, body_md = (
-        (md_text[: match.start()], md_text[match.start():]) if match else (md_text, "")
+        (md_text[:split], md_text[split:]) if split is not None else (md_text, "")
     )
 
     # nl2br on the cover only: its address-style lines must stay stacked, while
