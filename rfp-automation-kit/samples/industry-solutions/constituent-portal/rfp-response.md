@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-CONS453
 ## Constituent Services & Permitting Portal
 
-**Submitted by Aventra Software Group** — Industry Solutions
+**Submitted by Aventra Software Group** — Industry Solutions  
 Prepared for **City of Lakemont**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **City of Lakemont**
 
 September 16, 2026
 
-James Whitfield, Chief Operating Officer
+James Whitfield, Chief Operating Officer  
 City of Lakemont
 
 Dear James Whitfield,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

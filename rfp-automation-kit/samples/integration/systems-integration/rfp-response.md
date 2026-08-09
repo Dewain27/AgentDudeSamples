@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-SYST284
 ## Enterprise Systems Integration
 
-**Submitted by Aventra Software Group** — Integration & APIs
+**Submitted by Aventra Software Group** — Integration & APIs  
 Prepared for **Riverside Health Partners**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Riverside Health Partners**
 
 July 15, 2026
 
-Denise Park, Procurement Manager
+Denise Park, Procurement Manager  
 Riverside Health Partners
 
 Dear Denise Park,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-WEB-237
 ## Custom Web Application Platform
 
-**Submitted by Aventra Software Group** — Custom Application Development
+**Submitted by Aventra Software Group** — Custom Application Development  
 Prepared for **Harbor Point Bank**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Harbor Point Bank**
 
 March 22, 2026
 
-James Whitfield, Chief Operating Officer
+James Whitfield, Chief Operating Officer  
 Harbor Point Bank
 
 Dear James Whitfield,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

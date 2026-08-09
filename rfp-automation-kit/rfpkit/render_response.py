@@ -28,6 +28,15 @@ def _bullets(items):
     return "\n".join(f"- {i}" for i in items)
 
 
+def _stacked(*parts):
+    """Join lines with Markdown hard breaks.
+
+    Address and signature blocks must stay on separate lines; a plain newline
+    would be collapsed into a space by any Markdown renderer.
+    """
+    return "  \n".join(p for p in parts if p)
+
+
 def _date(d):
     return d.strftime("%B %d, %Y")
 
@@ -100,8 +109,7 @@ def render(offering: dict) -> str:
 # Proposal in Response to {ctx['rfp_id']}
 ## {offering['name']}
 
-**Submitted by {VENDOR['name']}** — {line['name']}
-Prepared for **{ctx['buyer_name']}**
+{_stacked(f"**Submitted by {VENDOR['name']}** — {line['name']}", f"Prepared for **{ctx['buyer_name']}**")}
 
 | | |
 | --- | --- |
@@ -118,8 +126,7 @@ Prepared for **{ctx['buyer_name']}**
 
 {_date(ctx['proposals_due'])}
 
-{ctx['contact_name']}, {ctx['contact_title']}
-{ctx['buyer_name']}
+{_stacked(f"{ctx['contact_name']}, {ctx['contact_title']}", ctx['buyer_name'])}
 
 Dear {ctx['contact_name']},
 
@@ -132,9 +139,7 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, {VENDOR['name']}
-{VENDOR['email']} · {VENDOR['phone']}
+{_stacked("**Priya Raman**", f"Engagement Director, {VENDOR['name']}", f"{VENDOR['email']} · {VENDOR['phone']}")}
 
 ## 2. Executive summary
 

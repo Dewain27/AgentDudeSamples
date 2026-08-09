@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-LEGA986
 ## Legacy Application Modernization
 
-**Submitted by Aventra Software Group** — Custom Application Development
+**Submitted by Aventra Software Group** — Custom Application Development  
 Prepared for **Franklin County**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Franklin County**
 
 May 13, 2026
 
-Karen Alvarez, Director of Information Technology
+Karen Alvarez, Director of Information Technology  
 Franklin County
 
 Dear Karen Alvarez,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

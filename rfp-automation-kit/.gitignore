@@ -11,4 +11,5 @@ venv/
 .idea/
 .vscode/
 
-# Note: samples/ and data/catalog.json ARE committed — they are the deliverable.
+# Note: samples/ (including the .pdf files) and data/catalog.json ARE committed —
+# they are the deliverable.

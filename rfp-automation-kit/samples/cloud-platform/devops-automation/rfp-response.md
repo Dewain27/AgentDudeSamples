@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-DEVO593
 ## DevOps & Platform Automation
 
-**Submitted by Aventra Software Group** — Cloud & Platform Engineering
+**Submitted by Aventra Software Group** — Cloud & Platform Engineering  
 Prepared for **Harbor Point Bank**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Harbor Point Bank**
 
 July 06, 2026
 
-Andrew Boyd, Chief Information Officer
+Andrew Boyd, Chief Information Officer  
 Harbor Point Bank
 
 Dear Andrew Boyd,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

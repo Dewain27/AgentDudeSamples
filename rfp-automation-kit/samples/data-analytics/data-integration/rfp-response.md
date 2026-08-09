@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-DATA809
 ## Data Integration & Pipelines
 
-**Submitted by Aventra Software Group** — Data & Analytics
+**Submitted by Aventra Software Group** — Data & Analytics  
 Prepared for **Cascade Family Medicine**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Cascade Family Medicine**
 
 August 15, 2026
 
-Robert Chen, VP of Operations
+Robert Chen, VP of Operations  
 Cascade Family Medicine
 
 Dear Robert Chen,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

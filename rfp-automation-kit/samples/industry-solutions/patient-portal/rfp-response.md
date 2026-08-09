@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-PATI805
 ## Patient Engagement Portal
 
-**Submitted by Aventra Software Group** — Industry Solutions
+**Submitted by Aventra Software Group** — Industry Solutions  
 Prepared for **Cascade Family Medicine**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Cascade Family Medicine**
 
 June 22, 2026
 
-James Whitfield, Chief Operating Officer
+James Whitfield, Chief Operating Officer  
 Cascade Family Medicine
 
 Dear James Whitfield,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

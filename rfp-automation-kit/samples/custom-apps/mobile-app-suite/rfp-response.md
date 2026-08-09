@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-MOBI329
 ## Mobile Application Suite
 
-**Submitted by Aventra Software Group** — Custom Application Development
+**Submitted by Aventra Software Group** — Custom Application Development  
 Prepared for **Pacific Coast Foods**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Pacific Coast Foods**
 
 October 18, 2026
 
-Andrew Boyd, Chief Information Officer
+Andrew Boyd, Chief Information Officer  
 Pacific Coast Foods
 
 Dear Andrew Boyd,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary

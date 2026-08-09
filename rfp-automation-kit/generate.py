@@ -10,6 +10,8 @@ Commands
     python generate.py list                 List product lines and offerings.
     python generate.py build                Generate samples for every offering.
     python generate.py build --offering ID  Generate samples for one offering.
+    python generate.py pdf                  Render every sample as a formatted PDF.
+    python generate.py pdf --offering ID    Render PDFs for one offering.
     python generate.py export               Write data/catalog.json (machine-readable).
     python generate.py answer "QUESTION"    Auto-match an RFP question to a library answer.
     python generate.py draft --offering ID  Assemble an automated draft from the offering's requirements.
@@ -94,6 +96,35 @@ def cmd_build(args):
 
 
 # ---------------------------------------------------------------------------
+# pdf
+# ---------------------------------------------------------------------------
+
+def cmd_pdf(args):
+    from rfpkit import render_pdf
+
+    out = Path(args.out)
+    targets = [models.offering_by_id(args.offering)] if args.offering else OFFERINGS
+
+    # Render the Markdown fresh so PDFs never lag behind the catalog.
+    try:
+        with render_pdf.PdfSession() as session:
+            count = 0
+            for o in targets:
+                ctx = models.derive_context(o)
+                folder = out / o["line"] / o["id"]
+                for kind, renderer in (("request", render_request), ("response", render_response)):
+                    label = f"{ctx['rfp_id']} · {o['name']}"
+                    path = folder / f"rfp-{kind}.pdf"
+                    session.render(renderer(o), path, kind, label)
+                    count += 1
+                print(f"pdf  {folder}/rfp-request.pdf, rfp-response.pdf")
+            print(f"\nRendered {count} PDFs for {len(targets)} offering(s) in {out}/")
+    except render_pdf.MissingPdfDependencies as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+# ---------------------------------------------------------------------------
 # export (machine-readable catalog for the automation implementation)
 # ---------------------------------------------------------------------------
 
@@ -160,6 +191,10 @@ def build_parser():
     b.add_argument("--out", default="samples", help="Output directory (default: samples).")
     b.add_argument("--offering", help="Build only this offering id.")
 
+    pf = sub.add_parser("pdf", help="Render samples as formatted PDFs (needs requirements-pdf.txt).")
+    pf.add_argument("--out", default="samples", help="Output directory (default: samples).")
+    pf.add_argument("--offering", help="Render only this offering id.")
+
     e = sub.add_parser("export", help="Write the machine-readable catalog JSON.")
     e.add_argument("--out", default="data/catalog.json", help="Output path (default: data/catalog.json).")
 
@@ -179,6 +214,7 @@ def main(argv=None):
     handlers = {
         "list": cmd_list,
         "build": cmd_build,
+        "pdf": cmd_pdf,
         "export": cmd_export,
         "answer": cmd_answer,
         "draft": cmd_draft,

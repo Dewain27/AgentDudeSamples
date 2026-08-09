@@ -5,6 +5,8 @@ vendor's **full product catalog** and produces a **sample RFP request and RFP
 response for every product offering** — plus a starter **automation layer** that
 assembles responses from a reusable answer library.
 
+Every sample ships as both **Markdown and a formatted PDF**.
+
 It is built to be the seed for a real RFP-response automation: the catalog and
 answer library are the knowledge base, and `rfpkit/automation.py` is a working
 (if simple) matcher you can later swap for embeddings or an LLM without changing
@@ -50,6 +52,9 @@ python generate.py build
 # Generate samples for just one offering
 python generate.py build --offering patient-portal
 
+# Render every sample as a formatted PDF (see "PDF output" below)
+python generate.py pdf
+
 # Export the whole catalog as machine-readable JSON (for your automation)
 python generate.py export            # -> data/catalog.json
 ```
@@ -59,13 +64,50 @@ Samples land under `samples/<product-line>/<offering>/`:
 ```
 samples/industry-solutions/patient-portal/
 ├── rfp-request.md      # what a buyer sends
+├── rfp-request.pdf     #   ... as a formatted PDF
 ├── rfp-response.md     # Aventra's matching proposal
+├── rfp-response.pdf    #   ... as a formatted PDF
 └── offering.json       # structured metadata for this offering
 ```
 
 Requests and responses are **deterministic** — the same offering always renders
 the same buyer, RFP number, dates, and pricing — so committed samples stay
 stable and diffs are meaningful.
+
+---
+
+## PDF output
+
+All 30 sample documents (15 offerings × request + response) are committed as
+PDFs alongside the Markdown, so you can hand them to someone without running
+anything.
+
+Each PDF is laid out as a real business document:
+
+- A **cover page** with a document-type badge, title, the issuing/submitting
+  organization, and the key metadata table (RFP number, dates, budget or fee).
+- A **sample-document notice** so the fictional content is never mistaken for
+  a real solicitation.
+- Numbered body sections with styled tables, running **page numbers**, and a
+  footer carrying the RFP number and offering name.
+- Colour-coded by document type — **slate blue** for buyer requests, **teal**
+  for Aventra's responses.
+
+Requests run 4 pages; responses run 6.
+
+**Regenerating PDFs** needs two optional packages (the rest of the kit stays
+dependency-free):
+
+```bash
+pip install -r requirements-pdf.txt
+python generate.py pdf                        # all offerings
+python generate.py pdf --offering data-warehouse
+```
+
+Rendering goes Markdown → styled HTML → headless Chromium, so the PDFs stay in
+lockstep with the Markdown; the `pdf` command re-renders from the catalog rather
+than reading stale files. If the extras are missing, the command explains how to
+install them and exits without touching anything.
 
 ---
 
@@ -116,16 +158,18 @@ LLM call — the callers stay the same.
 
 ```
 rfp-automation-kit/
-├── generate.py                 # CLI: list / build / export / answer / draft
+├── generate.py                 # CLI: list / build / pdf / export / answer / draft
+├── requirements-pdf.txt        # optional extras, only for `generate.py pdf`
 ├── rfpkit/
 │   ├── catalog_data.py         # SOURCE OF TRUTH: vendor, lines, offerings, response library
 │   ├── models.py               # catalog access + deterministic buyer/date derivation
 │   ├── automation.py           # question -> answer matcher (the automation seed)
 │   ├── render_request.py       # offering -> sample RFP request (Markdown)
-│   └── render_response.py      # offering -> sample RFP response (Markdown)
+│   ├── render_response.py      # offering -> sample RFP response (Markdown)
+│   └── render_pdf.py           # Markdown -> styled HTML -> PDF
 ├── data/
 │   └── catalog.json            # machine-readable catalog (via `generate.py export`)
-└── samples/                    # generated request+response+json per offering
+└── samples/                    # generated request+response (md + pdf) + json per offering
 ```
 
 ---

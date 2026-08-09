@@ -3,7 +3,7 @@
 # Proposal in Response to RFP-2026-API-188
 ## API Development & Management
 
-**Submitted by Aventra Software Group** — Integration & APIs
+**Submitted by Aventra Software Group** — Integration & APIs  
 Prepared for **Summit Ridge Credit Union**
 
 | | |
@@ -21,7 +21,7 @@ Prepared for **Summit Ridge Credit Union**
 
 June 13, 2026
 
-Michelle Torres, Director of Digital Services
+Michelle Torres, Director of Digital Services  
 Summit Ridge Credit Union
 
 Dear Michelle Torres,
@@ -35,8 +35,8 @@ This proposal is valid for 90 days.
 
 Sincerely,
 
-**Priya Raman**
-Engagement Director, Aventra Software Group
+**Priya Raman**  
+Engagement Director, Aventra Software Group  
 proposals@aventrasoftware.example · (512) 555-0182
 
 ## 2. Executive summary
