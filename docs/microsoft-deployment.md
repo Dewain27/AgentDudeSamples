@@ -20,10 +20,17 @@ Produces two artifacts in `dist/`:
 | `rfp-response-cowork-plugin.zip` | `manifest.json` + icons + `skills/rfp-response/` | Cowork **Upload plugin**, admin deployment, App Store submission |
 
 Build one at a time with `--target skill` or `--target cowork-plugin`; add
-`--keep-tree` to inspect the staged folders. The script regenerates reference
-content from the `rfp-automation-kit` catalog (still the single source of truth),
-applies the adaptations below, validates, and fails loudly rather than shipping
-an invalid package.
+`--keep-tree` to inspect the staged folders. The script applies the adaptation
+below, validates against the documented packaging limits, and fails loudly rather
+than shipping an invalid package.
+
+If you changed the catalog, regenerate the skill's bundled references and the
+knowledge base first — both derive from it:
+
+```bash
+python tools/build_skill_references.py    # skill's offering index + answer library
+python tools/export_knowledge_data.py && node tools/build_knowledge_base.js
+```
 
 ## Install it
 
@@ -41,7 +48,7 @@ Test from **Preview**; run test sets from **Evaluate**.
 
 Cowork validates it and saves it to your OneDrive; it appears under **Your
 skills** once syncing finishes. Skill uploads here have their own, looser limits:
-10 MB compressed, 50 MB uncompressed, up to 100 files. Ours is 35 KB / 12 files.
+10 MB compressed, 50 MB uncompressed, up to 100 files. Ours is 26 KB / 6 files.
 
 ### Cowork — as a plugin (shareable, deployable)
 
@@ -61,35 +68,51 @@ choose specific users, groups, or the whole tenant. Tenant-distributed packages
 skip App Store validation, so that's the path for internal use. Public
 distribution goes through Partner Center.
 
+## Connect the knowledge base
+
+The skill is deliberately thin on product data. Offering datasheets, case
+studies, and pricing live in `knowledge-base/` as Word and PDF documents, and the
+skill searches for them at run time. **Wire these up before you judge output
+quality** — without them, relevant-experience sections come out unevidenced,
+which is exactly the weakness testing surfaced.
+
+- **Copilot Studio:** put the documents on SharePoint or OneDrive, then add them
+  under **Build → Knowledge**.
+- **Cowork:** add the same location under **Sources**.
+
+Either way, keep the file names intact. The skill searches for
+`Aventra-<Offering Name>-Datasheet`, `Aventra-Past-Performance-and-References`,
+and `Aventra-Pricing-and-Engagement-Models` by name.
+
+See `knowledge-base/README.md` for what each document answers and how to
+regenerate the set from the catalog.
+
 ## What differs from the in-repo skill, and why
 
-The authored skill lives at `.claude/skills/rfp-response/`. Two things change on
+The authored skill lives at `.claude/skills/rfp-response/`. One thing changes on
 the way into a package:
 
-**1. Offering references are consolidated.** The authored skill keeps one file
-per offering (15 of them) so a shell agent loads only the ~60 lines it needs.
-That lands at exactly 20 companion files — the plugin ceiling, with no headroom
-to ever add anything. The package consolidates to six product-line files, giving
-**11**. Slightly more to read per run, room to grow in exchange. (Cowork's
-*skill* upload path allows 100 files, but the plugin path doesn't, so the build
-targets the stricter limit.)
-
-**2. PDF rendering is environment-aware.** The bundled `md_to_pdf.py` drives
+**PDF rendering is environment-aware.** The bundled `md_to_pdf.py` drives
 headless Chromium, which neither sandbox has and neither can install. Both hosts
 create PDF and Office files natively, so the packaged instructions use that and
 keep the script as the shell-environment option. One `SKILL.md` serves all three
 environments.
 
+Everything else ships verbatim. The package used to consolidate 15 per-offering
+reference files to fit the 20-file ceiling; moving that content to the knowledge
+base removed the problem at the source, and the skill now ships **5 companion
+files**.
+
 ## Limits enforced by the build
 
 | Limit | Value | This package |
 | --- | --- | ---: |
-| Companion files (excluding `SKILL.md`) | 20 | 11 |
+| Companion files (excluding `SKILL.md`) | 20 | 5 |
 | Size per companion file | 5 MB | 11 KB |
-| Total companion size | 10 MB | 79 KB |
+| Total companion size | 10 MB | 55 KB |
 | `name` — kebab-case, must match folder | ≤ 64 chars | `rfp-response` |
 | `description` | ≤ 1024 chars | 751 |
-| `SKILL.md` body | < 5,000 tokens | ~1,460 words |
+| `SKILL.md` body | < 5,000 tokens | ~1,910 words |
 | Hidden files, `..`, backslashes, reserved names | not allowed | none |
 | Skills per plugin package (ASKILL-M002) | 20 | 1 |
 
@@ -131,9 +154,10 @@ Developed and tested in a shell environment, so re-check these in the host:
   that's the field to tune.
 - **PDF output.** Confirm the host produces the PDF natively and that the cover
   block, numbered sections, and tables survive.
-- **Reference loading.** Confirm the agent opens
-  `references/offerings-<product-line>.md` after picking an offering rather than
-  answering from the index alone — grounding depends on it.
+- **Knowledge retrieval.** Confirm the agent actually finds and opens the
+  offering datasheet and the past-performance document. If section 8 comes back
+  generic, retrieval isn't reaching the knowledge base and grounding is thinner
+  than it looks.
 - **Gap flagging.** Give it an RFP demanding a certification Aventra doesn't hold
   (`evals/files/hitrust-analytics-rfp.md` is built for exactly this) and confirm
   it flags rather than fabricates. This is the behaviour most worth protecting.

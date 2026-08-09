@@ -22,6 +22,38 @@ Two facts about how proposals get judged should shape every decision below:
 
 Everything here follows from those two facts.
 
+## Where the content lives
+
+This skill carries the **method** and the language that must be reused word for
+word. The **product content** lives in a separate knowledge base, because it
+changes on a different clock and is owned by different people — pricing and
+offerings move monthly under product marketing; how to write a bid does not.
+
+| Source | Holds | Use it for |
+| --- | --- | --- |
+| `references/catalog.md` (bundled) | Every offering: scope, industries, compliance, commercials, approved positioning language | Matching the RFP to an offering, and drafting sections 3–4 |
+| `references/answer-library.md` (bundled) | Pre-approved answers to recurring questions | Security, hosting, SSO, accessibility, SLAs, pricing approach |
+| **Knowledge base** — `Aventra-<Offering>-Datasheet` | Full capabilities, integrations, differentiators, success measures | Depth in sections 4, 5, 11 |
+| **Knowledge base** — `Aventra-Past-Performance-and-References` | Case studies by industry, named-reference policy, the exhaustive certification list | Section 8, and any experience question |
+| **Knowledge base** — `Aventra-Pricing-and-Engagement-Models` | Current rates, what's included and excluded, under-budget guidance | Section 9 |
+
+**Search the knowledge base for the offering you matched, plus the experience and
+pricing documents, before you start writing.** Relevant experience is routinely
+15–25% of the scorecard, and it's the section that most often comes out thin
+because nobody looked up an actual case study.
+
+Two rules make retrieval safe, and both matter more here than they would with
+everything bundled:
+
+- **Retrieval always returns something.** A semantically close chunk is not the
+  same as an answer to the requirement in front of you. Read what comes back and
+  ask whether it actually addresses the requirement; if it doesn't, treat the
+  requirement as uncovered rather than stretching the nearest match.
+- **If the knowledge base isn't connected or returns nothing**, keep going — the
+  bundled index and answer library are enough for a sound draft. But say so in
+  your closing summary and flag that experience claims are unevidenced, because a
+  proposal citing no concrete past work reads very differently to an evaluator.
+
 ## Workflow
 
 ### 1. Read the solicitation and pull out the brief
@@ -52,9 +84,12 @@ the user can correct it before submission.
 Read `references/catalog.md` — the index of all 15 offerings, with guidance for
 telling close matches apart (that guidance exists because the near-misses are
 where this goes wrong: a data warehouse and a BI dashboard answer very different
-RFPs). Pick the best fit, then read `references/offerings/<id>.md` for the detail
-you'll need: capabilities, integrations, compliance, differentiators, and approved
-positioning language.
+RFPs). Pick the best fit.
+
+Then pull that offering's **datasheet from the knowledge base** for the depth the
+index doesn't carry: full capabilities, integrations, differentiators, and
+success measures. Search for the offering by name — the documents are titled
+`Aventra-<Offering Name>-Datasheet`.
 
 A substantial RFP can legitimately span two offerings. Lead with the primary one
 and present the second as a named, separately priced workstream, so the buyer can
@@ -77,11 +112,16 @@ pricing approach, and so on).
   agreed to.
 - **Adapt the phrasing** to the buyer's vocabulary. If they say "members," don't
   say "customers." If they call it "the Permit Center," use that name.
-- **Handle gaps honestly.** If a requirement isn't covered by any library block or
-  offering capability, do not invent an answer. Write what's true and mark it
-  clearly, e.g. `> **[NEEDS SME INPUT]** The RFP requires FedRAMP Moderate
-  authorization. No approved answer covers this — confirm status before
-  submitting.` Then list every flag in your closing summary.
+- **Handle gaps honestly.** If a requirement isn't covered by a library block, an
+  offering capability, or the knowledge base, do not invent an answer. Write
+  what's true and mark it clearly, e.g. `> **[NEEDS SME INPUT]** The RFP requires
+  FedRAMP Moderate authorization. No approved answer covers this — confirm status
+  before submitting.` Then list every flag in your closing summary.
+
+  Certifications deserve particular care: the list in `references/catalog.md` and
+  in the past-performance document is **exhaustive**. A framework not named there
+  is one Aventra does not hold, and the honest answer is to say so and let the bid
+  team decide — not to imply equivalence with something adjacent.
 
 ### 4. Write the proposal
 
@@ -107,7 +147,7 @@ contact, proposed fee, proposed duration). Then the numbered sections:
 | 5 | Technical approach | Methodology, hosting, security, authentication, integration, QA, accessibility |
 | 6 | Project plan and timeline | Phases with month ranges and milestones |
 | 7 | Project team | Named roles and what each owns |
-| 8 | Relevant experience | Comparable work, matched to their industry, plus references |
+| 8 | Relevant experience | Real case studies from `Aventra-Past-Performance-and-References`, matched to their industry, plus the reference policy |
 | 9 | Pricing | An itemized table summing to the fixed fee, with assumptions |
 | 10 | Support and service levels | What happens after launch |
 | 11 | Why Aventra | Differentiators, including the offering-specific ones |
@@ -174,8 +214,7 @@ a real bid. Drop it only if the user explicitly repoints this at a real vendor.
 
 | Path | Read it when |
 | --- | --- |
-| `references/catalog.md` | Always — to pick the offering (includes close-match guidance) |
-| `references/offerings/<id>.md` | After picking, for that offering's full detail |
+| `references/catalog.md` | Always — to pick the offering, and for approved positioning language |
 | `references/answer-library.md` | Always — the pre-approved answers |
 | `assets/example-rfp-response.md` | To see the target format and depth end to end |
 | `assets/example-rfp-request.md` | To see what a complete solicitation looks like |
@@ -183,3 +222,8 @@ a real bid. Drop it only if the user explicitly repoints this at a real vendor.
 
 The example pair is one matched request and the response written to it — the
 clearest illustration of how far a good answer goes beyond restating the question.
+
+Everything else — offering datasheets, case studies, named references, current
+pricing — comes from the knowledge base described at the top. If you find
+yourself wanting a fact that isn't in the bundled files, search there before
+assuming it doesn't exist.

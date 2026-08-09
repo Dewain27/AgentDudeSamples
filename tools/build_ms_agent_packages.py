@@ -57,9 +57,6 @@ WINDOWS_RESERVED = {
 # Each is asserted to apply, so an edit to the source that breaks one fails the
 # build loudly instead of shipping a package that points at files it doesn't have.
 
-OLD_OFFERING_PATH = "`references/offerings/<id>.md`"
-NEW_OFFERING_PATH = "`references/offerings-<product-line>.md`"
-
 OLD_PDF_SECTION = """### 5. Render the PDF
 
 ```bash
@@ -108,7 +105,6 @@ NEW_SCRIPT_ROW = (
 def transform_skill_md(text: str) -> str:
     """Apply the packaging transformations, asserting each one lands."""
     subs = [
-        ("offering reference path", OLD_OFFERING_PATH, NEW_OFFERING_PATH, 2),
         ("PDF section", OLD_PDF_SECTION, NEW_PDF_SECTION, 1),
         ("bundled-files script row", OLD_SCRIPT_ROW, NEW_SCRIPT_ROW, 1),
     ]
@@ -123,52 +119,6 @@ def transform_skill_md(text: str) -> str:
             )
         text = text.replace(old, new)
     return text
-
-
-def build_references(dest: Path) -> None:
-    """Regenerate offering references, consolidated one file per product line."""
-    sys.path.insert(0, str(KIT))
-    from rfpkit.catalog_data import OFFERINGS, PRODUCT_LINES  # noqa: E402
-
-    for line_key, line in PRODUCT_LINES.items():
-        out = [f"# {line['name']}\n", f"_{line['summary']}_\n"]
-        out.append(
-            "Full detail for every offering in this product line. Pricing ranges "
-            "are indicative for a full-scope engagement; quote a fixed fee inside "
-            "the range that reflects the scope the RFP actually describes.\n"
-        )
-        for o in [x for x in OFFERINGS if x["line"] == line_key]:
-            out.append(f"\n---\n\n## {o['name']}  (`{o['id']}`)\n")
-            out.append(f"_{o['tagline']}_\n")
-            out.append(f"**Scope:** {o['summary']}.  ")
-            out.append(f"**Best fit for:** {', '.join(o['target_industries'])}.  ")
-            out.append(
-                f"**Indicative pricing:** {o['pricing_model']} · "
-                f"${o['price_low']:,}–${o['price_high']:,} · "
-                f"{o['timeline_months']} months.\n"
-            )
-            out.append("**Capabilities to describe in the proposed solution**\n")
-            out += [f"- {c}" for c in o["capabilities"]]
-            out.append("\n**Requirements this offering answers**\n")
-            out += [f"- {r}" for r in o["typical_requirements"]]
-            out.append("\n**Integrations** — name the buyer's actual systems when "
-                       "the RFP identifies them; these are the fallback.\n")
-            out += [f"- {i}" for i in o["integrations"]]
-            out.append(f"\n**Compliance:** {', '.join(o['compliance'])}.\n")
-            out.append("**Differentiators**\n")
-            out += [f"- {d}" for d in o["differentiators"]]
-            out.append("\n**Success measures buyers care about** — mirror these in "
-                       "the executive summary when the RFP states similar goals.\n")
-            out += [f"- {s}" for s in o["success_metrics"]]
-            out.append("\n**Approved positioning language** — the backbone of "
-                       "sections 3 and 4. Adapt wording to the buyer's terms; keep "
-                       "the substance.\n")
-            out.append(f"_Understanding:_ {o['snippets']['understanding']}\n")
-            out.append(f"_Solution:_ {o['snippets']['solution']}\n")
-
-        (dest / f"offerings-{line_key}.md").write_text(
-            "\n".join(out) + "\n", encoding="utf-8"
-        )
 
 
 def validate(pkg: Path) -> list:
@@ -378,21 +328,10 @@ def main():
         encoding="utf-8",
     )
 
-    # References: catalog index + answer library verbatim, offerings consolidated
+    # References ship verbatim — the deep offering content now lives in the
+    # knowledge base, so there is nothing to consolidate or repoint.
     for name in ("catalog.md", "answer-library.md"):
         shutil.copy2(SKILL_SRC / "references" / name, stage / "references" / name)
-    build_references(stage / "references")
-
-    # The index points at per-offering files in the authored skill; repoint it.
-    idx = stage / "references" / "catalog.md"
-    idx.write_text(
-        idx.read_text(encoding="utf-8").replace(
-            "`references/offerings/<id>.md`",
-            "`references/offerings-<product-line>.md` (the file for that "
-            "offering's product line)",
-        ),
-        encoding="utf-8",
-    )
 
     for name in ("example-rfp-request.md", "example-rfp-response.md"):
         shutil.copy2(SKILL_SRC / "assets" / name, stage / "assets" / name)

@@ -1,8 +1,8 @@
 # Reusable answer library
 
-Pre-approved answers to the questions that recur in almost every RFP. Reuse these rather than inventing new claims — they are the vetted, consistent position Aventra takes, and rewriting them from scratch risks promising something the company does not actually do.
+Pre-approved answers to the questions that recur in almost every RFP. Reuse these rather than composing new ones — they are the vetted position Aventra can actually commit to, and rewriting them from memory is how a proposal ends up promising a service level nobody agreed to.
 
-Adapt wording to fit the buyer's phrasing, but keep every commitment (standards, timeframes, certifications) exactly as written. If an RFP asks something no block below covers, say so plainly in your summary and flag it for a subject-matter expert rather than guessing.
+Adapt wording to the buyer's phrasing, but keep every commitment (standards, timeframes, certifications) exactly as written. If a requirement isn't covered here, by an offering's positioning language, or by the knowledge base, flag it rather than inventing an answer.
 
 | Topic key | Covers |
 | --- | --- |
