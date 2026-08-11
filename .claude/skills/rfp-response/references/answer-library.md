@@ -2,7 +2,7 @@
 
 Pre-approved answers to the questions that recur in almost every RFP. Reuse these rather than composing new ones — they are the vetted position Aventra can actually commit to, and rewriting them from memory is how a proposal ends up promising a service level nobody agreed to.
 
-Adapt wording to the buyer's phrasing, but keep every commitment (standards, timeframes, certifications) exactly as written. If a requirement isn't covered here, by an offering's positioning language, or by the knowledge base, flag it rather than inventing an answer.
+Adapt wording to the buyer's phrasing, but keep every commitment (standards, timeframes, certifications) exactly as written. If a requirement isn't covered here, by an offering's detail file, or by the past-performance record, flag it rather than inventing an answer.
 
 | Topic key | Covers |
 | --- | --- |

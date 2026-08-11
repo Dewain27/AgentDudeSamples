@@ -328,14 +328,14 @@ def main():
         encoding="utf-8",
     )
 
-    # References ship verbatim — the deep offering content now lives in the
-    # knowledge base, so there is nothing to consolidate or repoint.
-    for name in ("catalog.md", "answer-library.md"):
-        shutil.copy2(SKILL_SRC / "references" / name, stage / "references" / name)
-
-    for name in ("example-rfp-request.md", "example-rfp-response.md"):
-        shutil.copy2(SKILL_SRC / "assets" / name, stage / "assets" / name)
-    shutil.copy2(SKILL_SRC / "scripts" / "md_to_pdf.py", stage / "scripts" / "md_to_pdf.py")
+    # Everything the skill carries ships verbatim. Copy whole directories rather
+    # than a whitelist, so adding a reference or example doesn't silently fail to
+    # reach the package — the validator catches the file-count ceiling.
+    for folder in ("references", "assets", "scripts"):
+        src = SKILL_SRC / folder
+        if src.is_dir():
+            shutil.copytree(src, stage / folder, dirs_exist_ok=True,
+                            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
 
     problems = validate(stage)
     companions = [p for p in stage.rglob("*") if p.is_file() and p.name != "SKILL.md"]

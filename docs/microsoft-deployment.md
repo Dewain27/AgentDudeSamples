@@ -48,7 +48,7 @@ Test from **Preview**; run test sets from **Evaluate**.
 
 Cowork validates it and saves it to your OneDrive; it appears under **Your
 skills** once syncing finishes. Skill uploads here have their own, looser limits:
-10 MB compressed, 50 MB uncompressed, up to 100 files. Ours is 26 KB / 6 files.
+10 MB compressed, 50 MB uncompressed, up to 100 files. Ours is 55 KB / 16 files.
 
 ### Cowork — as a plugin (shareable, deployable)
 
@@ -68,24 +68,25 @@ choose specific users, groups, or the whole tenant. Tenant-distributed packages
 skip App Store validation, so that's the path for internal use. Public
 distribution goes through Partner Center.
 
-## Connect the knowledge base
+## Nothing else to set up
 
-The skill is deliberately thin on product data. Offering datasheets, case
-studies, and pricing live in `knowledge-base/` as Word and PDF documents, and the
-skill searches for them at run time. **Wire these up before you judge output
-quality** — without them, relevant-experience sections come out unevidenced,
-which is exactly the weakness testing surfaced.
+The skill is **self-contained**. Offering detail, case studies, certifications,
+and pricing all ship inside the package, so there is no knowledge source to
+configure, no connector to register, and no service to stand up. Upload the ZIP
+and it works.
 
-- **Copilot Studio:** put the documents on SharePoint or OneDrive, then add them
-  under **Build → Knowledge**.
-- **Cowork:** add the same location under **Sources**.
+That is a deliberate choice for a catalog this size — 15 offerings comes to 15
+companion files and 129 KB, well inside the 20-file / 10 MB limits — and it buys
+two things a knowledge source can't: the agent reads approved commitment language
+*verbatim* rather than a retrieved paraphrase, and there is no "knowledge base
+unreachable" failure mode.
 
-Either way, keep the file names intact. The skill searches for
-`Aventra-<Offering Name>-Datasheet`, `Aventra-Past-Performance-and-References`,
-and `Aventra-Pricing-and-Engagement-Models` by name.
-
-See `knowledge-base/README.md` for what each document answers and how to
-regenerate the set from the catalog.
+If the content later outgrows the package (hundreds of past proposals, security
+questionnaires, a live rate card), the Word and PDF documents under
+`knowledge-base/` are generated from the same catalog and can be attached as a
+knowledge source instead — Copilot Studio and Cowork both accept direct file
+upload, so even that needs no external service. That's a build choice, not a
+redesign.
 
 ## What differs from the in-repo skill, and why
 
@@ -98,21 +99,18 @@ create PDF and Office files natively, so the packaged instructions use that and
 keep the script as the shell-environment option. One `SKILL.md` serves all three
 environments.
 
-Everything else ships verbatim. The package used to consolidate 15 per-offering
-reference files to fit the 20-file ceiling; moving that content to the knowledge
-base removed the problem at the source, and the skill now ships **5 companion
-files**.
+Everything else ships verbatim.
 
 ## Limits enforced by the build
 
 | Limit | Value | This package |
 | --- | --- | ---: |
-| Companion files (excluding `SKILL.md`) | 20 | 5 |
+| Companion files (excluding `SKILL.md`) | 20 | 15 |
 | Size per companion file | 5 MB | 11 KB |
-| Total companion size | 10 MB | 55 KB |
+| Total companion size | 10 MB | 129 KB |
 | `name` — kebab-case, must match folder | ≤ 64 chars | `rfp-response` |
 | `description` | ≤ 1024 chars | 751 |
-| `SKILL.md` body | < 5,000 tokens | ~1,910 words |
+| `SKILL.md` body | < 5,000 tokens | ~1,720 words |
 | Hidden files, `..`, backslashes, reserved names | not allowed | none |
 | Skills per plugin package (ASKILL-M002) | 20 | 1 |
 
@@ -154,10 +152,10 @@ Developed and tested in a shell environment, so re-check these in the host:
   that's the field to tune.
 - **PDF output.** Confirm the host produces the PDF natively and that the cover
   block, numbered sections, and tables survive.
-- **Knowledge retrieval.** Confirm the agent actually finds and opens the
-  offering datasheet and the past-performance document. If section 8 comes back
-  generic, retrieval isn't reaching the knowledge base and grounding is thinner
-  than it looks.
+- **Reference loading.** Confirm the agent opens
+  `references/offerings-<product-line>.md` and `references/past-performance.md`
+  rather than answering from the index alone. If section 8 comes back generic
+  with no named engagement, it skipped the past-performance file.
 - **Gap flagging.** Give it an RFP demanding a certification Aventra doesn't hold
   (`evals/files/hitrust-analytics-rfp.md` is built for exactly this) and confirm
   it flags rather than fabricates. This is the behaviour most worth protecting.

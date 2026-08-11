@@ -1,6 +1,6 @@
 # Aventra Software Group — offering index
 
-Enough about every offering to match an incoming RFP to the right one and to write a grounded first draft. **Full detail lives in the knowledge base** — see `Aventra-<Offering>-Datasheet` for complete capabilities, integrations, differentiators, and success measures; `Aventra-Past-Performance-and-References` for case studies and named references; `Aventra-Pricing-and-Engagement-Models` for current commercial terms.
+Enough about every offering to match an incoming RFP to the right one. Once you have picked one, open `references/offerings-<product-line>.md` for its full capabilities, integrations, differentiators, and success measures.
 
 **Vendor:** Aventra Software Group · founded 2009 · Austin, Texas · 240 staff  
 **Contact:** proposals@aventrasoftware.example · (512) 555-0182  

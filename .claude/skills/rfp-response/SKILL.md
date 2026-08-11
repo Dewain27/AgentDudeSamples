@@ -20,39 +20,28 @@ Two facts about how proposals get judged should shape every decision below:
    staff, is worse than admitting a gap — bluffs get discovered at evaluation or,
    worse, after award.
 
-Everything here follows from those two facts.
+Everything below follows from those two facts.
 
-## Where the content lives
+The skill is self-contained — no knowledge source, connector, or external system
+to call. Bundled files are listed at the end; the two you'll open every time are
+`references/catalog.md` (what Aventra sells) and `references/answer-library.md`
+(pre-approved answers to recurring questions).
 
-This skill carries the **method** and the language that must be reused word for
-word. The **product content** lives in a separate knowledge base, because it
-changes on a different clock and is owned by different people — pricing and
-offerings move monthly under product marketing; how to write a bid does not.
+## Learn from the worked examples
 
-| Source | Holds | Use it for |
-| --- | --- | --- |
-| `references/catalog.md` (bundled) | Every offering: scope, industries, compliance, commercials, approved positioning language | Matching the RFP to an offering, and drafting sections 3–4 |
-| `references/answer-library.md` (bundled) | Pre-approved answers to recurring questions | Security, hosting, SSO, accessibility, SLAs, pricing approach |
-| **Knowledge base** — `Aventra-<Offering>-Datasheet` | Full capabilities, integrations, differentiators, success measures | Depth in sections 4, 5, 11 |
-| **Knowledge base** — `Aventra-Past-Performance-and-References` | Case studies by industry, named-reference policy, the exhaustive certification list | Section 8, and any experience question |
-| **Knowledge base** — `Aventra-Pricing-and-Engagement-Models` | Current rates, what's included and excluded, under-budget guidance | Section 9 |
+`assets/` holds two complete request-and-response pairs. They are the fastest way
+to see the expected depth, and they cover the two shapes a solicitation takes:
 
-**Search the knowledge base for the offering you matched, plus the experience and
-pricing documents, before you start writing.** Relevant experience is routinely
-15–25% of the scorecard, and it's the section that most often comes out thin
-because nobody looked up an actual case study.
+| Example | Shows |
+| --- | --- |
+| `example-rfp-request.md` → `example-rfp-response.md` | A buyer with no mandated format, answered in the default 12-section structure |
+| `example-tender-request.md` → `example-tender-prescribed-structure.md` | A buyer who mandates their own Part A–H structure, a compliance table, and a hard budget cap the full scope doesn't fit |
 
-Two rules make retrieval safe, and both matter more here than they would with
-everything bundled:
-
-- **Retrieval always returns something.** A semantically close chunk is not the
-  same as an answer to the requirement in front of you. Read what comes back and
-  ask whether it actually addresses the requirement; if it doesn't, treat the
-  requirement as uncovered rather than stretching the nearest match.
-- **If the knowledge base isn't connected or returns nothing**, keep going — the
-  bundled index and answer library are enough for a sound draft. But say so in
-  your closing summary and flag that experience claims are unevidenced, because a
-  proposal citing no concrete past work reads very differently to an evaluator.
+Read whichever matches the solicitation in front of you before drafting. What to
+notice in both: every requirement is answered in the buyer's own numbering,
+commitments are lifted verbatim from the answer library, case studies are cited
+concretely rather than gestured at, and the gaps are marked in the document
+rather than smoothed over.
 
 ## Workflow
 
@@ -86,10 +75,9 @@ telling close matches apart (that guidance exists because the near-misses are
 where this goes wrong: a data warehouse and a BI dashboard answer very different
 RFPs). Pick the best fit.
 
-Then pull that offering's **datasheet from the knowledge base** for the depth the
-index doesn't carry: full capabilities, integrations, differentiators, and
-success measures. Search for the offering by name — the documents are titled
-`Aventra-<Offering Name>-Datasheet`.
+Then open `references/offerings-<product-line>.md` for that offering's full
+detail: capabilities, integrations, differentiators, and success measures. The
+index tells you which product line an offering belongs to.
 
 A substantial RFP can legitimately span two offerings. Lead with the primary one
 and present the second as a named, separately priced workstream, so the buyer can
@@ -113,13 +101,13 @@ pricing approach, and so on).
 - **Adapt the phrasing** to the buyer's vocabulary. If they say "members," don't
   say "customers." If they call it "the Permit Center," use that name.
 - **Handle gaps honestly.** If a requirement isn't covered by a library block, an
-  offering capability, or the knowledge base, do not invent an answer. Write
-  what's true and mark it clearly, e.g. `> **[NEEDS SME INPUT]** The RFP requires
-  FedRAMP Moderate authorization. No approved answer covers this — confirm status
-  before submitting.` Then list every flag in your closing summary.
+  offering's capabilities, or `references/past-performance.md`, do not invent an
+  answer. Write what's true and mark it clearly, e.g. `> **[NEEDS SME INPUT]** The
+  RFP requires FedRAMP Moderate authorization. No approved answer covers this —
+  confirm status before submitting.` Then list every flag in your closing summary.
 
   Certifications deserve particular care: the list in `references/catalog.md` and
-  in the past-performance document is **exhaustive**. A framework not named there
+  `references/past-performance.md` is **exhaustive**. A framework not named there
   is one Aventra does not hold, and the honest answer is to say so and let the bid
   team decide — not to imply equivalence with something adjacent.
 
@@ -147,7 +135,7 @@ contact, proposed fee, proposed duration). Then the numbered sections:
 | 5 | Technical approach | Methodology, hosting, security, authentication, integration, QA, accessibility |
 | 6 | Project plan and timeline | Phases with month ranges and milestones |
 | 7 | Project team | Named roles and what each owns |
-| 8 | Relevant experience | Real case studies from `Aventra-Past-Performance-and-References`, matched to their industry, plus the reference policy |
+| 8 | Relevant experience | Concrete case studies from `references/past-performance.md`, matched to their industry, plus the reference policy |
 | 9 | Pricing | An itemized table summing to the fixed fee, with assumptions |
 | 10 | Support and service levels | What happens after launch |
 | 11 | Why Aventra | Differentiators, including the offering-specific ones |
@@ -216,14 +204,11 @@ a real bid. Drop it only if the user explicitly repoints this at a real vendor.
 | --- | --- |
 | `references/catalog.md` | Always — to pick the offering, and for approved positioning language |
 | `references/answer-library.md` | Always — the pre-approved answers |
-| `assets/example-rfp-response.md` | To see the target format and depth end to end |
-| `assets/example-rfp-request.md` | To see what a complete solicitation looks like |
+| `references/offerings-<product-line>.md` | After picking an offering, for its full detail |
+| `references/past-performance.md` | Section 8, and any experience or certification question |
+| `references/pricing.md` | Section 9 — ranges, fee build-up, what's excluded, under-budget guidance |
+| `assets/example-*.md` | Before drafting — the two worked pairs described above |
 | `scripts/md_to_pdf.py` | To render the finished Markdown as a PDF |
 
-The example pair is one matched request and the response written to it — the
-clearest illustration of how far a good answer goes beyond restating the question.
-
-Everything else — offering datasheets, case studies, named references, current
-pricing — comes from the knowledge base described at the top. If you find
-yourself wanting a fact that isn't in the bundled files, search there before
-assuming it doesn't exist.
+That is the whole skill. If a fact isn't in these files, it isn't an approved
+claim — flag it rather than filling the gap from general knowledge.
