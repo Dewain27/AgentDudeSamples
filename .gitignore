@@ -1,5 +1,7 @@
-# Generated output (regenerate with `python generate.py ...`)
-/output/
+# Node (only needed to regenerate the Word knowledge-base documents)
+node_modules/
+package-lock.json
+package.json
 
 # Python
 __pycache__/
@@ -14,8 +16,10 @@ venv/
 .idea/
 .vscode/
 
-# Skill eval workspace (regenerate with the skill-creator loop)
-/rfp-response-workspace/
+# Staged package folders — the .zip files beside them ARE committed
+samples/**/packages/rfp-response/
+samples/**/packages/rfp-response-cowork-plugin/
 
-# Build output (rebuild: python tools/build_copilot_studio_package.py)
-/dist/
+# Skill eval run outputs (regenerate with the skill-creator loop)
+samples/**/build/eval-runs/
+samples/**/build/knowledge-data.json
