@@ -238,11 +238,13 @@ def main():
         print(f"{k:62} {p:>3}/{t:<3}")
     ws = [v for k, v in summary.items() if k.endswith("with_skill")]
     bs = [v for k, v in summary.items() if k.endswith("without_skill")]
-    a = "SKILL + KNOWLEDGE BASE" if args.iteration >= 2 else "WITH SKILL"
-    b = "SKILL, NO KNOWLEDGE BASE" if args.iteration >= 2 else "BASELINE"
+    a = "SKILL + KNOWLEDGE BASE" if args.iteration == 2 else "SKILL (self-contained)" if args.iteration >= 3 else "WITH SKILL"
+    b = "SKILL, NO KNOWLEDGE BASE" if args.iteration == 2 else "BASELINE"
     print("-" * 72)
-    print(f"{a:62} {sum(p for p,_ in ws):>3}/{sum(t for _,t in ws):<3}")
-    print(f"{b:62} {sum(p for p,_ in bs):>3}/{sum(t for _,t in bs):<3}")
+    if ws:
+        print(f"{a:62} {sum(p for p,_ in ws):>3}/{sum(t for _,t in ws):<3}")
+    if bs:  # single-arm iterations have no comparison arm
+        print(f"{b:62} {sum(p for p,_ in bs):>3}/{sum(t for _,t in bs):<3}")
 
 
 if __name__ == "__main__":
