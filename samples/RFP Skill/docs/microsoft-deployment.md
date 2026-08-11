@@ -24,12 +24,10 @@ Build one at a time with `--target skill` or `--target cowork-plugin`; add
 below, validates against the documented packaging limits, and fails loudly rather
 than shipping an invalid package.
 
-If you changed the catalog, regenerate the skill's bundled references and the
-knowledge base first — both derive from it:
+If you changed the catalog, regenerate the skill's bundled references first:
 
 ```bash
-python build/tools/build_skill_references.py    # bundled references
-python build/tools/export_knowledge_data.py && node build/tools/build_knowledge_base.js
+python build/tools/build_skill_references.py
 ```
 
 ## Install it
@@ -78,15 +76,13 @@ and it works.
 That is a deliberate choice for a catalog this size — 15 offerings comes to 15
 companion files and 129 KB, well inside the 20-file / 10 MB limits — and it buys
 two things a knowledge source can't: the agent reads approved commitment language
-*verbatim* rather than a retrieved paraphrase, and there is no "knowledge base
-unreachable" failure mode.
+*verbatim* rather than a retrieved paraphrase, and there is no external
+dependency that can be unreachable.
 
-If the content later outgrows the package (hundreds of past proposals, security
-questionnaires, a live rate card), the Word and PDF documents under
-`knowledge-base/` are generated from the same catalog and can be attached as a
-knowledge source instead — Copilot Studio and Cowork both accept direct file
-upload, so even that needs no external service. That's a build choice, not a
-redesign.
+If the content later outgrows the package — hundreds of past proposals, security
+questionnaires, a live rate card — the same catalog can feed a knowledge source
+instead. Copilot Studio and Cowork both accept direct file upload, so even that
+path needs no external service. It's a build change, not a redesign.
 
 ## What differs from the in-repo skill, and why
 

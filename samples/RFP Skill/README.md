@@ -37,8 +37,7 @@ bid. See [`test-rfps/README.md`](test-rfps/README.md) for what each one exercise
 | `packages/` | Prebuilt ZIPs, ready to upload. No build required. |
 | `test-rfps/` | Seven sample solicitations for testing, with a guide to each |
 | `docs/microsoft-deployment.md` | Deeper detail on Copilot Studio and Cowork, limits, and caveats |
-| `knowledge-base/` | **Optional.** Word/PDF versions of the catalog as sales collateral, and the growth path if content outgrows the package |
-| `build/` | How it's generated: the catalog source of truth, generators, and packaging tools |
+| `build/` | How it's generated: the catalog source of truth and the packaging tools |
 
 ---
 
@@ -177,8 +176,8 @@ python skill/rfp-response/evals/grade.py --iteration 3
 ```
 
 `evals.json` holds the prompts and the assertions. The most recent run scored
-**36/36** with the skill in complete isolation — no knowledge base, no repo
-access, nothing but the skill and the solicitation.
+**36/36** with the skill in complete isolation — nothing available but the skill
+itself and the solicitation.
 
 The behaviours most worth protecting, in order:
 
@@ -209,13 +208,6 @@ upload.
 To repoint the skill at a real vendor, replace the catalog contents and the
 `VENDOR` block, then regenerate. The method in `SKILL.md` doesn't change.
 
-To also refresh the optional Word/PDF collateral:
-
-```bash
-python build/tools/export_knowledge_data.py
-node   build/tools/build_knowledge_base.js
-```
-
 ---
 
 ## Known limits
@@ -227,6 +219,8 @@ node   build/tools/build_knowledge_base.js
   Replace before any store submission.
 - **Aventra is fictional**, including the developer name and URLs in the plugin
   manifest. Repoint them before this represents a real company.
-- **Bundling doesn't scale forever.** At hundreds of past proposals or a live
-  rate card, move the content to a knowledge source — see
-  [`knowledge-base/README.md`](knowledge-base/README.md) for when and how.
+- **Bundling doesn't scale forever.** The catalog fits in 15 companion files
+  today. At hundreds of past proposals or a live rate card you'd exceed the
+  20-file / 10 MB packaging limits and want an external knowledge source
+  instead — both Copilot Studio and Cowork accept direct file upload, so even
+  that needs no service standing up.

@@ -22,10 +22,10 @@
     {
       "id": 1,
       "name": "ambiguous-match-uncovered-requirement",
-      "prompt": "Northfield sent over their analytics RFP (it's at .claude/skills/rfp-response/evals/files/hitrust-analytics-rfp.md). Draft our response please. I want to be able to hand this to our proposal reviewer, so be straight with me about anything you weren't sure about.",
+      "prompt": "Northfield sent over their analytics RFP (it's at test-rfps/03-northfield-analytics-uncertified-requirement.md). Draft our response please. I want to be able to hand this to our proposal reviewer, so be straight with me about anything you weren't sure about.",
       "expected_output": "A proposal matched primarily to data-warehouse (governed single source of truth) with BI dashboards presented as part of the scope or a second workstream. Critically, the HITRUST CSF certification requirement (4.3.2) must be flagged as not covered by approved answers rather than fabricated, and surfaced in the closing summary. Priced inside $400k-$850k, addressed to Angela Voss, quoting RFP #NRHS-2026-114.",
       "files": [
-        ".claude/skills/rfp-response/evals/files/hitrust-analytics-rfp.md"
+        "test-rfps/03-northfield-analytics-uncertified-requirement.md"
       ],
       "assertions": [
         "Leads with the data-warehouse offering (governed single source of truth), with dashboards/BI included as scope rather than proposing dashboards alone",
@@ -43,10 +43,10 @@
     {
       "id": 2,
       "name": "prescribed-structure-under-budget",
-      "prompt": "Need our tender for the Cedar Valley water district job - the ITT doc is in .claude/skills/rfp-response/evals/files/fieldwork-mobile-rfp.md. Their budget looks tight to me but see what you can do. PDF please.",
+      "prompt": "Need our tender for the Cedar Valley water district job - the ITT doc is in test-rfps/04-cedar-valley-mandated-structure-tight-budget.md. Their budget looks tight to me but see what you can do. PDF please.",
       "expected_output": "A tender following the buyer's mandated Part A-H structure (NOT the skill's default 12-section layout), including a Part B compliance table covering R1-R11. Matched to mobile-app-suite. Because the $180,000 cap is below the offering's indicative floor, the response should propose a reduced or phased scope at a deliverable price rather than silently squeezing the number, and say what is deferred. Rendered as a PDF, quoting ITT 2026-07, addressed to Derek Nowak.",
       "files": [
-        ".claude/skills/rfp-response/evals/files/fieldwork-mobile-rfp.md"
+        "test-rfps/04-cedar-valley-mandated-structure-tight-budget.md"
       ],
       "assertions": [
         "Follows the buyer's mandated Part A through Part H structure rather than the skill's default 12-section layout",

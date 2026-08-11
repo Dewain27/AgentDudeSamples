@@ -22,7 +22,7 @@ ROOT = DEFAULT_WS / "iteration-1"
 # Distinctive fragments of the case studies in
 # Aventra-Past-Performance-and-References. These were deliberately removed from
 # the skill's bundled index, so their presence is hard evidence that the
-# knowledge base was actually read rather than the model paraphrasing the index.
+# past-performance file was actually read rather than the index paraphrased.
 CASE_MARKERS = {
     "eval-0": ["18 paper workflows", "400 caseworkers", "mid-size county",
                "benefits eligibility", "permits-and-licensing"],
@@ -33,7 +33,7 @@ CASE_MARKERS = {
 }
 
 # Language used when experience can't be evidenced — the guardrail the skill
-# is supposed to fall back on when the knowledge base is absent.
+# is supposed to fall back on when it cannot evidence a claim.
 UNEVIDENCED = re.compile(
     r"(no (named |specific )?(case stud|client reference|reference)"
     r"|references?[^.]{0,60}(not|cannot|unavailable|on request only)"
@@ -246,8 +246,8 @@ def main():
         print(f"{k:62} {p:>3}/{t:<3}")
     ws = [v for k, v in summary.items() if k.endswith("with_skill")]
     bs = [v for k, v in summary.items() if k.endswith("without_skill")]
-    a = "SKILL + KNOWLEDGE BASE" if args.iteration == 2 else "SKILL (self-contained)" if args.iteration >= 3 else "WITH SKILL"
-    b = "SKILL, NO KNOWLEDGE BASE" if args.iteration == 2 else "BASELINE"
+    a = "SKILL (self-contained)" if args.iteration >= 3 else "WITH SKILL"
+    b = "BASELINE"
     print("-" * 72)
     if ws:
         print(f"{a:62} {sum(p for p,_ in ws):>3}/{sum(t for _,t in ws):<3}")

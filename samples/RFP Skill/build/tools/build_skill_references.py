@@ -9,12 +9,11 @@ That is a deliberate choice for a catalog this size. Fifteen offerings plus case
 studies and pricing comes to 14 companion files and ~90 KB, comfortably inside
 the 20-file / 10 MB packaging limits, and bundling buys two things retrieval
 can't: the agent reads approved language *verbatim* rather than a paraphrase of
-a retrieved chunk, and there is no "knowledge base unreachable" failure mode.
+a retrieved chunk, and there is no external dependency to fail.
 
-If the content ever outgrows the package — hundreds of past proposals, security
-questionnaires, a live rate card — the same generator feeds the Word/PDF
-documents under `knowledge-base/`, which can be attached as a knowledge source
-instead. That's a build choice, not a redesign.
+If the content ever outgrows the 20-file / 10 MB packaging limits, the same
+catalog can feed an external knowledge source instead — that's a build
+change, not a redesign.
 
 Run after editing `build/rfp-automation-kit/rfpkit/catalog_data.py`, the single
 source of truth:
@@ -179,9 +178,6 @@ def build_offering_details() -> dict:
 
 def build_past_performance() -> str:
     """Case studies, reference policy, and the exhaustive certification list."""
-    import sys as _s
-    _s.path.insert(0, str(SAMPLE / "build" / "rfp-sample-generator"))
-    from rfpgen.company import VENDOR as P
     from rfpkit.catalog_data import VENDOR
 
     out = ["# Past performance, references, and certifications\n"]
@@ -196,7 +192,7 @@ def build_past_performance() -> str:
         "what genuinely is comparable. An evaluator forgives a candid gap far "
         "more readily than a stretched claim they can check.\n"
     )
-    for industry, studies in P.case_studies.items():
+    for industry, studies in VENDOR["case_studies"].items():
         out.append(f"\n## {industry.capitalize()}\n")
         out += [f"- {s}" for s in studies]
 
@@ -220,8 +216,8 @@ def build_past_performance() -> str:
         "to lose a bid, and the slowest to recover from.\n"
     )
     out.append("\n## Company profile\n")
-    out.append(P.overview + "\n")
-    out.append(f"**Representative technologies:** {', '.join(P.tech_stack)}.\n")
+    out.append(VENDOR["overview"] + "\n")
+    out.append(f"**Representative technologies:** {', '.join(VENDOR['tech_stack'])}.\n")
     return "\n".join(out) + "\n"
 
 

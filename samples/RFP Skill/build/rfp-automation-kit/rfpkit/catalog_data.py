@@ -29,6 +29,97 @@ VENDOR = {
         "AWS Advanced Consulting Partner",
         "Microsoft Solutions Partner (Digital & App Innovation)",
     ],
+    "overview": (
+        "Aventra Software Group designs, builds, and operates custom software "
+        "for mid-market and enterprise organizations. Since 2009 we have "
+        "delivered more than 300 engagements across healthcare, government, "
+        "education, financial services, and manufacturing. We specialize in "
+        "modernizing legacy systems, unifying fragmented data, and shipping "
+        "user-friendly applications that teams adopt without a fight."
+    ),
+    "tech_stack": [
+        "TypeScript / React / Next.js",
+        "Python / Django / FastAPI",
+        "Java / Spring Boot",
+        ".NET / C#",
+        "PostgreSQL, SQL Server, and Snowflake",
+        "Kubernetes, Terraform, and GitHub Actions",
+    ],
+    # Past-performance engagements, keyed by industry. Used for the
+    # relevant-experience section of a proposal, which typically carries
+    # 15-25% of an evaluation scorecard.
+    "case_studies": {
+        "healthcare": [
+            (
+                "Built a patient intake and scheduling portal for a 6-clinic regional "
+                "provider, cutting no-show rates by 22% in the first year."
+            ),
+            (
+                "Modernized a HL7/FHIR integration layer connecting an EHR to three "
+                "specialty systems, retiring 40,000 lines of legacy code."
+            ),
+        ],
+        "government": [
+            (
+                "Delivered a public permits-and-licensing portal for a mid-size "
+                "county, moving 18 paper workflows online."
+            ),
+            (
+                "Rebuilt a benefits eligibility screening tool used by 400 "
+                "caseworkers, meeting Section 508 accessibility standards."
+            ),
+        ],
+        "education": [
+            (
+                "Developed a unified student services platform for a community "
+                "college district serving 30,000 students."
+            ),
+            (
+                "Integrated a learning management system with an SIS and financial "
+                "aid system, eliminating dual data entry."
+            ),
+        ],
+        "financial services": [
+            (
+                "Built a loan-origination workflow platform for a regional credit "
+                "union, reducing average decision time from days to hours."
+            ),
+            (
+                "Delivered a compliance reporting data warehouse consolidating 12 "
+                "source systems."
+            ),
+        ],
+        "manufacturing": [
+            (
+                "Created a plant-floor production tracking application replacing a "
+                "spreadsheet-based process across 4 facilities."
+            ),
+            (
+                "Integrated an ERP with shop-floor IoT sensors for real-time OEE "
+                "dashboards."
+            ),
+        ],
+        "retail": [
+            (
+                "Built an omnichannel inventory and order-management platform for a "
+                "120-store specialty retailer."
+            ),
+            (
+                "Delivered a customer loyalty and promotions engine integrated with "
+                "the point-of-sale system."
+            ),
+        ],
+        "nonprofit": [
+            (
+                "Developed a donor and grant management system for a national "
+                "nonprofit, unifying three disconnected databases."
+            ),
+            (
+                "Built a volunteer coordination and impact-reporting platform used "
+                "across 60 chapters."
+            ),
+        ],
+    },
 }
 
 

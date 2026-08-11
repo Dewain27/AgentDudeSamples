@@ -1,15 +1,7 @@
+# Generated on demand — regenerate with `python generate.py build && python generate.py pdf`
+/samples/
+/data/catalog.json
+
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.venv/
-venv/
-.pytest_cache/
-
-# Editor / OS
-.DS_Store
-.idea/
-.vscode/
-
-# Note: samples/ (including the .pdf files) and data/catalog.json ARE committed —
-# they are the deliverable.
