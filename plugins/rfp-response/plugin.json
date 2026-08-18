@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "rfp-response",
+  "description": "Draft a complete, submission-ready RFP response (proposal) for Aventra Software Group from an incoming RFP, RFI, RFQ, tender, or vendor questionnaire \u2014 matching the request to the right product offering, answering requirements from a library of pre-approved answers, and delivering Markdown plus a formatted PDF. Use this skill whenever someone shares a solicitation and wants a proposal, bid, or res",
+  "version": "1.0.0",
+  "author": {
+    "name": "AgentDudeSamples"
+  },
+  "repository": "https://github.com/Dewain27/AgentDudeSamples",
+  "license": "MIT",
+  "keywords": [
+    "rfp",
+    "proposal",
+    "bid",
+    "tender",
+    "sales",
+    "document-generation",
+    "agent-skills"
+  ]
+}

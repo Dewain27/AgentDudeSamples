@@ -1,0 +1,19 @@
+{
+  "name": "agentdude-samples",
+  "metadata": {
+    "description": "Sample Agent Skills and plugins you can install and try, each built around a fictional company so nothing exposes real data",
+    "version": "1.0.0"
+  },
+  "owner": {
+    "name": "Dewain27",
+    "url": "https://github.com/Dewain27"
+  },
+  "plugins": [
+    {
+      "name": "rfp-response",
+      "source": "plugins/rfp-response",
+      "description": "Turns an incoming RFP into a submission-ready proposal \u2014 matches the request to a product offering, answers from a library of pre-approved answers, flags what it can't answer, and produces Markdown plus a formatted PDF.",
+      "version": "1.0.0"
+    }
+  ]
+}

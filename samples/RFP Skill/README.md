@@ -39,11 +39,37 @@ bid. See [`test-rfps/README.md`](test-rfps/README.md) for what each one exercise
 | `docs/microsoft-deployment.md` | Deeper detail on Copilot Studio and Cowork, limits, and caveats |
 | `build/` | How it's generated: the catalog source of truth and the packaging tools |
 
+The installable Copilot CLI plugin is generated to [`plugins/rfp-response/`](../../plugins/rfp-response/) at the repository root — Copilot marketplaces reference plugins by repo-relative path, and that path has to be free of spaces.
+
 ---
 
 ## Installation
 
-### Scenario 1 — Claude Code (or any Agent Skills client)
+### Scenario 1 — GitHub Copilot CLI (from the marketplace)
+
+The easiest route — nothing to download. This repository is registered as a
+Copilot plugin marketplace, so the CLI installs the skill straight from GitHub:
+
+```bash
+copilot plugin marketplace add Dewain27/AgentDudeSamples
+copilot plugin install rfp-response@agentdude-samples
+```
+
+Or from inside an interactive Copilot session:
+
+```
+/plugin marketplace add Dewain27/AgentDudeSamples
+/plugin install rfp-response@agentdude-samples
+```
+
+To pin it for a whole repository instead, add it to `enabledPlugins` in that
+repo's `.github/copilot/settings.json`, or to `~/.copilot/settings.json` for
+every project.
+
+The installed plugin lives at [`plugins/rfp-response/`](../../plugins/rfp-response/)
+and is generated from the same skill source as every other package here.
+
+### Scenario 2 — Claude Code (or any Agent Skills client)
 
 Copy the skill folder into your project's skills directory:
 
@@ -67,7 +93,7 @@ pip install markdown playwright
 Without them the script exits with a clear message and the Markdown is still a
 complete deliverable.
 
-### Scenario 2 — Microsoft Copilot Studio
+### Scenario 3 — Microsoft Copilot Studio
 
 Requires an agent built on the **GitHub Copilot harness**. Skills aren't
 available on the standard or Copilot chat harnesses.
@@ -83,7 +109,7 @@ needs installing.
 > Copilot Studio bills usage-based **Copilot Credits**, and that covers building,
 > testing, and evaluating — not just production traffic.
 
-### Scenario 3 — Microsoft 365 Copilot Cowork, as a skill
+### Scenario 4 — Microsoft 365 Copilot Cowork, as a skill
 
 The simplest route, and personal to you:
 
@@ -94,7 +120,7 @@ The simplest route, and personal to you:
 Cowork validates it and saves it to your OneDrive; it appears under **Your
 skills** once syncing finishes.
 
-### Scenario 4 — Microsoft 365 Copilot Cowork, as a plugin
+### Scenario 5 — Microsoft 365 Copilot Cowork, as a plugin
 
 Use this when you want to share it with colleagues or have IT deploy it.
 

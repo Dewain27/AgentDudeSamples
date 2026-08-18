@@ -13,7 +13,27 @@ your own content.
 
 | Sample | What it is | Install into |
 | --- | --- | --- |
-| **[RFP Skill](samples/RFP%20Skill/)** | An Agent Skill that turns an incoming RFP into a submission-ready proposal — matching the request to a product offering, answering from a library of pre-approved answers, flagging what it can't answer, and producing Markdown plus a formatted PDF. Ships with 7 test solicitations. | Claude Code · Copilot Studio · Copilot Cowork |
+| **[RFP Skill](samples/RFP%20Skill/)** | An Agent Skill that turns an incoming RFP into a submission-ready proposal — matching the request to a product offering, answering from a library of pre-approved answers, flagging what it can't answer, and producing Markdown plus a formatted PDF. Ships with 7 test solicitations. | GitHub Copilot CLI · Claude Code · Copilot Studio · Copilot Cowork |
+
+---
+
+## Installing from GitHub Copilot
+
+This repository is a **GitHub Copilot plugin marketplace**. Register it once, then
+install any sample that ships a plugin:
+
+```bash
+copilot plugin marketplace add Dewain27/AgentDudeSamples
+copilot plugin install rfp-response@agentdude-samples
+```
+
+The same commands work as `/plugin ...` inside an interactive Copilot session, and
+VS Code lists the marketplace's plugins under `@agentPlugins` in the Extensions
+search view.
+
+`.github/plugin/marketplace.json` is the manifest Copilot reads. Installable
+plugins live under [`plugins/`](plugins/) — one space-free directory per plugin,
+because marketplaces reference them by repo-relative path.
 
 ---
 
@@ -23,13 +43,22 @@ Each sample lives in `samples/<Sample Name>/` and follows the same shape, so you
 can find your way around one you've never opened:
 
 ```
+.github/plugin/
+└── marketplace.json     Registers this repo as a Copilot plugin marketplace
+
+plugins/
+└── <plugin-name>/       Installable Copilot plugin, generated from a sample
+
 samples/<Sample Name>/
-├── README.md        What it is, how to install it per scenario, how to test it
-├── packages/        Prebuilt artifacts — upload these, no build required
-├── test-rfps/       (or similar) Sample inputs for trying it out
-├── docs/            Deeper platform-specific detail
-└── build/           Source of truth and the tooling that generates the sample
+├── README.md            What it is, how to install it per scenario, how to test it
+├── packages/            Prebuilt artifacts — upload these, no build required
+├── test-rfps/           (or similar) Sample inputs for trying it out
+├── docs/                Deeper platform-specific detail
+└── build/               Source of truth and the tooling that generates the sample
 ```
+
+A sample owns its content; `plugins/` and `.github/plugin/marketplace.json` are
+repo-level because that is where Copilot expects to find them.
 
 Start with the sample's own `README.md`. It carries installation instructions for
 each supported host, what good output looks like, and the known limits.
@@ -56,5 +85,8 @@ A few things hold across every sample here:
 ## Adding a sample
 
 Create `samples/<Sample Name>/` following the layout above, then add a row to the
-inventory table. A sample is ready to publish when someone can clone the repo,
-read one README, install it, and try it without asking a question.
+inventory table. If it ships an installable plugin, generate it into `plugins/`
+and add an entry to `.github/plugin/marketplace.json`.
+
+A sample is ready to publish when someone can clone the repo, read one README,
+install it, and try it without asking a question.

@@ -12,17 +12,20 @@ Code as *"Full — same `SKILL.md` format."* So this is packaging, not porting.
 python build/tools/build_ms_agent_packages.py
 ```
 
-Produces two artifacts in `packages/` (both are committed, so you can skip the build entirely):
+Produces three artifacts, all committed, so you can skip the build entirely:
 
 | Artifact | Layout | Use it for |
 | --- | --- | --- |
 | `packages/rfp-response.zip` | `SKILL.md` at the ZIP root + companions | Copilot Studio **Upload a skill**, and Cowork **Upload skill** |
 | `packages/rfp-response-cowork-plugin.zip` | `manifest.json` + icons + `skills/rfp-response/` | Cowork **Upload plugin**, admin deployment, App Store submission |
+| `plugins/rfp-response/` (repo root) | `plugin.json` + `skills/rfp-response/` | **GitHub Copilot CLI**, installed from this repo's marketplace |
 
-Build one at a time with `--target skill` or `--target cowork-plugin`; add
-`--keep-tree` to inspect the staged folders. The script applies the adaptation
-below, validates against the documented packaging limits, and fails loudly rather
-than shipping an invalid package.
+Build one at a time with `--target skill`, `--target cowork-plugin`, or
+`--target copilot-plugin`.
+
+Add `--keep-tree` to inspect the staged folders. The script applies the
+adaptation below, validates against the documented packaging limits, and fails
+loudly rather than shipping an invalid package.
 
 If you changed the catalog, regenerate the skill's bundled references first:
 
@@ -31,6 +34,29 @@ python build/tools/build_skill_references.py
 ```
 
 ## Install it
+
+### GitHub Copilot CLI
+
+This repository is registered as a Copilot plugin marketplace, so nothing needs
+downloading:
+
+```bash
+copilot plugin marketplace add Dewain27/AgentDudeSamples
+copilot plugin install rfp-response@agentdude-samples
+```
+
+`.github/plugin/marketplace.json` at the repo root is the manifest Copilot reads.
+Its `plugins[].source` points at `plugins/rfp-response`, which holds a
+`plugin.json` manifest beside `skills/rfp-response/` — the same skill folder every
+other package is built from.
+
+That path lives at the repository root rather than inside this sample on purpose:
+a marketplace references plugins by repo-relative path, and `samples/RFP Skill/`
+contains a space, which is a liability for CLI tooling.
+
+To enable it declaratively for a whole repository instead, add `rfp-response` to
+`enabledPlugins` in that repo's `.github/copilot/settings.json`, or in
+`~/.copilot/settings.json` for every project.
 
 ### Copilot Studio
 
