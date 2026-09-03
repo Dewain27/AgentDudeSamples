@@ -14,7 +14,7 @@ your own content.
 | Sample | What it is | Install into |
 | --- | --- | --- |
 | **[RFP Skill](samples/RFP%20Skill/)** | An Agent Skill that turns an incoming RFP into a submission-ready proposal — matching the request to a product offering, answering from a library of pre-approved answers, flagging what it can't answer, and producing Markdown plus a formatted PDF. Ships with 7 test solicitations. | GitHub Copilot CLI · Claude Code · Copilot Studio · Copilot Cowork |
-| **[Build Work Estimator](samples/Build%20Work%20Estimator/)** | An Agent Skill that estimates the work of **building** something with an AI coding agent — turns, tokens, and cost — calibrated from your own session history rather than assumed constants. Requires a contingency reserve and checks whether it actually covers observed variance, translates Microsoft work into build-time Copilot Credits, and learns from recorded actuals. Estimates the build, never the run. | GitHub Copilot CLI · Claude Code |
+| **[Build Work Estimator](samples/Build%20Work%20Estimator/)** | An Agent Skill that estimates the work of **building** something with an AI coding agent — turns, tokens, and cost — calibrated from your own session history rather than assumed constants. Requires a contingency reserve and checks whether it actually covers observed variance, translates Microsoft work into build-time Copilot Credits, and learns from recorded actuals. Estimates the build, never the run. | GitHub Copilot CLI · Claude Code · Copilot Cowork · Claude Cowork · Copilot Studio |
 
 ---
 

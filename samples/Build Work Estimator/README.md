@@ -81,14 +81,45 @@ scenario and there is no side-by-side mode in them.
 
 ## Install
 
-```
-copilot plugin marketplace add Dewain27/AgentDudeSamples
-copilot plugin install build-work-estimator@agentdude-samples
+Runs in four hosts. Three artifacts cover them, all built from one source.
+
+| Host | Install | Artifact |
+| --- | --- | --- |
+| **GitHub Copilot** (CLI / VS Code) | `copilot plugin marketplace add Dewain27/AgentDudeSamples`<br>`copilot plugin install build-work-estimator@agentdude-samples` | [`plugins/build-work-estimator/`](../../plugins/build-work-estimator/) |
+| **Claude Code** | Point a skill directory at [`skill/build-work-estimator/`](skill/build-work-estimator/), or install the plugin folder above | same |
+| **Microsoft Copilot Cowork** | Upload [`packages/build-work-estimator-cowork-plugin.zip`](packages/build-work-estimator-cowork-plugin.zip) | Teams manifest + icons + `skills/` |
+| **Claude Cowork** · **Copilot Studio** | Upload [`packages/build-work-estimator.zip`](packages/build-work-estimator.zip) | Agent Skills standard package |
+
+Both zips are **prebuilt and committed** — no toolchain needed to try them, per
+this repo's conventions. Rebuild with:
+
+```bash
+python build/build_plugin.py          # canonical generator
+python build/build_host_packages.py   # zips for the sandboxed hosts
 ```
 
-The same commands work as `/plugin ...` inside an interactive Copilot session.
-For Claude Code, point a skill directory at
-[`skill/build-work-estimator/`](skill/build-work-estimator/).
+### What changes per host
+
+The estimator degrades honestly rather than failing. Run
+`python scripts/environment.py` in any host for a capability report.
+
+| Capability | Claude Code | GitHub Copilot | Copilot Cowork | Claude Cowork |
+| --- | --- | --- | --- | --- |
+| Measured calibration (`~/.claude/projects`) | **yes** | no | no | no |
+| Manifest parsing | yes | yes | yes | yes |
+| PDF rendered by the bundled script | yes | usually | no | no |
+| Estimate still produced | yes | yes | **yes** | **yes** |
+
+Two consequences, both handled and both stated in the output:
+
+- **Only Claude Code can calibrate from measured history.** Everywhere else the
+  estimate falls back to published baselines, and every report says which was
+  used — a prior and a measurement are not the same claim.
+- **Sandboxed hosts have no package installation and no browser.** PyYAML is not
+  required: manifests are read by a bundled parser whose output is asserted
+  identical to PyYAML's on every shipped manifest. For PDF, the packaged
+  instructions tell the host to create the document natively from the Markdown
+  rather than attempting to install a browser.
 
 ## Try it
 
@@ -241,9 +272,13 @@ was wired to `gh`.
 
 ## Requirements
 
-Python 3.9+. `PyYAML` for manifests. `markdown` and `playwright` (with Chromium)
-for PDF output — if those are missing the Markdown is still written and the run
-still succeeds.
+**Python 3.9+ and nothing else.** Every dependency is optional:
+
+| Package | Used for | If absent |
+| --- | --- | --- |
+| `PyYAML` | Manifest parsing | Bundled parser takes over, asserted identical on the supported subset |
+| `markdown` + `playwright` | PDF rendering | Markdown still written; host creates the PDF natively |
+| `Pillow` | Icon generation at **build** time only | Not needed to run the skill |
 
 ## Note
 
@@ -273,3 +308,11 @@ your own delivery patterns. Every report it generates says so.
    a representative sample, and is never better than your own measured profile.
 8. **Contribution is one-way and public.** A merged record cannot be recalled
    from a public repository's history.
+9. **Host packaging is built to the documented formats, not verified in every
+   host.** The Copilot Cowork package follows the Teams manifest v1.28 shape and
+   the Agent Skills package follows the open standard — the same shapes the RFP
+   sample in this repo ships. The packaged skill is tested end to end by
+   extracting the zip and running it, and its limits are asserted against the
+   documented ceilings, but no automated test installs it into Copilot Cowork,
+   Claude Cowork, or Copilot Studio. Treat first-run in those hosts as
+   unverified.

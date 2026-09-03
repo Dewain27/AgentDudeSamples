@@ -26,6 +26,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import calibrate  # noqa: E402
 import licensing  # noqa: E402
+import miniyaml  # noqa: E402
 import rates  # noqa: E402
 
 VALID_SIZES = tuple(calibrate.SIZE_TO_BUCKET)
@@ -79,18 +80,16 @@ def validate_reserve(value, source="reserve_percent"):
 
 
 def load_manifest(path):
-    try:
-        import yaml
-    except ImportError:
-        raise EstimateError(
-            "PyYAML is required to read a manifest. Install it with "
-            "`pip install pyyaml`, or use --interactive."
-        )
+    """Read a manifest. Works without PyYAML -- sandboxed hosts have no pip."""
     try:
         with open(path, "r") as fh:
-            data = yaml.safe_load(fh) or {}
+            text = fh.read()
     except (IOError, OSError) as exc:
         raise EstimateError("Could not read manifest %s: %s" % (path, exc))
+    try:
+        data = miniyaml.load(text) or {}
+    except miniyaml.ManifestParseError as exc:
+        raise EstimateError("Could not parse manifest %s: %s" % (path, exc))
     if not isinstance(data, dict):
         raise EstimateError("Manifest must be a mapping at the top level.")
     return data

@@ -443,6 +443,11 @@ def main(argv=None):
             print("WARNING  PDF not generated: %s" % reason)
             print("         The Markdown estimate at %s is complete."
                   % (args.out + ".md"))
+            print("         On a host that creates documents natively "
+                  "(Copilot Cowork, Claude Cowork,")
+            print("         Copilot Studio), ask it to produce the PDF from "
+                  "that Markdown rather")
+            print("         than installing a browser.")
         else:
             written.append(pdf_path)
             print("Wrote %s" % pdf_path)
