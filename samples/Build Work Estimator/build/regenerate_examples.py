@@ -65,9 +65,17 @@ def run(argv):
     return proc.stdout
 
 
-def generate(scenario, out_dir, formats="both"):
-    """Produce <name>.md (and .pdf) for one scenario into out_dir."""
-    payload = os.path.join(out_dir, scenario["name"] + ".json")
+def generate(scenario, out_dir, formats="both", payload_dir=None):
+    """Produce <name>-estimate.md (and .pdf) for one scenario into out_dir.
+
+    The intermediate estimate JSON goes to a scratch directory, not to
+    out_dir: examples/ holds inputs (manifests, calibration profile) and
+    outputs (.md, .pdf), and nothing else.
+    """
+    payload_dir = payload_dir or tempfile.mkdtemp()
+    if not os.path.isdir(payload_dir):
+        os.makedirs(payload_dir)
+    payload = os.path.join(payload_dir, scenario["name"] + ".json")
     run([sys.executable, os.path.join(SCRIPTS, "estimate.py"),
          "--manifest", os.path.join(EXAMPLES, scenario["manifest"]),
          "--profile", PROFILE,
@@ -136,8 +144,9 @@ def main(argv=None):
             "point of committing them." % PROFILE)
 
     if not args.check:
+        scratch = tempfile.mkdtemp()
         for scenario in SCENARIOS:
-            generate(scenario, EXAMPLES, "both")
+            generate(scenario, EXAMPLES, "both", payload_dir=scratch)
             print("Regenerated examples/%s-estimate.{md,pdf}" % scenario["name"])
         print("\nCommit the result. `--check` in CI will fail if these drift "
               "from the code.")

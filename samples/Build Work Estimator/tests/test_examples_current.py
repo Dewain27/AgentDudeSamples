@@ -75,6 +75,39 @@ class TestInputsAreCommitted(unittest.TestCase):
             "since that distinction is the largest single swing in the model")
 
 
+class TestExamplesDirectoryIsClean(unittest.TestCase):
+    """examples/ holds inputs and outputs only -- no build intermediates."""
+
+    ALLOWED_SUFFIXES = ("-manifest.yaml", "-estimate.md", "-estimate.pdf")
+    ALLOWED_EXACT = ("calibration-profile.json",)
+
+    def test_no_stray_files(self):
+        stray = []
+        for name in sorted(os.listdir(EXAMPLES)):
+            if name.startswith("."):
+                continue
+            if name in self.ALLOWED_EXACT:
+                continue
+            if any(name.endswith(s) for s in self.ALLOWED_SUFFIXES):
+                continue
+            stray.append(name)
+        self.assertEqual(
+            stray, [],
+            "examples/ should contain only manifests, the calibration "
+            "profile, and the rendered .md/.pdf outputs. Found: %s" % stray)
+
+    def test_regeneration_leaves_no_intermediates(self):
+        before = set(os.listdir(EXAMPLES))
+        subprocess.run(
+            [sys.executable, os.path.join(BUILD, "regenerate_examples.py")],
+            capture_output=True, text=True)
+        after = set(os.listdir(EXAMPLES))
+        self.assertEqual(
+            after - before, set(),
+            "regeneration wrote intermediate files into examples/: %s"
+            % sorted(after - before))
+
+
 class TestExamplesAreCurrent(unittest.TestCase):
     def test_committed_examples_match_a_fresh_regeneration(self):
         proc = subprocess.run(
