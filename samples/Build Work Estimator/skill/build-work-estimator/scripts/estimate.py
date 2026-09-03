@@ -630,6 +630,13 @@ def main(argv=None):
                     help="reserve %%, overrides the manifest")
     ap.add_argument("--profile", default=None)
     ap.add_argument("--out", default=None, help="write result JSON here")
+    ap.add_argument("--estimate-id", default=None,
+                    help="fixed estimate id (deterministic regeneration)")
+    ap.add_argument("--generated", default=None,
+                    help="fixed generation timestamp (deterministic "
+                         "regeneration)")
+    ap.add_argument("--no-ledger", action="store_true",
+                    help="do not append to the ledger (regeneration/CI)")
     args = ap.parse_args(argv)
 
     try:
@@ -646,7 +653,15 @@ def main(argv=None):
         print("ERROR  %s" % exc, file=sys.stderr)
         return 1
 
-    append_ledger(result, manifest)
+    # Fixed id and timestamp make the shipped examples byte-reproducible, so
+    # CI can detect drift with a plain diff instead of fuzzy matching.
+    if args.estimate_id:
+        result["estimate_id"] = args.estimate_id
+    if args.generated:
+        result["generated"] = args.generated
+
+    if not args.no_ledger:
+        append_ledger(result, manifest)
     payload = json.dumps(result, indent=2)
     if args.out:
         with open(args.out, "w") as fh:

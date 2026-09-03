@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "generated": "2026-08-30T00:00:00Z",
+  "source": "measured",
+  "sessions": 24,
+  "date_range": ["2026-06-01", "2026-08-30"],
+  "total_cost": 1420.0,
+  "cost_per_main_turn": 0.32,
+  "median_context_tokens": 210000,
+  "mean_output_tokens_per_turn": 980,
+  "cache_hit_rate": 0.94,
+  "subagent_multiplier": 1.15,
+  "model_mix": {"claude-opus-5": 0.55, "claude-sonnet-5": 0.45},
+  "component_shares": {"cache_read": 0.66, "cache_write": 0.25, "output": 0.09},
+  "unpriced_records": 0,
+  "corrections": {"medium": {"n": 3, "median_ratio": 1.35}},
+  "buckets": [
+    {"label": "exploration", "n": 7, "median_turns": 38, "median_cost": 4.1, "min_cost": 0.9, "max_cost": 96.0},
+    {"label": "trivial", "n": 3, "median_turns": 62, "median_cost": 11.2, "min_cost": 5.4, "max_cost": 28.0},
+    {"label": "small", "n": 6, "median_turns": 165, "median_cost": 38.5, "min_cost": 21.0, "max_cost": 121.0},
+    {"label": "medium", "n": 5, "median_turns": 395, "median_cost": 118.0, "min_cost": 26.0, "max_cost": 402.0},
+    {"label": "large", "n": 3, "median_turns": 880, "median_cost": 372.0, "min_cost": 155.0, "max_cost": 1180.0}
+  ]
+}

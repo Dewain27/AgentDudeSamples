@@ -286,13 +286,66 @@ Consent is required per contribution with a typed phrase; `y` and `yes` are
 deliberately not accepted. Full detail, including exactly what is and is not
 sent: [`docs/CONTRIBUTING-CALIBRATION.md`](docs/CONTRIBUTING-CALIBRATION.md).
 
+## Build governance
+
+Generated artifacts must never lag the code that produced them. Committed
+sample output that is quietly wrong reads as authoritative, which is worse than
+shipping no sample at all — so this is enforced rather than remembered.
+
+**After any change to this sample, run the chain in order:**
+
+```bash
+cd "samples/Build Work Estimator"
+
+python build/regenerate_examples.py     # rewrite the worked examples
+python build/build_plugin.py            # regenerate plugins/build-work-estimator
+python build/build_host_packages.py     # rebuild the host zips
+cd tests && python -m unittest discover -p 'test_*.py'
+```
+
+Then commit everything the chain touched.
+
+### What CI enforces
+
+[`.github/workflows/build-work-estimator.yml`](../../.github/workflows/build-work-estimator.yml)
+runs on every push and pull request that touches **this sample or its generated
+plugin** — it is path-scoped, so other samples in the repo neither trigger it
+nor are affected by it.
+
+| Check | Fails when |
+| --- | --- |
+| Test suite | Any of the 228 tests fail |
+| Runs without optional dependencies | The estimator breaks with PyYAML uninstalled |
+| **Worked examples are current** | The committed examples drift from the code, or a PDF is left behind at old numbers |
+| **Generated plugin is current** | `plugins/build-work-estimator` was not rebuilt after a source change |
+| Host packages rebuild and validate | A package breaks a documented limit or the packaged example is stale |
+| Rate staleness | Reported as a warning when a rate table is past its 90-day window |
+
+### Why the examples are reproducible at all
+
+The worked examples are generated from **committed inputs only**: the scenario
+manifests and [`examples/calibration-profile.json`](examples/calibration-profile.json).
+Estimate ids and timestamps are pinned per scenario, so two runs produce
+byte-identical Markdown and the drift check can be a plain comparison rather
+than a fuzzy one.
+
+Before this existed the examples were built from a calibration profile that
+lived only on one machine — nobody else could reproduce them, and nothing would
+have noticed if they went stale.
+
+PDFs are **not** byte-reproducible: the renderer embeds a creation date and the
+compressor is not stable. They are regenerated every time and verified by
+content instead — every headline figure in the Markdown must appear in the PDF
+text, which catches the failure that actually matters, a PDF left behind at old
+numbers.
+
 ## Tests
 
 ```bash
 cd "samples/Build Work Estimator/tests" && python3 -m unittest discover -p 'test_*.py'
 ```
 
-114 tests. Fixtures are synthetic and committed; no test reads real history and
+228 tests. Fixtures are synthetic and committed; no test reads real history and
 no test makes a network call.
 
 The most important suite is `test_contribute.py`. It seeds a ledger entry with
