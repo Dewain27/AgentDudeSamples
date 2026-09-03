@@ -300,3 +300,47 @@ not, so its **outputs are fixture-able** and the boundary tests run offline.
 Step 6 is the real gate. If a review of the Kestrel specification produces
 only findings that change nothing, the skill does not earn its place and
 should not ship.
+
+---
+
+## 11. The gate, run manually
+
+The gate above was performed by hand before committing this spec, because
+merging it on faith would have been merging an unproven premise. Nothing is
+implemented, so the review was done the way the skill would do it: extract the
+specification's declared inventory, check it against the work breakdown, then
+apply judgment to the candidates.
+
+**Result: 4 genuine missing components in a 39-item breakdown, plus 1 false
+positive.**
+
+| Ref | Finding | Verdict |
+| --- | --- | --- |
+| N5 | RPO 15 min / RTO 4 hours — no item covers backup, restore, or DR runbooks | **real** |
+| N6 | 900 concurrent advisor sessions — no item covers load or performance testing | **real** |
+| N9 | Encryption at rest with CMK — Key Vault is listed, but customer-managed key setup for Cosmos and Storage is unowned | **real** |
+| S10 / N8 | Region-pinned inference — nothing covers configuring or verifying it | **real** |
+| S9 | Segregation of duties — plausibly inside the CI/CD item, but not stated | weak; a reviewer would ask |
+| N10 | Accessibility — flagged by keyword matching, actually covered by the WCAG item | **false positive** |
+
+Every finding is a missing component, not a number. That is the boundary in
+§2 holding under a real test rather than in principle.
+
+The false positive earns its place in this record: the specification says
+*"Accessibility"* and the work item says *"WCAG 2.2 AA"*, so mechanical
+matching missed a real match. It is direct evidence that extraction alone is
+insufficient and judgment is the actual product — and a caution that a
+researcher optimising for finding-count will manufacture noise.
+
+### What this does and does not prove
+
+It proves the gap is real: a 39-item breakdown of a specification, reviewed
+against that specification, was missing disaster recovery, load testing,
+key management, and residency enforcement. Four items on a build of this size
+is material.
+
+It does **not** prove the skill will work well. This was me reviewing a
+specification I wrote myself, which is the easiest possible case — I knew
+where I had been thin. The honest next test is a specification written by
+someone else, and until that happens the finding above should be read as
+*"the gap exists"* rather than *"the skill is validated"*.

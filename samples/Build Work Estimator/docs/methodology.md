@@ -154,7 +154,7 @@ Nothing in the estimator checks whether that breakdown is complete, whether an
 item is plausibly sized, or whether the specification is detailed enough to
 size from at all.
 
-[`2026-09-03-build-work-researcher-design.md`](2026-09-03-build-work-researcher-design.md)
+[The Build Work Researcher design spec](https://github.com/Dewain27/AgentDudeSamples/blob/main/samples/Build%20Work%20Estimator/docs/2026-09-03-build-work-researcher-design.md)
 specifies a companion skill that attacks exactly that gap — and, critically,
 produces **structure and questions, never numbers**, so nothing it finds
 enters the arithmetic without a human sizing it first.
