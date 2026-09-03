@@ -45,6 +45,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
+| Specification | `draft` — confidence in sizing: **low** |
 | Evaluation cycles planned | 4 |
 | Contingency reserve | 25% |
 | Calibration | Measured, 24 local sessions |
@@ -69,6 +70,18 @@ between.
 - The build range comes from observed spread in comparable work; the target range from running 3 to 6 evaluation cycles instead of 4.
 
 Everything below explains how each of these figures was reached.
+
+## What this was sized from
+
+| | Reference |
+| --- | --- |
+| Functional specification | Harbor Line dispatch requirements (illustrative) |
+| Technical specification | Copilot Studio agent design note (illustrative) |
+| Status | `draft` — Draft only. Sizes will move as it settles. |
+| Confidence in sizing | **low** |
+
+> **The specification is a draft.** Sizes will move as it settles, and a draft
+> that grows is the most common reason a build overruns its estimate.
 
 ## Platforms
 

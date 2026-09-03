@@ -40,6 +40,9 @@ PROFILE = {
 MANIFEST = {
     "project": "Harbor Line dispatch",
     "reserve_percent": 25,
+    "specification": {"functional": "fixture spec",
+                      "technical": "fixture spec",
+                      "status": "approved"},
     "build_platform": "claude-code",
     "target_platform": "copilot-studio",
     "licensing": {"model": "consumption", "plan": "Claude Console"},

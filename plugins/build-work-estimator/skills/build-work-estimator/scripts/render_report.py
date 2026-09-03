@@ -23,6 +23,7 @@ import github_copilot  # noqa: E402
 import target_platform as tp  # noqa: E402
 import licensing  # noqa: E402
 import rates  # noqa: E402
+import specification as spec_mod  # noqa: E402
 
 NOT_A_COMPARISON = """> **This is not a platform comparison tool.** It reports one chosen build
 > platform and one chosen target, each in its own meter. Platform decisions are
@@ -235,6 +236,12 @@ def build_summary(result):
                       format(total, ",.2f")))
     elif licence.get("model"):
         out.append("| Licensing | Consumption — every unit bills |")
+    spec = result.get("specification") or {}
+    if spec:
+        out.append("| Specification | %s — confidence in sizing: **%s** |"
+                   % ("none provided" if spec.get("absent")
+                      else "`%s`" % spec.get("status"),
+                      spec.get("confidence", "unknown")))
     out.append("| Evaluation cycles planned | %d |" % result["eval_cycles"])
     out.append("| Contingency reserve | %.0f%% |" % result["reserve_percent"])
     if profile.get("source") == "measured" and \
@@ -357,6 +364,8 @@ def build_plan_markdown(result):
     """Combined report: build platform + target platform, both meters."""
     out = build_header(result)
     out.extend(build_summary(result))
+    if result.get("specification"):
+        out.append(spec_mod.render_markdown(result["specification"]))
     out.extend(build_context(result))
 
     build = result.get("build")

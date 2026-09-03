@@ -45,6 +45,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
 | Target harness | `standard` — does not bill for build or test |
 | Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats x 1 month = **$57.00** over the build |
+| Specification | `draft` — confidence in sizing: **low** |
 | Evaluation cycles planned | 3 |
 | Contingency reserve | 30% |
 | Calibration | Not applicable — the build platform is not metered from local session history |
@@ -69,6 +70,18 @@ between.
 - The build side has no measured spread of its own: the declared interaction volume is the estimate. Only the target side varies here.
 
 Everything below explains how each of these figures was reached.
+
+## What this was sized from
+
+| | Reference |
+| --- | --- |
+| Functional specification | Outage triage service definition (illustrative) |
+| Technical specification | Standard-harness agent design (illustrative) |
+| Status | `draft` — Draft only. Sizes will move as it settles. |
+| Confidence in sizing | **low** |
+
+> **The specification is a draft.** Sizes will move as it settles, and a draft
+> that grows is the most common reason a build overruns its estimate.
 
 ## Platforms
 

@@ -13,6 +13,11 @@
 project: Granite Peak Utilities -- outage triage agent
 author: Dewain Robinson
 
+specification:
+  functional: Outage triage service definition (illustrative)
+  technical: Standard-harness agent design (illustrative)
+  status: draft
+
 reserve_percent: 30
 
 build_platform: github-copilot     # what does the building

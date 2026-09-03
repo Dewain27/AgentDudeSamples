@@ -26,6 +26,9 @@ PROFILE = {
 
 MANIFEST = {
     "project": "Fixture build", "reserve_percent": 20,
+    "specification": {"functional": "fixture spec",
+                      "technical": "fixture spec",
+                      "status": "approved"},
     "build_platform": "claude-code",
     "target_platform": "copilot-studio",
     "licensing": {"model": "consumption"},

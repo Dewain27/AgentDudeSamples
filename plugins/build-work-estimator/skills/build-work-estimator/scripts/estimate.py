@@ -28,6 +28,7 @@ import calibrate  # noqa: E402
 import licensing  # noqa: E402
 import miniyaml  # noqa: E402
 import rates  # noqa: E402
+import specification as spec_mod  # noqa: E402
 
 VALID_SIZES = tuple(calibrate.SIZE_TO_BUCKET)
 BROWNFIELD_FACTOR = 1.5
@@ -130,6 +131,9 @@ def interview(prompt=input, echo=print):
     echo("Build Work Estimator -- estimates the BUILD, never the run.")
     echo("")
     project = prompt("Project name: ").strip() or "Unnamed build"
+
+    import specification as _spec
+    specification = _spec.interview(prompt=prompt, echo=echo)
 
     items = []
     echo("")
@@ -277,6 +281,7 @@ def interview(prompt=input, echo=print):
         "project": project,
         "items": items,
         "reserve_percent": reserve,
+        "specification": specification,
         "build_platform": build_platform,
         "target_platform": target_platform,
         "target": target,
@@ -477,6 +482,10 @@ def compute_plan(manifest, profile):
     build_info, build_key, target_info, target_key = validate_platforms(manifest)
     reserve_pct = validate_reserve(manifest.get("reserve_percent"))
     licence = licensing.normalise(manifest.get("licensing"))
+    try:
+        specification = spec_mod.normalise(manifest.get("specification"))
+    except spec_mod.SpecificationError as exc:
+        raise EstimateError(str(exc))
 
     target_cfg = dict(manifest.get("target") or {})
     cycles = max(1, int(target_cfg.get("eval_cycles", 1) or 1))
@@ -555,6 +564,7 @@ def compute_plan(manifest, profile):
         "remediation_factor": round(remediation_factor, 3),
         "remediation_share": REMEDIATION_SHARE,
         "licensing": licence,
+        "specification": specification,
         "build_detail": build_detail,
         "targets": targets,
         "warnings": rates.staleness_warnings(),
@@ -690,7 +700,8 @@ def main(argv=None):
 
         profile = calibrate.load_profile(args.profile)
         result = compute_plan(manifest, profile)
-    except (EstimateError, licensing.LicensingError) as exc:
+    except (EstimateError, licensing.LicensingError,
+            spec_mod.SpecificationError) as exc:
         print("ERROR  %s" % exc, file=sys.stderr)
         return 1
 

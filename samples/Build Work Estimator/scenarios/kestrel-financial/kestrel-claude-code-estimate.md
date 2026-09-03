@@ -45,6 +45,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude for Enterprise, $150.00/month x 6 seats x 5 months = **$4,500.00** over the build |
+| Specification | `approved` — confidence in sizing: **high** |
 | Evaluation cycles planned | 6 |
 | Contingency reserve | 30% |
 | Calibration | Measured, 24 local sessions |
@@ -69,6 +70,15 @@ between.
 - The build range comes from observed spread in comparable work; the target range from running 5 to 8 evaluation cycles instead of 6.
 
 Everything below explains how each of these figures was reached.
+
+## What this was sized from
+
+| | Reference |
+| --- | --- |
+| Functional specification | specification.md sections 1-4 (product and functional scope) |
+| Technical specification | specification.md sections 5-9 (integration, Azure, data, NFRs, compliance) |
+| Status | `approved` — Signed off. Sizes rest on agreed scope. |
+| Confidence in sizing | **high** |
 
 ## Platforms
 
