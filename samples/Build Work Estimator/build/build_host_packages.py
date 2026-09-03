@@ -67,7 +67,7 @@ COWORK_ID = str(uuid.uuid5(uuid.NAMESPACE_URL,
 # References consolidated for packaging: 5 files -> 2.
 REFERENCE_GROUPS = {
     "rates.md": ["rates-anthropic.md", "rates-copilot-credits.md"],
-    "methodology.md": ["methodology.md", "licensing-and-stacks.md",
+    "methodology.md": ["methodology.md", "platforms-and-licensing.md",
                        "contributing-calibration.md"],
 }
 

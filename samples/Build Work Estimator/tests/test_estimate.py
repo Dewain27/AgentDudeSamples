@@ -40,8 +40,11 @@ PROFILE = {
 MANIFEST = {
     "project": "Harbor Line dispatch",
     "reserve_percent": 25,
-    "build_stack": "claude-code",
+    "build_platform": "claude-code",
+    "target_platform": "copilot-studio",
     "licensing": {"model": "consumption", "plan": "Claude Console"},
+    "target": {"harness": "github-copilot", "eval_test_cases": 10,
+               "eval_cycles": 1, "interactive_test_hours": 2},
     "items": [{"name": "Dispatch API", "size": "medium", "files": 9,
                "unknowns": 2, "brownfield": False}],
 }

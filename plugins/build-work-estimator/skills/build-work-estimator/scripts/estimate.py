@@ -169,20 +169,86 @@ def interview(prompt=input, echo=print):
             reserve = None
 
     echo("")
-    echo("What are you BUILDING WITH? This decides the currency, and it is")
-    echo("independent of what you are building FOR -- using Claude Code to")
-    echo("build a Copilot Studio agent is still 'claude-code'.")
+    echo("=" * 68)
+    echo("Q1. What are you BUILDING WITH?")
     echo("")
-    for key in sorted(rates.BUILD_STACKS):
-        echo("  %-16s %s" % (key, rates.BUILD_STACKS[key]["currency"]))
-    stack = ""
-    while stack not in rates.BUILD_STACKS:
-        stack = prompt("\n  Build stack: ").strip().lower()
-        if stack not in rates.BUILD_STACKS:
-            echo("    Expected one of: %s" % ", ".join(sorted(rates.BUILD_STACKS)))
+    echo("This is the coding agent that authors the work. Copilot Studio is")
+    echo("NOT an option here -- it is a destination, not a build tool.")
+    echo("")
+    for key in sorted(rates.BUILD_PLATFORMS):
+        echo("  %-16s %s" % (key, rates.BUILD_PLATFORMS[key]["currency"]))
+    build_platform = ""
+    while build_platform not in rates.BUILD_PLATFORMS:
+        build_platform = prompt("\n  Build platform: ").strip().lower()
+        if build_platform not in rates.BUILD_PLATFORMS:
+            echo("    Expected one of: %s"
+                 % ", ".join(sorted(rates.BUILD_PLATFORMS)))
 
     echo("")
-    echo("How is it licensed? This decides what the number MEANS.")
+    echo("=" * 68)
+    echo("Q2. What are you BUILDING ON?")
+    echo("")
+    echo("Where the agent is deployed, previewed, evaluated and validated.")
+    echo("")
+    for key in sorted(rates.TARGET_PLATFORMS):
+        echo("  %-16s %s" % (key, rates.TARGET_PLATFORMS[key]["currency"]))
+    target_platform = ""
+    while target_platform not in rates.TARGET_PLATFORMS:
+        target_platform = prompt("\n  Target platform: ").strip().lower()
+        if target_platform not in rates.TARGET_PLATFORMS:
+            echo("    Expected one of: %s"
+                 % ", ".join(sorted(rates.TARGET_PLATFORMS)))
+    if target_platform == "ai-recommend":
+        echo("")
+        echo("  Requirements interview needed before this can be estimated.")
+        echo("  Agree a concrete target with the user, then re-run with it set.")
+
+    target = {}
+    if target_platform in ("copilot-studio", "both"):
+        echo("")
+        echo("=" * 68)
+        echo("Q3. Which TARGET HARNESS?")
+        echo("")
+        echo("  standard        build, preview, test and evaluation in the")
+        echo("                  interface are NOT billed")
+        echo("  github-copilot  billed from the moment building starts")
+        echo("")
+        echo("This one answer moves the target figure between near-zero and")
+        echo("the largest line in the estimate, so it is not guessed.")
+        harness = ""
+        while harness not in rates.HARNESS_BUILD_BILLING or harness == "none":
+            harness = prompt("\n  Target harness: ").strip().lower()
+            if harness not in rates.HARNESS_BUILD_BILLING or harness == "none":
+                echo("    Expected 'standard' or 'github-copilot'.")
+        target["harness"] = harness
+
+        echo("")
+        echo("Evaluations, remediation and retesting are always planned --")
+        echo("an agent build where every evaluation passes first time is not")
+        echo("a plan, it is a hope.")
+        target["eval_test_cases"] = int(
+            prompt("  Evaluation test cases [0]: ").strip() or "0")
+        target["eval_repeats"] = int(
+            prompt("  Repeats per test set [3]: ").strip() or "3")
+        target["eval_cycles"] = int(
+            prompt("  Build -> evaluate -> fix cycles to plan [1]: ").strip()
+            or "1")
+
+        echo("")
+        echo("Human validation happens in the Copilot Studio interface. The")
+        echo("hours are used to size test volume -- never priced as labour.")
+        target["interactive_test_hours"] = float(
+            prompt("  Planned validation hours [0]: ").strip() or "0")
+
+    if target_platform in ("azure", "both"):
+        echo("")
+        target["azure_build_usd"] = float(
+            prompt("  Azure spend during build and test ($) [0]: ").strip()
+            or "0")
+
+    echo("")
+    echo("=" * 68)
+    echo("How is the BUILD PLATFORM licensed? This decides what the number MEANS.")
     echo("")
     echo("  consumption   every unit bills (API/Console, pay-as-you-go)")
     echo("  seat          draws on an allowance already paid for")
@@ -211,7 +277,9 @@ def interview(prompt=input, echo=print):
         "project": project,
         "items": items,
         "reserve_percent": reserve,
-        "build_stack": stack,
+        "build_platform": build_platform,
+        "target_platform": target_platform,
+        "target": target,
         "licensing": licence,
     }
 
@@ -251,29 +319,65 @@ def correction_for(profile, bucket):
     return (ratio if applied else 1.0), info
 
 
-def validate_stack(manifest):
-    """The build stack decides the currency. The target workload does not."""
-    raw = manifest.get("build_stack")
-    if raw is None:
-        if "microsoft" in manifest:
-            raise EstimateError(
-                "`microsoft:` is no longer used, because it described what the "
-                "build was FOR\nrather than what it was built WITH -- and only "
-                "the latter decides the currency.\n\n"
-                "Replace it with `build_stack:`, one of: %s\n\n"
-                "Building a Microsoft workload with Claude Code is "
-                "`build_stack: claude-code`;\nit bills in tokens, not credits."
-                % ", ".join(sorted(rates.BUILD_STACKS)))
+REMEDIATION_SHARE = 0.25   # each extra eval cycle costs ~25% of the build
+
+
+def validate_platforms(manifest):
+    """Two axes, both required, and they are not the same question.
+
+    build_platform  = what does the AI-assisted building (Claude Code or
+                      GitHub Copilot). Decides the build-side currency.
+    target_platform = where the result is deployed, previewed, evaluated and
+                      validated. Decides the target-side meter.
+
+    Copilot Studio is a TARGET, never a build platform. Microsoft's own VS Code
+    extension docs name GitHub Copilot and Claude Code as the harnesses used to
+    author Copilot Studio agent components.
+    """
+    if "build_stack" in manifest and "build_platform" not in manifest:
         raise EstimateError(
-            "build_stack is required, and must be one of: %s\n\n"
-            "This is what you BUILD WITH, not what you build FOR. Using Claude "
-            "Code to\nbuild a Copilot Studio agent is `claude-code` -- it is "
-            "metered in tokens."
-            % ", ".join(sorted(rates.BUILD_STACKS)))
+            "`build_stack:` has been replaced by two separate keys, because "
+            "one value was\ndoing two jobs.\n\n"
+            "  build_platform:  %s\n"
+            "  target_platform: %s\n\n"
+            "Copilot Studio was never a build platform -- it is where the "
+            "agent is deployed,\npreviewed, evaluated and validated. The "
+            "building happens in a coding agent."
+            % (" | ".join(sorted(rates.BUILD_PLATFORMS)),
+               " | ".join(sorted(rates.TARGET_PLATFORMS))))
+
+    raw_build = manifest.get("build_platform")
+    if raw_build is None:
+        raise EstimateError(
+            "build_platform is required: %s\n\n"
+            "This is what does the building. It is not the same as what you "
+            "are building ON."
+            % " | ".join(sorted(rates.BUILD_PLATFORMS)))
+    raw_target = manifest.get("target_platform")
+    if raw_target is None:
+        raise EstimateError(
+            "target_platform is required: %s\n\n"
+            "This is where the agent is deployed, previewed, evaluated and "
+            "validated.\nUse `ai-recommend` to have the skill interview for "
+            "requirements and propose one."
+            % " | ".join(sorted(rates.TARGET_PLATFORMS)))
     try:
-        return rates.stack_info(raw), str(raw).strip().lower()
+        build = rates.build_platform_info(raw_build)
+        target = rates.target_platform_info(raw_target)
     except ValueError as exc:
         raise EstimateError(str(exc))
+
+    target_key = str(raw_target).strip().lower()
+    if target_key == "ai-recommend":
+        raise EstimateError(
+            "target_platform is still `ai-recommend`.\n\n"
+            "Run the requirements interview, agree a concrete target with the "
+            "user, then set\n`target_platform:` to that value. The estimator "
+            "will not silently pick one -- the\nchoice changes the "
+            "architecture, not just the number."
+        )
+    return (build, str(raw_build).strip().lower(),
+            target, target_key)
 
 
 def compute(manifest, profile):
@@ -331,20 +435,11 @@ def compute(manifest, profile):
     }
 
     thin = sorted(set(r["bucket"] for r in rows if 0 < r["n"] < 3))
-    stack, stack_key = validate_stack(manifest)
-    licence = licensing.normalise(manifest.get("licensing"))
-    attribution = licensing.attribute(base, licence, profile)
-
     return {
         "estimate_id": new_estimate_id(),
         "generated": calibrate._now(),
         "author": manifest.get("author", "Dewain Robinson"),
         "project": manifest.get("project", "Unnamed build"),
-        "build_stack": stack_key,
-        "stack_label": stack["label"],
-        "stack_currency": stack["currency"],
-        "stack_note": stack["note"],
-        "licensing": attribution,
         "items": rows,
         "base": round(base, 2),
         "low": round(low, 2),
@@ -366,52 +461,102 @@ def compute(manifest, profile):
     }
 
 
-def compute_stack(manifest, profile):
-    """Route a manifest to the pricer for its build stack.
+def compute_plan(manifest, profile):
+    """Estimate a build across both platforms.
 
-    Only `claude-code` uses the turn-and-context model, because that is what
-    the local calibration measures. Microsoft stacks are metered in their own
-    currencies and are driven by their own activity blocks -- pricing them
-    from Claude-derived turn medians would be inventing a number.
+    Build-side and target-side are ADDITIVE, not alternatives: the same
+    project spends on both meters at the same time. The evaluation loop ties
+    them together -- a failed evaluation on the target sends remediation work
+    back to the build platform, and both are re-spent.
     """
-    stack, key = validate_stack(manifest)
+    build_info, build_key, target_info, target_key = validate_platforms(manifest)
     reserve_pct = validate_reserve(manifest.get("reserve_percent"))
+    licence = licensing.normalise(manifest.get("licensing"))
 
-    if key == "claude-code":
-        return compute(manifest, profile)
+    target_cfg = dict(manifest.get("target") or {})
+    cycles = max(1, int(target_cfg.get("eval_cycles", 1) or 1))
 
-    if key == "copilot-studio":
-        import copilot_credits
-        try:
-            detail = copilot_credits.compute(
-                manifest.get("copilot_studio") or manifest.get("copilot"),
-                reserve_pct)
-        except copilot_credits.CreditError as exc:
-            raise EstimateError(str(exc))
+    # --- build side -------------------------------------------------------
+    if build_key == "claude-code":
+        base = compute(manifest, profile)
+        build_detail = None
+        build_currency_total = base["base"]
     else:
         import github_copilot
         try:
-            detail = github_copilot.compute(
+            build_detail = github_copilot.compute(
                 manifest.get("github_copilot"), reserve_pct)
         except github_copilot.GitHubCopilotError as exc:
             raise EstimateError(str(exc))
+        base = None
+        build_currency_total = build_detail.get("total_units", 0)
 
-    licence = licensing.normalise(manifest.get("licensing"))
-    return {
+    # Remediation: every cycle after the first sends work back to the build
+    # platform. An estimate that prices only the first pass is planning for a
+    # build where every evaluation passes first time, which does not happen.
+    remediation_factor = 1.0 + (cycles - 1) * REMEDIATION_SHARE
+
+    # --- target side ------------------------------------------------------
+    import target_platform
+    targets = []
+    for key in (["copilot-studio", "azure"] if target_key == "both"
+                else [target_key]):
+        try:
+            targets.append(target_platform.compute(
+                target_cfg, reserve_pct, target=key))
+        except target_platform.TargetPlatformError as exc:
+            raise EstimateError(str(exc))
+
+    result = {
         "estimate_id": new_estimate_id(),
         "generated": calibrate._now(),
         "author": manifest.get("author", "Dewain Robinson"),
         "project": manifest.get("project", "Unnamed build"),
-        "build_stack": key,
-        "stack_label": stack["label"],
-        "stack_currency": stack["currency"],
-        "stack_note": stack["note"],
-        "licensing": licence,
+        "build_platform": build_key,
+        "build_platform_label": build_info["label"],
+        "build_currency": build_info["currency"],
+        "target_platform": target_key,
+        "target_platform_label": target_info["label"],
+        "target_currency": target_info["currency"],
         "reserve_percent": reserve_pct,
-        "stack_detail": detail,
-        "items": [],
+        "eval_cycles": cycles,
+        "remediation_factor": round(remediation_factor, 3),
+        "remediation_share": REMEDIATION_SHARE,
+        "licensing": licence,
+        "build_detail": build_detail,
+        "targets": targets,
         "warnings": rates.staleness_warnings(),
     }
+
+    if base is not None:
+        # Scale the Claude Code build for remediation across cycles, then
+        # re-attribute against the seat allowance on the scaled figure.
+        for key in ("base", "low", "high"):
+            base[key] = round(base[key] * remediation_factor, 2)
+        for row in base["items"]:
+            row["cost"] = round(row["cost"] * remediation_factor, 2)
+            row["low"] = round(row["low"] * remediation_factor, 2)
+            row["high"] = round(row["high"] * remediation_factor, 2)
+            row["turns"] = int(round(row["turns"] * remediation_factor))
+        base["reserve"] = round(base["base"] * reserve_pct / 100.0, 2)
+        base["budget_ask"] = round(base["base"] + base["reserve"], 2)
+        base["adequacy"] = {
+            "reserve_percent": reserve_pct,
+            "budget_ask": base["budget_ask"],
+            "high": base["high"],
+            "covers_high": base["budget_ask"] >= base["high"],
+            "required_percent": round(
+                (base["high"] - base["base"]) / base["base"] * 100.0, 1)
+            if base["base"] else 0.0,
+        }
+        base["licensing"] = licensing.attribute(base["base"], licence, profile)
+        result["build"] = base
+        result["profile"] = base["profile"]
+    else:
+        result["build"] = None
+        result["profile"] = {"source": "not applicable"}
+
+    return result
 
 
 def append_ledger(result, manifest, path=None):
@@ -425,38 +570,48 @@ def append_ledger(result, manifest, path=None):
             ledger = json.load(fh)
     except (IOError, OSError, ValueError):
         ledger = {"schema": 1, "estimates": []}
-    if result.get("stack_detail") is not None:
-        # Non-Claude-Code stacks are metered in their own units, so the ledger
-        # records those rather than a dollar base that does not exist.
-        detail = result["stack_detail"]
+    build = result.get("build") if result.get("targets") is not None else result
+    if result.get("targets") is not None:
+        targets = [{"target": tgt["target"],
+                    "credits": tgt.get("total_credits", 0),
+                    "dollars": tgt.get("total_dollars", 0)}
+                   for tgt in result["targets"]]
+    else:
+        targets = []
+
+    if build and build.get("base") is not None:
+        predicted = {
+            "base": build["base"], "low": build["low"],
+            "high": build["high"], "budget_ask": build["budget_ask"],
+            "targets": targets,
+            "items": [
+                {"name": r["name"], "size": r["size"], "bucket": r["bucket"],
+                 "files": r["files"], "unknowns": r["unknowns"],
+                 "brownfield": r["brownfield"], "turns": r["turns"],
+                 "cost": r["cost"]}
+                for r in build["items"]
+            ],
+        }
+        profile_source = build.get("profile", {}).get("source", "unknown")
+    else:
+        detail = result.get("build_detail") or result.get("stack_detail") or {}
         predicted = {
             "unit": detail.get("unit", "unit"),
             "total_units": detail.get("total_units",
                                       detail.get("total_credits")),
             "budget_units": detail.get("budget_units",
                                        detail.get("budget_credits")),
+            "targets": targets,
             "items": [],
         }
         profile_source = "not applicable"
-    else:
-        predicted = {
-            "base": result["base"], "low": result["low"],
-            "high": result["high"], "budget_ask": result["budget_ask"],
-            "items": [
-                {"name": r["name"], "size": r["size"], "bucket": r["bucket"],
-                 "files": r["files"], "unknowns": r["unknowns"],
-                 "brownfield": r["brownfield"], "turns": r["turns"],
-                 "cost": r["cost"]}
-                for r in result["items"]
-            ],
-        }
-        profile_source = result["profile"]["source"]
 
     ledger["estimates"].append({
         "estimate_id": result["estimate_id"],
         "generated": result["generated"],
         "project": result["project"],
-        "build_stack": result["build_stack"],
+        "build_platform": result.get("build_platform"),
+        "target_platform": result.get("target_platform"),
         "manifest": manifest,
         "predicted": predicted,
         "profile_source": profile_source,
@@ -486,7 +641,7 @@ def main(argv=None):
             manifest["reserve_percent"] = args.reserve
 
         profile = calibrate.load_profile(args.profile)
-        result = compute_stack(manifest, profile)
+        result = compute_plan(manifest, profile)
     except (EstimateError, licensing.LicensingError) as exc:
         print("ERROR  %s" % exc, file=sys.stderr)
         return 1

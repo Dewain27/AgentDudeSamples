@@ -32,7 +32,7 @@ should be *measured from the estimator's own usage history* rather than assumed.
 The estimate is reported in **the currency of the stack the build is done with**
 — tokens and dollars for Claude Code, Copilot Credits for Copilot Studio, GitHub
 AI Credits for GitHub Copilot — and **how that stack is licensed** decides what
-the number means. Both are covered in `licensing-and-stacks.md`.
+the number means. Both are covered in `platforms-and-licensing.md`.
 
 > **Revision, 2026-09-03.** The first implementation keyed the currency off
 > `microsoft: true`, meaning *the target workload is Microsoft*. That was wrong:

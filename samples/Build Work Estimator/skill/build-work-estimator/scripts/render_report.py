@@ -20,14 +20,16 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import copilot_credits  # noqa: E402
 import github_copilot  # noqa: E402
+import target_platform as tp  # noqa: E402
 import licensing  # noqa: E402
 import rates  # noqa: E402
 
-NOT_A_COMPARISON = """> **This is not a stack comparison tool.** It reports one build stack, in that
-> stack's own currency. Technology stack decisions are not made on cost alone —
-> capability, existing skills, governance, integration, and support all matter
-> more than a build-time figure — and using this report to pick a stack would
-> be using it for something it was not designed to answer."""
+NOT_A_COMPARISON = """> **This is not a platform comparison tool.** It reports one chosen build
+> platform and one chosen target, each in its own meter. Platform decisions are
+> not made on cost alone — capability, existing skills, governance, integration,
+> and support all matter more than a build-time figure — and using this report
+> to pick a platform would be using it for something it was not designed to
+> answer."""
 
 AUTHOR = "Dewain Robinson"
 
@@ -77,7 +79,8 @@ def build_header(result):
     out.append("---")
     out.append("title: Build Work Estimate — %s" % result["project"])
     out.append("author: %s" % AUTHOR)
-    out.append("build_stack: %s" % result["build_stack"])
+    out.append("build_platform: %s" % result["build_platform"])
+    out.append("target_platform: %s" % result["target_platform"])
     out.append("estimate_id: %s" % result["estimate_id"])
     out.append("generated: %s" % result["generated"])
     out.append("---")
@@ -93,15 +96,20 @@ def build_header(result):
             "source", "not applicable"),
         timestamp=result["generated"]))
     out.append("")
-    out.append("## Build stack — %s" % result["stack_label"])
+    out.append("## Platforms")
     out.append("")
-    out.append("**Metered in: %s.** %s"
-               % (result["stack_currency"], result["stack_note"]))
+    out.append("| | Platform | Metered in |")
+    out.append("| --- | --- | --- |")
+    out.append("| **Built with** | %s | %s |"
+               % (result["build_platform_label"], result["build_currency"]))
+    out.append("| **Built on** | %s | %s |"
+               % (result["target_platform_label"], result["target_currency"]))
     out.append("")
-    out.append("> The currency is decided by what you **build with**, not what "
-               "you build **for**.\n> Building a Microsoft workload with Claude "
-               "Code is metered in tokens; building\n> it in Copilot Studio is "
-               "metered in Copilot Credits.")
+    out.append("> These are different questions and different meters, and the "
+               "same project spends\n> on **both**. The building happens in a "
+               "coding agent authoring the agent\n> definition; the target "
+               "platform is where it is deployed, previewed, evaluated\n> and "
+               "validated. Copilot Studio is a destination, not a build tool.")
     out.append("")
     out.append(NOT_A_COMPARISON)
     out.append("")
@@ -113,6 +121,177 @@ def build_header(result):
     out.append(SCOPE_TABLE)
     out.append("")
     return out
+
+
+def build_plan_markdown(result):
+    """Combined report: build platform + target platform, both meters."""
+    out = build_header(result)
+
+    out.append("## Summary")
+    out.append("")
+    out.append("| Component | Meter | Total | With %.0f%% reserve |"
+               % result["reserve_percent"])
+    out.append("| --- | --- | ---: | ---: |")
+
+    build = result.get("build")
+    detail = result.get("build_detail")
+    if build:
+        out.append("| Build — authoring and remediation | %s | %s | %s |"
+                   % (result["build_currency"], money(build["base"]),
+                      money(build["budget_ask"])))
+    elif detail:
+        out.append("| Build — authoring and remediation | %s | %s | %s |"
+                   % (result["build_currency"],
+                      format(detail["total_units"], ",.0f"),
+                      format(detail["budget_units"], ",.0f")))
+    for target in result["targets"]:
+        if target["target"] == "azure":
+            out.append("| Target — build and test on Azure | USD | %s | %s |"
+                       % (money(target["total_dollars"]),
+                          money(target["budget_dollars"])))
+        elif target["bills_during_build"]:
+            out.append("| Target — preview, test and evaluation | Copilot "
+                       "Credits | %s | %s |"
+                       % (format(target["total_credits"], ",.0f"),
+                          format(target["budget_credits"], ",.0f")))
+        else:
+            # Standard harness: preview/test/eval are unbilled, but billable
+            # side-effects still land. Showing a bare 0 would understate it.
+            note = ("billable side-effects only — preview, test and evaluation "
+                    "are unbilled on the standard harness")
+            out.append("| Target — %s | Copilot Credits | %s | %s |"
+                       % (note, format(target["total_credits"], ",.0f"),
+                          format(target["budget_credits"], ",.0f")))
+    out.append("")
+    out.append("**Two meters, not two options.** The figures above are spent "
+               "on the same project\nover the same period and add together; "
+               "they are not alternatives to choose between.")
+    out.append("")
+
+    out.append("## The build loop")
+    out.append("")
+    out.append("```")
+    out.append("  %-22s        %s" % (result["build_platform_label"],
+                                      result["target_platform_label"]))
+    out.append("  %-22s        %s" % ("-" * 22, "-" * 22))
+    out.append("  author definition   -->  deploy")
+    out.append("                           preview / interactive test  <- human")
+    out.append("                           run evaluations")
+    out.append("  remediate           <--  evaluations fail")
+    out.append("  (repeat)")
+    out.append("```")
+    out.append("")
+    out.append("This estimate plans **%d evaluation cycle%s**. Each cycle after "
+               "the first adds\n**%.0f%%** of the original build back as "
+               "remediation, giving a build-side multiplier\nof **%.2fx**. An "
+               "estimate that prices only the first pass is planning for a "
+               "build\nwhere every evaluation passes first time."
+               % (result["eval_cycles"],
+                  "" if result["eval_cycles"] == 1 else "s",
+                  result["remediation_share"] * 100,
+                  result["remediation_factor"]))
+    out.append("")
+
+    if build:
+        out.append("## Build — %s" % result["build_platform_label"])
+        out.append("")
+        out.append("| | Amount |")
+        out.append("| --- | ---: |")
+        out.append("| Base estimate (incl. remediation) | %s |"
+                   % money(build["base"]))
+        out.append("| Reserve (%.0f%%) | %s |"
+                   % (build["reserve_percent"], money(build["reserve"])))
+        out.append("| **Budget ask** | **%s** |" % money(build["budget_ask"]))
+        out.append("| Observed low | %s |" % money(build["low"]))
+        out.append("| Observed high | %s |" % money(build["high"]))
+        out.append("")
+        adequacy = build["adequacy"]
+        out.append("### Reserve adequacy")
+        out.append("")
+        if adequacy["covers_high"]:
+            out.append("A **%.0f%%** reserve brings the budget ask to %s, "
+                       "which covers the observed high of %s."
+                       % (adequacy["reserve_percent"],
+                          money(adequacy["budget_ask"]), money(adequacy["high"])))
+        else:
+            out.append("**The reserve does not cover observed variance.**")
+            out.append("")
+            out.append("A **%.0f%%** reserve reaches %s. Comparable work has "
+                       "reached %s. Full coverage\nwould require **%.0f%%**."
+                       % (adequacy["reserve_percent"],
+                          money(adequacy["budget_ask"]), money(adequacy["high"]),
+                          adequacy["required_percent"]))
+        out.append("")
+        out.append("| Item | Size | Files | Turns | Estimate | Range | n |")
+        out.append("| --- | --- | ---: | ---: | ---: | --- | ---: |")
+        for row in build["items"]:
+            out.append("| %s | %s%s | %d | %s | %s | %s – %s | %d |"
+                       % (row["name"], row["size"],
+                          " (brownfield)" if row["brownfield"] else "",
+                          row["files"], format(row["turns"], ","),
+                          money(row["cost"]), money(row["low"]),
+                          money(row["high"]), row["n"]))
+        out.append("")
+        if build.get("thin_buckets"):
+            out.append("> **Thin calibration data** for: %s. Those medians are "
+                       "weak." % ", ".join(build["thin_buckets"]))
+            out.append("")
+        profile = build["profile"]
+        out.append("### Calibration basis")
+        out.append("")
+        if profile["source"] == "measured":
+            out.append("Measured from %d local session%s%s."
+                       % (profile["sessions"],
+                          "" if profile["sessions"] == 1 else "s",
+                          (" spanning %s to %s" % tuple(profile["date_range"]))
+                          if profile.get("date_range") else ""))
+        else:
+            out.append("**Published baselines — no local session history was "
+                       "found.** This is\nmaterially less reliable than a "
+                       "measured profile. Run `calibrate.py` after some\nreal "
+                       "work to improve it.")
+        out.append("")
+        out.append("Cost per agent turn: **%s**, at **list price** — an "
+                   "organization on contracted\nrates must substitute its own."
+                   % money(profile["cost_per_main_turn"]))
+        out.append("")
+        if build.get("licensing"):
+            out.append(licensing.render_markdown(build["licensing"]))
+    elif detail:
+        out.append(github_copilot.render_markdown(detail))
+
+    for target in result["targets"]:
+        out.append(tp.render_markdown(target))
+
+    out.append("## Known limits")
+    out.append("")
+    out.append("1. **Build only.** Nothing here is the cost of running the "
+               "agent once it is live.")
+    out.append("2. **Human validation is a dependency, not a line item.** "
+               "Hours are collected to\n   size test volume, never estimated "
+               "as labour.")
+    out.append("3. **Turn counts are the weakest input**, and thin buckets are "
+               "flagged above.")
+    out.append("4. **Rates go stale.** Re-verify against the sources cited.")
+    out.append("5. **This is a sample.** Modify it for your organization "
+               "before budgeting use.")
+    out.append("")
+    for warning in result.get("warnings") or []:
+        out.append("> WARNING: %s" % warning)
+    if result.get("warnings"):
+        out.append("")
+    out.append("## Close the loop")
+    out.append("")
+    out.append("```")
+    out.append("python record_actual.py %s --sessions <session-id> [...]"
+               % result["estimate_id"])
+    out.append("```")
+    out.append("")
+    out.append("---")
+    out.append("")
+    out.append("*%s*" % FOOTER)
+    out.append("")
+    return "\n".join(out)
 
 
 def build_stack_markdown(result):
@@ -179,6 +358,8 @@ def build_stack_markdown(result):
 
 
 def build_markdown(result, credits=None):
+    if result.get("targets") is not None:
+        return build_plan_markdown(result)
     if result.get("stack_detail") is not None:
         return build_stack_markdown(result)
     p = result["profile"]

@@ -71,7 +71,8 @@ class TestManifestParsingWithoutPyYAML(unittest.TestCase):
         path = os.path.join(EXAMPLES, "harbor-line-manifest.yaml")
         with _BlockImport("yaml"):
             data = estimate.load_manifest(path)
-        self.assertEqual(data["build_stack"], "claude-code")
+        self.assertEqual(data["build_platform"], "claude-code")
+        self.assertEqual(data["target_platform"], "copilot-studio")
         self.assertEqual(data["reserve_percent"], 25)
         self.assertEqual(data["licensing"]["seat_monthly_cost"], 200)
         self.assertEqual(len(data["items"]), 4)
@@ -81,9 +82,9 @@ class TestManifestParsingWithoutPyYAML(unittest.TestCase):
         path = os.path.join(EXAMPLES, "harbor-line-manifest.yaml")
         with _BlockImport("yaml"):
             data = estimate.load_manifest(path)
-            result = estimate.compute(data, PROFILE)
-        self.assertGreater(result["base"], 0)
-        self.assertEqual(result["build_stack"], "claude-code")
+            result = estimate.compute_plan(data, PROFILE)
+        self.assertGreater(result["build"]["base"], 0)
+        self.assertEqual(result["build_platform"], "claude-code")
 
 
 class TestMiniYaml(unittest.TestCase):
@@ -193,7 +194,7 @@ class TestReportWithoutBrowser(unittest.TestCase):
         directory = tempfile.mkdtemp()
         try:
             import json
-            result = estimate.compute(manifest(), PROFILE)
+            result = estimate.compute_plan(manifest(), PROFILE)
             payload = os.path.join(directory, "e.json")
             with open(payload, "w") as fh:
                 json.dump(result, fh)

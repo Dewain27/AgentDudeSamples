@@ -34,25 +34,50 @@ actually cost.
 Asked for any of those, the skill declines and redirects rather than
 improvising a number.
 
-## The stack decides the currency
+## Two platforms, two meters
 
-What you build **with** determines how the build is metered. What you build
-**for** does not.
+The estimator asks two questions up front, because they are different questions
+with different answers:
 
-| You build with | You build for | Metered in |
+| Question | Field | Values |
 | --- | --- | --- |
-| Claude Code | A Copilot Studio agent | **Tokens → USD** |
-| Copilot Studio | A Copilot Studio agent | **Copilot Credits** |
-| GitHub Copilot | A .NET service | **GitHub AI Credits** |
+| What are you building **with**? | `build_platform` | `claude-code` · `github-copilot` |
+| What are you building **on**? | `target_platform` | `copilot-studio` · `azure` · `both` · `ai-recommend` |
 
-Using Claude Code to build a Microsoft workload is common, and it bills in
-tokens. A Microsoft-tooled build is reported in credits throughout — no headline,
-total, or row label is denominated in tokens, because Microsoft products do not
-bill that way.
+**Copilot Studio is not a build platform.** An AI-assisted build happens in a
+coding agent authoring the agent definition; Copilot Studio is where the result
+is deployed, previewed, evaluated, and validated. Microsoft's own VS Code
+extension docs name GitHub Copilot and Claude Code as the harnesses used for
+exactly that, under a heading called *Agent-driven development*.
+
+Both meters are spent on the same project at the same time — they **add
+together**, they are not alternatives.
+
+### The target harness decides whether the target side bills at all
+
+| Harness | Build, preview, test, evaluate |
+| --- | --- |
+| `standard` | **Not billed** — billing starts after publish, test chat does not count |
+| `github-copilot` | **Billed from the moment building starts** |
+
+Required whenever the target is Copilot Studio, and never guessed. A
+standard-harness target legitimately returns near-zero target cost; the report
+says so and shows the counterfactual for the other harness.
+
+### Evaluations, remediation, and retesting are always planned
+
+An agent build is a loop, not a pass. Each cycle adds remediation back onto the
+build platform and re-runs evaluations on the target. **Evaluations are capped at
+20 per agent node per day**, so a large test set sets a minimum elapsed time no
+budget shortens — the report states that alongside cost.
+
+Human validation in the Copilot Studio interface is named as a **dependency, not
+a cost line**: planned hours size the interactive test volume, and are never
+priced as labour.
 
 **GitHub AI Credits are not Copilot Studio Copilot Credits.** Both are $0.01 per
-credit, and they are separate meters on separate products with separate
-allowances. They never share a code path here.
+credit, separate meters on separate products with separate allowances. They never
+share a code path here.
 
 ## Licensing decides what the number means
 
@@ -70,14 +95,20 @@ The estimator also checks whether the build plus your *other* committed work
 overruns the allowance, and warns that 5-hour and weekly windows can stall a
 build that fits comfortably in a month.
 
-Full detail: [`docs/licensing-and-stacks.md`](docs/licensing-and-stacks.md).
+Full detail: [`docs/platforms-and-licensing.md`](docs/platforms-and-licensing.md).
 
-## Not a stack comparison tool
+## Not a platform comparison tool
 
-Each report covers one stack, in one currency, and says so. Stack decisions are
-not made on cost alone — capability, team skills, governance, and integration
-matter more than a build-time figure — so the shipped examples each show a single
-scenario and there is no side-by-side mode in them.
+Each report covers one chosen build platform and one chosen target, and says so.
+Platform decisions are not made on cost alone — capability, team skills,
+governance, and integration matter more than a build-time figure — so the
+shipped examples each show a single scenario and there is no side-by-side mode
+in them.
+
+When `target_platform` is `ai-recommend`, the skill interviews for requirements,
+states a recommendation **with its reasoning**, and estimates the agreed target.
+It refuses to run while the value is unresolved — the choice changes the
+architecture, not just the number.
 
 ## Install
 
@@ -137,10 +168,10 @@ python skill/build-work-estimator/scripts/render_report.py \
 Two worked examples ship, deliberately different companies and projects rather
 than a comparison:
 
-| Scenario | Stack | Licensing | Demonstrates |
+| Scenario | Built with → built on | Licensing | Demonstrates |
 | --- | --- | --- | --- |
-| [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | Claude Code | Seat (Claude Max) | A **Microsoft workload built in Claude Code** — billed in tokens, not credits — plus seat attribution and allowance overrun |
-| [Granite Peak Utilities](examples/granite-peak-estimate.md) ([pdf](examples/granite-peak-estimate.pdf)) | Copilot Studio | Consumption | A build **authored in Copilot Studio** — denominated in Copilot Credits throughout, with the reasoning-model surcharge broken out |
+| [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | **Claude Code** → Copilot Studio, GitHub Copilot harness | Seat (Claude Max) | Both meters billing at once; 4 eval cycles; the 20-evals-per-day velocity cap forcing 24 days minimum |
+| [Granite Peak Utilities](examples/granite-peak-estimate.md) ([pdf](examples/granite-peak-estimate.pdf)) | **GitHub Copilot** → Copilot Studio, standard harness | Seat (Copilot Business) | Standard harness billing nothing for build or test, with the counterfactual shown; side-effects still billing |
 
 ## What good output looks like
 

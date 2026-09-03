@@ -102,40 +102,93 @@ PUBLISHED_BASELINE = {
 # billed in tokens, not Copilot Credits -- getting this backwards prices the
 # work in a currency nobody is charged in.
 
-BUILD_STACKS = {
+# WHAT DOES THE BUILDING. An AI-assisted build happens in a coding agent --
+# Claude Code or GitHub Copilot -- authoring the agent definition. Copilot
+# Studio is NOT a build platform: it is where the result is deployed,
+# previewed, evaluated, and validated. Microsoft's own VS Code extension
+# documentation says as much, naming GitHub Copilot and Claude Code as the
+# harnesses used to create and update Copilot Studio agent components.
+BUILD_PLATFORMS = {
     "claude-code": {
         "label": "Claude Code",
         "currency": "USD (tokens)",
         "unit": "token",
-        "module": "anthropic",
         "note": "Metered in input/output/cache tokens, priced per model.",
-    },
-    "copilot-studio": {
-        "label": "Microsoft Copilot Studio",
-        "currency": "Copilot Credits",
-        "unit": "Copilot Credit",
-        "module": "copilot_studio",
-        "note": "Metered in Copilot Credits. Not tokens, and not GitHub AI "
-                "Credits -- a separate meter that happens to share a rate.",
     },
     "github-copilot": {
         "label": "GitHub Copilot",
         "currency": "GitHub AI Credits",
         "unit": "GitHub AI Credit",
-        "module": "github_copilot",
         "note": "Metered in GitHub AI Credits, or legacy premium requests on "
                 "older plans. A separate meter from Copilot Studio credits.",
     },
 }
 
+# WHERE IT RUNS. The target platform is where the agent is deployed and where
+# preview, test, and evaluation consumption lands. It is a different meter
+# from the build platform, and both are spent on the same project.
+TARGET_PLATFORMS = {
+    "copilot-studio": {
+        "label": "Microsoft Copilot Studio",
+        "currency": "Copilot Credits",
+        "note": "Deployment, preview, test, and evaluation consumption is "
+                "metered in Copilot Credits -- whether that is billed depends "
+                "on the harness.",
+    },
+    "azure": {
+        "label": "Azure",
+        "currency": "Azure consumption (USD)",
+        "note": "Model and service consumption billed to the Azure "
+                "subscription. Rates depend on the services chosen and are "
+                "supplied by the user, not bundled here.",
+    },
+    "both": {
+        "label": "Copilot Studio and Azure",
+        "currency": "Copilot Credits + Azure consumption",
+        "note": "Agent surface in Copilot Studio with Azure-hosted services "
+                "behind it. Both meters apply.",
+    },
+    "ai-recommend": {
+        "label": "To be recommended",
+        "currency": "decided after the requirements interview",
+        "note": "The skill asks a short requirements interview, recommends a "
+                "target with its reasoning, and estimates the agreed one.",
+    },
+}
 
-def stack_info(name):
+
+def build_platform_info(name):
     key = str(name or "").strip().lower()
-    if key not in BUILD_STACKS:
+    if key not in BUILD_PLATFORMS:
         raise ValueError(
-            "unknown build_stack %r; expected one of: %s"
-            % (name, ", ".join(sorted(BUILD_STACKS))))
-    return BUILD_STACKS[key]
+            "unknown build_platform %r; expected one of: %s"
+            % (name, ", ".join(sorted(BUILD_PLATFORMS))))
+    return BUILD_PLATFORMS[key]
+
+
+def target_platform_info(name):
+    key = str(name or "").strip().lower()
+    if key not in TARGET_PLATFORMS:
+        raise ValueError(
+            "unknown target_platform %r; expected one of: %s"
+            % (name, ", ".join(sorted(TARGET_PLATFORMS))))
+    return TARGET_PLATFORMS[key]
+
+
+# Documented evaluation constraints. These bound velocity, not just cost.
+EVAL_LIMITS_SOURCE = (
+    "https://learn.microsoft.com/microsoft-copilot-studio/"
+    "workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node"
+)
+EVAL_GUIDANCE_SOURCE = (
+    "https://learn.microsoft.com/microsoft-365/copilot/extensibility/"
+    "evaluation-test-categories#iteration-loop"
+)
+MAX_EVALUATIONS_PER_NODE_PER_DAY = 20
+MAX_AI_GENERATED_TEST_METHODS = 5
+TARGET_PASS_RATE_LOW = 0.80
+TARGET_PASS_RATE_HIGH = 0.90
+EVAL_RESULTS_RETENTION_DAYS = 89
 
 
 # --------------------------------------------------------------------------

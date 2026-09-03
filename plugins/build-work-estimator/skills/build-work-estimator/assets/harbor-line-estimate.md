@@ -1,14 +1,15 @@
 ---
-title: Build Work Estimate — Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
+title: Build Work Estimate — Harbor Line Logistics -- dispatch agent
 author: Dewain Robinson
-build_stack: claude-code
-estimate_id: est_20260903T093307_718b2e
-generated: 2026-09-03T09:33:07Z
+build_platform: claude-code
+target_platform: copilot-studio
+estimate_id: est_20260903T100519_a78168
+generated: 2026-09-03T10:05:19Z
 ---
 
-# Build Work Estimate — Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
+# Build Work Estimate — Harbor Line Logistics -- dispatch agent
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T093307_718b2e` · **Generated:** 2026-09-03T09:33:07Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260903T100519_a78168` · **Generated:** 2026-09-03T10:05:19Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -32,21 +33,26 @@ generated: 2026-09-03T09:33:07Z
 > own delivery patterns, model choices, and review overhead.
 >
 > Rates verified 2026-06-24 and change without notice.
-> Calibration source: `measured` · Generated 2026-09-03T09:33:07Z
+> Calibration source: `measured` · Generated 2026-09-03T10:05:19Z
 
-## Build stack — Claude Code
+## Platforms
 
-**Metered in: USD (tokens).** Metered in input/output/cache tokens, priced per model.
+| | Platform | Metered in |
+| --- | --- | --- |
+| **Built with** | Claude Code | USD (tokens) |
+| **Built on** | Microsoft Copilot Studio | Copilot Credits |
 
-> The currency is decided by what you **build with**, not what you build **for**.
-> Building a Microsoft workload with Claude Code is metered in tokens; building
-> it in Copilot Studio is metered in Copilot Credits.
+> These are different questions and different meters, and the same project spends
+> on **both**. The building happens in a coding agent authoring the agent
+> definition; the target platform is where it is deployed, previewed, evaluated
+> and validated. Copilot Studio is a destination, not a build tool.
 
-> **This is not a stack comparison tool.** It reports one build stack, in that
-> stack's own currency. Technology stack decisions are not made on cost alone —
-> capability, existing skills, governance, integration, and support all matter
-> more than a build-time figure — and using this report to pick a stack would
-> be using it for something it was not designed to answer.
+> **This is not a platform comparison tool.** It reports one chosen build
+> platform and one chosen target, each in its own meter. Platform decisions are
+> not made on cost alone — capability, existing skills, governance, integration,
+> and support all matter more than a build-time figure — and using this report
+> to pick a platform would be using it for something it was not designed to
+> answer.
 
 ## Scope — this estimates the build, not the run
 
@@ -63,49 +69,61 @@ cover operating it afterwards.
 
 ## Summary
 
+| Component | Meter | Total | With 25% reserve |
+| --- | --- | ---: | ---: |
+| Build — authoring and remediation | USD (tokens) | $890.21 | $1,112.76 |
+| Target — preview, test and evaluation | Copilot Credits | 32,290 | 40,362 |
+
+**Two meters, not two options.** The figures above are spent on the same project
+over the same period and add together; they are not alternatives to choose between.
+
+## The build loop
+
+```
+  Claude Code                   Microsoft Copilot Studio
+  ----------------------        ----------------------
+  author definition   -->  deploy
+                           preview / interactive test  <- human
+                           run evaluations
+  remediate           <--  evaluations fail
+  (repeat)
+```
+
+This estimate plans **4 evaluation cycles**. Each cycle after the first adds
+**25%** of the original build back as remediation, giving a build-side multiplier
+of **1.75x**. An estimate that prices only the first pass is planning for a build
+where every evaluation passes first time.
+
+## Build — Claude Code
+
 | | Amount |
 | --- | ---: |
-| Base estimate | $508.69 |
-| Reserve (25%) | $127.17 |
-| **Budget ask** | **$635.86** |
-| Observed low | $131.81 |
-| Observed high | $2,989.13 |
+| Base estimate (incl. remediation) | $890.21 |
+| Reserve (25%) | $222.55 |
+| **Budget ask** | **$1,112.76** |
+| Observed low | $230.67 |
+| Observed high | $5,230.98 |
 
-## Reserve adequacy
+### Reserve adequacy
 
 **The reserve does not cover observed variance.**
 
-A **25%** reserve brings the budget ask to $635.86. Comparable work in the
-calibration data has reached $2,989.13. Full coverage would require **488%**.
+A **25%** reserve reaches $1,112.76. Comparable work has reached $5,230.98. Full coverage
+would require **488%**.
 
-This is the single most likely way this estimate causes a problem: not that the
-point figure is wrong, but that the contingency carried on top of it is too thin
-for how wide the real spread is.
+| Item | Size | Files | Turns | Estimate | Range | n |
+| --- | --- | ---: | ---: | ---: | --- | ---: |
+| Agent instructions, topics and tool definitions | medium (brownfield) | 11 | 1,218 | $448.35 | $98.79 – $2,291.12 | 5 |
+| Dataverse schema and rate-card importer | small | 4 | 289 | $106.26 | $57.96 – $417.44 | 6 |
+| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 100 | $36.72 | $8.05 – $1,504.12 | 7 |
+| Driver mobile handoff screens | medium | 8 | 812 | $298.90 | $65.85 – $1,018.27 | 5 |
 
-## Breakdown
-
-| Item | Size | Files | Unknowns | Turns | Estimate | Range | n |
-| --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
-| Agent topic + tool authoring | medium (brownfield) | 11 | 2 | 696 | $256.20 | $56.45 – $1,309.21 | 5 |
-| Dataverse schema and rate-card importer | small | 4 | 1 | 165 | $60.72 | $33.12 – $238.54 | 6 |
-| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 3 | 57 | $20.98 | $4.60 – $859.50 | 7 |
-| Driver mobile handoff screens | medium | 8 | 0 | 464 | $170.80 | $37.63 – $581.87 | 5 |
-
-## Calibration basis
+### Calibration basis
 
 Measured from 24 local sessions spanning 2026-06-01 to 2026-08-30.
 
-Cost per agent turn: **$0.32**. Rates are **list price** — an organization on
-contracted rates must substitute its own.
-
-### Correction factors from recorded actuals
-
-| Bucket | n | Observed ratio | Applied (shrunk) | In effect |
-| --- | ---: | ---: | ---: | --- |
-| medium | 3 | 1.35x | 1.18x | yes |
-
-Observed ratios are shrunk toward 1.0 in proportion to sample size, so a single
-recorded actual cannot swing future estimates.
+Cost per agent turn: **$0.32**, at **list price** — an organization on contracted
+rates must substitute its own.
 
 ## Licensing
 
@@ -114,11 +132,11 @@ so no additional money changes hands for this build -- but the seat is not free.
 
 | | |
 | --- | ---: |
-| Share of a typical month's allowance | **107%** |
+| Share of a typical month's allowance | **188%** |
 | Seat cost per month | $200.00 |
-| **Attributable cost of this build** | **$214.94** |
+| **Attributable cost of this build** | **$376.15** |
 | Already committed to other work | 45% |
-| **Total committed** | **152%** |
+| **Total committed** | **233%** |
 
 The attributable cost is the seat's monthly price apportioned by the share of
 the allowance this build consumes. Nothing extra is invoiced, but this is the
@@ -126,10 +144,10 @@ real cost of the capacity the build uses up.
 
 ### Allowance overrun
 
-**This build plus existing workload exceeds the allowance by 52%.**
+**This build plus existing workload exceeds the allowance by 133%.**
 
 Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$104.94**.
+bills on top of the seat. Overage exposure at the same rate: **$266.15**.
 
 Options: spread the build across allowance periods, move part of it to
 consumption billing, add seats, or reduce the other committed work.
@@ -143,33 +161,74 @@ comfortably in a month can still exhaust a short window and stall.
 Monthly headroom will not protect it; expect to hit shorter windows and plan
 for pauses.
 
-Notional value at list rates: **$508.69** — what this build would cost on
+Notional value at list rates: **$890.21** — what this build would cost on
 consumption billing. Shown for scale; it is not a charge.
 
-## Assumptions and sensitivities
+## Target platform — Microsoft Copilot Studio
 
-- Turn counts come from the calibration profile, and are the weakest input in
-  this model. Where `n` is small, treat the figure as indicative only.
-- Cost scales with context size and turn count. Session hygiene — clearing between
-  unrelated tasks — moves the number more than most scope changes do.
-- Brownfield work is scaled by 1.5x over greenfield.
-- Each declared unknown widens the upper bound by 25%.
+**Target harness:** `github-copilot` — GitHub Copilot harness bills from the moment you start building. Creating a solution with natural language, previewing, testing, and generating evaluations all consume credits. Credits cover LLM tokens, tools (knowledge and MCPs), and the harness itself.
+
+| Build-and-test activity | Credits | At $0.01/CC | Basis |
+| --- | ---: | ---: | --- |
+| Interactive validation in the Copilot Studio interface | 16,800 | $168.00 | 16.0 human hours x 25 interactions/hour = 400 interactions |
+| Evaluation runs | 15,360 | $153.60 | 40 cases x 3 repeats x 4 cycles = 480 runs |
+| Agent flow runs during build and test | 130 | $1.30 | 1,000 actions across 4 cycles at 13 CC per 100 |
+| **Total** | **32,290** | **$322.90** | |
+| Reserve (25%) | 8,072 | $80.73 | required contingency |
+| **Budget ask** | **40,362** | **$403.62** | |
+
+**Reasoning-model surcharge: 25,840 credits ($258.40).** Reasoning models bill the feature
+rate *plus* the premium token tier, so the effective tier is `premium` whatever
+the `standard` tier selected.
+
+### The evaluation loop
+
+Evaluation is not a one-off gate. Microsoft's guidance is an explicit cycle —
+define tests, run evaluations, analyse results, improve the agent, repeat — with a
+target pass rate of 80–90% and near 100% on core tests.
+
+This estimate plans **4 cycles**: 480 evaluation runs in total, plus the
+remediation each failed cycle sends back to the build platform.
+
+> **Velocity, not just cost.** Evaluations are capped at **20 per agent node per
+> day**, so this volume needs a minimum of **24 days** of elapsed time however much
+> budget is available.
+
+### Human validation — a dependency, not a cost line
+
+**16.0 hours** of interactive validation are planned in the Copilot Studio
+interface. Those hours are collected to size the test volume above — they are
+**not** estimated as labour cost, consistent with this tool metering agent
+consumption rather than people.
+
+Someone must go into the interface, confirm behaviour, and make configuration
+changes between cycles. That step gates the loop, and no amount of build budget
+removes it.
+
+### Not included
+
+- Production runtime once the agent is live
+- Capacity pack sizing and overage enforcement
+- End-user Microsoft 365 Copilot licence offsets
+- Human hours for validation (collected to size test volume only)
+
+For production runtime consumption use Microsoft's [agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/).
+
+Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [harness billing](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview) · [evaluation limits](https://learn.microsoft.com/microsoft-copilot-studio/workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node) · [iteration guidance](https://learn.microsoft.com/microsoft-365/copilot/extensibility/evaluation-test-categories#iteration-loop)
 
 ## Known limits
 
-1. **Build only.** Says nothing about what the built thing costs to run.
-2. **Turn counts are the weakest input**, and thin buckets are flagged above.
-3. **List pricing only.** Contracted rates must be substituted.
-4. **This machine only.** Sessions from other devices are not visible.
-5. **Rates go stale.** Both providers change pricing without notice.
+1. **Build only.** Nothing here is the cost of running the agent once it is live.
+2. **Human validation is a dependency, not a line item.** Hours are collected to
+   size test volume, never estimated as labour.
+3. **Turn counts are the weakest input**, and thin buckets are flagged above.
+4. **Rates go stale.** Re-verify against the sources cited.
+5. **This is a sample.** Modify it for your organization before budgeting use.
 
 ## Close the loop
 
-When this build is done, record what it actually cost. That is how the estimator
-gets better — and without it, it cannot.
-
 ```
-python record_actual.py est_20260903T093307_718b2e --sessions <session-id> [...]
+python record_actual.py est_20260903T100519_a78168 --sessions <session-id> [...]
 ```
 
 ---
