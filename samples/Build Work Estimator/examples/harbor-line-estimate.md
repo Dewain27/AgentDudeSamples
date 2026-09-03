@@ -32,7 +32,7 @@ generated: 2026-09-03T00:00:00Z
 > against your contracted rates rather than list price, and adjusted for your
 > own delivery patterns, model choices, and review overhead.
 >
-> Rates verified 2026-06-24 and change without notice.
+> Rates verified 2026-09-03 and change without notice.
 > Calibration source: `measured` · Generated 2026-09-03T00:00:00Z
 
 ## Estimate summary
@@ -198,7 +198,7 @@ consumption billing. Shown for scale; it is not a charge.
 | --- | ---: | ---: | --- |
 | Interactive validation in the Copilot Studio interface | 16,800 | $168.00 | 16.0 human hours x 25 interactions/hour = 400 interactions |
 | Evaluation runs | 15,360 | $153.60 | 40 cases x 3 repeats x 4 cycles = 480 runs |
-| Agent flow runs during build and test | 130 | $1.30 | 1,000 actions across 4 cycles at 13 CC per 100 |
+| Agent flow runs during build and test | 130 | $1.30 | 1,000 actions across 4 cycles at 13 CC per 100 -- test runs in the designer and test chat are exempt |
 | **Total** | **32,290** | **$322.90** | |
 | Reserve (25%) | 8,072 | $80.73 | required contingency |
 | **Budget ask** | **40,362** | **$403.62** | |
@@ -234,6 +234,7 @@ removes it.
 ### Not included
 
 - Production runtime once the agent is live
+- Agent flow test runs in the designer or test chat (documented exemption)
 - Capacity pack sizing and overage enforcement
 - End-user Microsoft 365 Copilot licence offsets
 - Human hours for validation (collected to size test volume only)

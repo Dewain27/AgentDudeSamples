@@ -121,11 +121,22 @@ class TestTargetHarness(unittest.TestCase):
         self.assertTrue(out["bills_during_build"])
         self.assertGreater(out["total_credits"], 0)
 
-    def test_side_effects_bill_on_every_harness(self):
+    def test_agent_flow_test_runs_are_exempt_on_the_standard_harness(self):
+        """Microsoft documents the exemption explicitly.
+
+        "Testing an agent flow in the flow designer or from the agent's test
+        chat doesn't consume capacity for agent flow actions." Billing them
+        anyway over-charged every standard-harness build estimate.
+        """
         out = tp.compute({"harness": "standard", "agent_flow_actions": 500,
                           "eval_cycles": 1}, 0)
-        self.assertGreater(out["total_credits"], 0,
-                           "agent flow runs bill regardless of harness")
+        self.assertEqual(out["total_credits"], 0.0)
+        self.assertTrue(out["agent_flow_test_runs_exempt"])
+
+    def test_agent_flow_runs_do_bill_on_the_github_copilot_harness(self):
+        out = tp.compute({"harness": "github-copilot",
+                          "agent_flow_actions": 500, "eval_cycles": 1}, 0)
+        self.assertAlmostEqual(out["total_credits"], 500 / 100.0 * 13, 2)
 
 
 class TestEvaluationLoop(unittest.TestCase):

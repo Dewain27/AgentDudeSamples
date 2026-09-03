@@ -32,7 +32,7 @@ generated: 2026-09-03T00:00:00Z
 > against your contracted rates rather than list price, and adjusted for your
 > own delivery patterns, model choices, and review overhead.
 >
-> Rates verified 2026-06-24 and change without notice.
+> Rates verified 2026-09-03 and change without notice.
 > Calibration source: `not applicable` · Generated 2026-09-03T00:00:00Z
 
 ## Estimate summary
@@ -53,18 +53,18 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — GitHub AI Credits | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | 900 | 104 | $10.04 |
-| **Likely** | **900** | **156** | **$10.56** |
-| High | 900 | 260 | $11.60 |
-| **Likely + 30% reserve** | **1,170** | **203** | **$13.73** |
+| Low | 900 | 0 | $9.00 |
+| **Likely** | **900** | **0** | **$9.00** |
+| High | 900 | 0 | $9.00 |
+| **Likely + 30% reserve** | **1,170** | **0** | **$11.70** |
 
-> **Plan for $10.56. Hold $13.73 including the 30% reserve.**
+> **Plan for $9.00. Hold $11.70 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
 between.
 
-- Copilot Credits are converted at $0.01 each so the two meters can be shown in one column. They are separate budgets drawn on different accounts.
+- The target column is **zero because of the harness**, not because nothing was estimated. On the standard harness, build, preview, test and evaluation in the interface are not billed, and agent flow test runs are explicitly exempt. See the target section below.
 - The build figure is **notional** — on seat licensing no additional money is invoiced. See Licensing below for the share of the seat this build actually consumes.
 - The build side has no measured spread of its own: the declared interaction volume is the estimate. Only the target side varies here.
 
@@ -154,15 +154,8 @@ Rates verified 2026-09-03. Sources: [models and pricing](https://docs.github.com
 > below consumes no credits. That is a correct result, not a missing one.
 
 Had this been the GitHub Copilot harness, the same volume of preview and
-evaluation work would have cost roughly **6,048 credits ($60.48)** — worth knowing
+evaluation work would have cost roughly **6,204 credits ($62.04)** — worth knowing
 before choosing a harness.
-
-| Build-and-test activity | Credits | At $0.01/CC | Basis |
-| --- | ---: | ---: | --- |
-| Agent flow runs during build and test | 156 | $1.56 | 1,200 actions across 3 cycles at 13 CC per 100 |
-| **Total** | **156** | **$1.56** | |
-| Reserve (30%) | 47 | $0.47 | required contingency |
-| **Budget ask** | **203** | **$2.03** | |
 
 ### The evaluation loop
 
@@ -191,6 +184,7 @@ removes it.
 ### Not included
 
 - Production runtime once the agent is live
+- Agent flow test runs in the designer or test chat (documented exemption)
 - Capacity pack sizing and overage enforcement
 - End-user Microsoft 365 Copilot licence offsets
 - Human hours for validation (collected to size test volume only)
