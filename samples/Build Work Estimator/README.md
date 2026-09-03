@@ -199,7 +199,7 @@ The examples above are minimal illustrations. For a programme-scale case, see
 wealth-management agent plus web application on Copilot Studio and Azure, with
 a complete [product and technical specification](scenarios/kestrel-financial/specification.md)
 — nine agent capabilities, eighteen tools, twelve integrations, 568 evaluation
-cases across 6 cycles, 39 work items, 6 engineers, 5 months.
+cases across 6 cycles, 43 work items, 6 engineers, 5 months.
 
 It is estimated **twice**, once built with Claude Code and once with GitHub
 Copilot, sharing one work breakdown and one target. **Each report is

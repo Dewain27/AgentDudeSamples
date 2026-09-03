@@ -16,7 +16,7 @@ harness, an advisor console and client portal on Azure, twelve system
 integrations, and a financial-services evaluation strategy of 568 test cases
 across 6 cycles.
 
-Phases 1 and 2 are in scope. 39 work items, 6 engineers, 5 months.
+Phases 1 and 2 are in scope. 43 work items, 6 engineers, 5 months.
 
 ## Two runs
 
