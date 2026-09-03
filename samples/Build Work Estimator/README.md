@@ -367,8 +367,15 @@ cd "samples/Build Work Estimator"
 python build/regenerate_examples.py     # rewrite the worked examples
 python build/build_plugin.py            # regenerate plugins/build-work-estimator
 python build/build_host_packages.py     # rebuild the host zips
+python build/check_docs.py              # documentation still describes reality
 cd tests && python -m unittest discover -p 'test_*.py'
 ```
+
+**Documentation is part of the change, not a follow-up.** `check_docs.py`
+settles every claim that can be settled mechanically — test counts cited in
+prose, the script inventory in both directions, companion-file counts, rate
+verification dates, and local links. It runs as its own CI step, so a PR that
+adds a module without documenting it fails.
 
 Then commit everything the chain touched.
 
@@ -381,7 +388,8 @@ nor are affected by it.
 
 | Check | Fails when |
 | --- | --- |
-| Test suite | Any of the 228 tests fail |
+| Test suite | Any test fails |
+| **Documentation matches the repository** | A cited count, the script inventory, a rate date, or a local link has drifted |
 | Runs without optional dependencies | The estimator breaks with PyYAML uninstalled |
 | **Worked examples are current** | The committed examples drift from the code, or a PDF is left behind at old numbers |
 | **Generated plugin is current** | `plugins/build-work-estimator` was not rebuilt after a source change |
@@ -412,7 +420,7 @@ numbers.
 cd "samples/Build Work Estimator/tests" && python3 -m unittest discover -p 'test_*.py'
 ```
 
-228 tests. Fixtures are synthetic and committed; no test reads real history and
+300 tests. Fixtures are synthetic and committed; no test reads real history and
 no test makes a network call.
 
 The most important suite is `test_contribute.py`. It seeds a ledger entry with

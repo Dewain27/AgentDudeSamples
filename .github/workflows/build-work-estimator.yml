@@ -66,6 +66,13 @@ jobs:
             sys.exit(0 if d['build']['base'] > 0 else 1)"
           pip install pyyaml
 
+      - name: Documentation matches the repository
+        run: |
+          # Docs drift silently. This settles every claim that can be checked
+          # mechanically: test counts, script inventory, companion counts,
+          # rate verification dates, local links.
+          python build/check_docs.py --check
+
       - name: Every figure traces to a derivation
         run: |
           # No number ships unless the estimator can say where it came from.
