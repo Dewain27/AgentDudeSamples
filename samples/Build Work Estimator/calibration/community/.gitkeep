@@ -1,0 +1,5 @@
+Anonymized community calibration records land here, one YAML file per record,
+added by pull request via contribute.py.
+
+See ../../docs/CONTRIBUTING-CALIBRATION.md for exactly what a record contains
+and what it can never contain.

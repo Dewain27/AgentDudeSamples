@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "build-work-estimator",
+  "description": "Estimates the work of BUILDING something with an AI coding agent -- turns, tokens, and cost -- calibrated from your own session history, with a required contingency reserve, build-time Copilot Credits for Microsoft work, and Markdown plus PDF reports. Estimates the build, never the run.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dewain Robinson",
+    "url": "https://github.com/Dewain27"
+  },
+  "repository": "https://github.com/Dewain27/AgentDudeSamples",
+  "license": "MIT",
+  "keywords": [
+    "estimation",
+    "cost",
+    "tokens",
+    "budgeting",
+    "copilot-credits",
+    "build-estimation",
+    "agent-skills"
+  ]
+}

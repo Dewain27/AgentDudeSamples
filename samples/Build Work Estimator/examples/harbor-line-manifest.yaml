@@ -1,0 +1,52 @@
+# Build Work Estimator -- worked example
+# Author: Dewain Robinson
+#
+# Harbor Line Logistics is a FICTIONAL company. Every figure below is invented.
+# This estimates the work of BUILDING the system, never the cost of running it.
+
+project: Harbor Line Logistics -- dispatch modernization
+author: Dewain Robinson
+
+# REQUIRED. No default. The percentage added on top for budgeting headroom.
+reserve_percent: 25
+
+# Triggers the build-time Copilot Credits analysis.
+microsoft: true
+
+copilot:
+  harness: github-copilot   # none | standard | github-copilot
+  tier: standard            # basic | standard | premium
+  reasoning_model: true
+  authoring_turns: 140
+  tokens_per_turn: 4500
+  test_runs: 35
+  interactions_per_test_run: 6
+  interaction_type: generative_answer
+  eval_runs: 25
+  eval_tokens_per_run: 3200
+  agent_flow_actions: 600
+
+items:
+  - name: Dispatch scheduling API
+    size: medium
+    files: 11
+    unknowns: 2
+    brownfield: true
+
+  - name: Carrier rate-card importer
+    size: small
+    files: 4
+    unknowns: 1
+    brownfield: false
+
+  - name: Legacy AS400 field mapping research
+    size: exploration
+    files: 0
+    unknowns: 3
+    brownfield: true
+
+  - name: Driver mobile handoff screens
+    size: medium
+    files: 8
+    unknowns: 0
+    brownfield: false

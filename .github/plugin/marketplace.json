@@ -2,7 +2,7 @@
   "name": "agentdude-samples",
   "metadata": {
     "description": "Sample Agent Skills and plugins you can install and try, each built around a fictional company so nothing exposes real data",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "owner": {
     "name": "Dewain27",
@@ -14,6 +14,13 @@
       "source": "plugins/rfp-response",
       "description": "Turns an incoming RFP into a submission-ready proposal \u2014 matches the request to a product offering, answers from a library of pre-approved answers, flags what it can't answer, and produces Markdown plus a formatted PDF.",
       "version": "1.0.0"
+    },
+    {
+      "name": "build-work-estimator",
+      "source": "plugins/build-work-estimator",
+      "description": "Estimates the work of BUILDING something with an AI coding agent -- turns, tokens, and cost -- calibrated from your own session history, with a required contingency reserve, build-time Copilot Credits for Microsoft work, and Markdown plus PDF reports. Estimates the build, never the run.",
+      "version": "1.0.0",
+      "author": "Dewain Robinson"
     }
   ]
 }

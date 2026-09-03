@@ -1,0 +1,9 @@
+{
+  "author": "Dewain Robinson",
+  "buckets": {},
+  "min_confident_n": 5,
+  "note": "Community-contributed build calibration. Self-selected, not a representative sample of anyone's work. Useful as a fallback for installs with no local history; never better than a user's own measured profile.",
+  "records": 0,
+  "schema": 1,
+  "skipped": 0
+}
