@@ -94,7 +94,96 @@ PUBLISHED_BASELINE = {
 }
 
 # --------------------------------------------------------------------------
-# Copilot Credits
+# Build stacks -- WHAT YOU BUILD WITH decides the currency
+# --------------------------------------------------------------------------
+#
+# The stack you build WITH determines how the build is metered. The workload
+# you build FOR does not. Using Claude Code to build a Copilot Studio agent is
+# billed in tokens, not Copilot Credits -- getting this backwards prices the
+# work in a currency nobody is charged in.
+
+BUILD_STACKS = {
+    "claude-code": {
+        "label": "Claude Code",
+        "currency": "USD (tokens)",
+        "unit": "token",
+        "module": "anthropic",
+        "note": "Metered in input/output/cache tokens, priced per model.",
+    },
+    "copilot-studio": {
+        "label": "Microsoft Copilot Studio",
+        "currency": "Copilot Credits",
+        "unit": "Copilot Credit",
+        "module": "copilot_studio",
+        "note": "Metered in Copilot Credits. Not tokens, and not GitHub AI "
+                "Credits -- a separate meter that happens to share a rate.",
+    },
+    "github-copilot": {
+        "label": "GitHub Copilot",
+        "currency": "GitHub AI Credits",
+        "unit": "GitHub AI Credit",
+        "module": "github_copilot",
+        "note": "Metered in GitHub AI Credits, or legacy premium requests on "
+                "older plans. A separate meter from Copilot Studio credits.",
+    },
+}
+
+
+def stack_info(name):
+    key = str(name or "").strip().lower()
+    if key not in BUILD_STACKS:
+        raise ValueError(
+            "unknown build_stack %r; expected one of: %s"
+            % (name, ", ".join(sorted(BUILD_STACKS))))
+    return BUILD_STACKS[key]
+
+
+# --------------------------------------------------------------------------
+# GitHub Copilot -- GitHub AI Credits, and legacy premium requests
+# --------------------------------------------------------------------------
+#
+# DISTINCT from Copilot Studio Copilot Credits. Both happen to be $0.01 per
+# credit; they are different meters on different products with separate
+# allowances. Conflating them produces a plausible-looking wrong number.
+
+GITHUB_VERIFIED = "2026-09-03"
+GITHUB_SOURCE = "https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing"
+GITHUB_LEGACY_SOURCE = "https://docs.github.com/copilot/concepts/billing/copilot-requests"
+GITHUB_PLANS_SOURCE = "https://docs.github.com/en/copilot/get-started/plans"
+
+#: USD per GitHub AI Credit.
+DOLLARS_PER_GITHUB_AI_CREDIT = 0.01
+
+#: Billing modes GitHub currently runs in parallel.
+GITHUB_BILLING_MODES = {
+    "ai-credits": {
+        "label": "Usage-based GitHub AI Credits",
+        "note": "Interactions consume input, output, and cached tokens. "
+                "GitHub prices those at the model's published rates and "
+                "converts the result to AI Credits at $0.01 per credit. On "
+                "Business and Enterprise plans credits are pooled at the "
+                "billing-entity level.",
+    },
+    "premium-requests": {
+        "label": "Legacy premium requests",
+        "note": "Each interaction costs one premium request multiplied by the "
+                "model's multiplier, drawn from a monthly plan allowance. "
+                "Eligible Copilot Pro and Pro+ subscribers on existing annual "
+                "plans remain on this model until their plan expires.",
+    },
+}
+
+#: Code completions and next edit suggestions do not consume AI Credits and
+#: are unlimited on paid plans -- so they contribute nothing to a build
+#: estimate, however much they are used.
+GITHUB_UNMETERED = (
+    "Code completions",
+    "Next edit suggestions",
+)
+
+
+# --------------------------------------------------------------------------
+# Copilot Studio Credits
 # --------------------------------------------------------------------------
 
 COPILOT_VERIFIED = "2026-09-03"

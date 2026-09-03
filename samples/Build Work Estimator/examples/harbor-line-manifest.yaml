@@ -1,39 +1,39 @@
-# Build Work Estimator -- worked example
+# Build Work Estimator -- Scenario A: building WITH Claude Code
 # Author: Dewain Robinson
 #
-# Harbor Line Logistics is a FICTIONAL company. Every figure below is invented.
-# This estimates the work of BUILDING the system, never the cost of running it.
+# Harbor Line Logistics is a FICTIONAL company. Every figure is invented.
+#
+# NOTE WHAT THIS DEMONSTRATES: the thing being built is a Microsoft workload --
+# a Copilot Studio dispatch agent -- but the BUILD is done in Claude Code.
+# The currency follows the build stack, so this is metered in tokens, not
+# Copilot Credits. Building a Microsoft workload does not make it a Microsoft
+# build.
 
-project: Harbor Line Logistics -- dispatch modernization
+project: Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
 author: Dewain Robinson
 
-# REQUIRED. No default. The percentage added on top for budgeting headroom.
+# REQUIRED. No default.
 reserve_percent: 25
 
-# Triggers the build-time Copilot Credits analysis.
-microsoft: true
+# What we BUILD WITH. Not what we build FOR.
+build_stack: claude-code
 
-copilot:
-  harness: github-copilot   # none | standard | github-copilot
-  tier: standard            # basic | standard | premium
-  reasoning_model: true
-  authoring_turns: 140
-  tokens_per_turn: 4500
-  test_runs: 35
-  interactions_per_test_run: 6
-  interaction_type: generative_answer
-  eval_runs: 25
-  eval_tokens_per_run: 3200
-  agent_flow_actions: 600
+licensing:
+  model: seat                 # seat | consumption
+  plan: Claude Max
+  seat_monthly_cost: 200      # REQUIRED for seat -- a seat is not free
+  seats: 1
+  other_workload_share: 0.45  # 45% of the allowance already spoken for
+  concentrated: true          # compressed into a short delivery window
 
 items:
-  - name: Dispatch scheduling API
+  - name: Agent topic + tool authoring
     size: medium
     files: 11
     unknowns: 2
     brownfield: true
 
-  - name: Carrier rate-card importer
+  - name: Dataverse schema and rate-card importer
     size: small
     files: 4
     unknowns: 1

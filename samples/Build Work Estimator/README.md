@@ -8,8 +8,9 @@ costs — then renders the estimate as Markdown and PDF.
 
 It calibrates itself against your own session history rather than shipping
 assumed constants, requires a contingency reserve and checks whether that
-reserve is actually big enough, translates Microsoft work into build-time
-Copilot Credits, and can learn from what builds actually cost.
+reserve is actually big enough, reports in **the currency of the stack you build
+with**, understands how that stack is licensed, and learns from what builds
+actually cost.
 
 ---
 
@@ -32,6 +33,51 @@ Copilot Credits, and can learn from what builds actually cost.
 
 Asked for any of those, the skill declines and redirects rather than
 improvising a number.
+
+## The stack decides the currency
+
+What you build **with** determines how the build is metered. What you build
+**for** does not.
+
+| You build with | You build for | Metered in |
+| --- | --- | --- |
+| Claude Code | A Copilot Studio agent | **Tokens → USD** |
+| Copilot Studio | A Copilot Studio agent | **Copilot Credits** |
+| GitHub Copilot | A .NET service | **GitHub AI Credits** |
+
+Using Claude Code to build a Microsoft workload is common, and it bills in
+tokens. A Microsoft-tooled build is reported in credits throughout — no headline,
+total, or row label is denominated in tokens, because Microsoft products do not
+bill that way.
+
+**GitHub AI Credits are not Copilot Studio Copilot Credits.** Both are $0.01 per
+credit, and they are separate meters on separate products with separate
+allowances. They never share a code path here.
+
+## Licensing decides what the number means
+
+| Licensing | The real question |
+| --- | --- |
+| **Consumption** — API/Console, Bedrock, Vertex, Foundry, pay-as-you-go | What will this cost? |
+| **Seat** — Claude Pro/Max/Team/Enterprise, GitHub Business/Enterprise, prepaid packs | Will it fit, and what share of the seat does it burn? |
+
+**A seat is not free.** Marginal spend inside an allowance is zero, but the seat
+was bought with real money — so a build consuming 40% of a month's allowance
+carries 40% of that month's seat cost. Reporting `$0` would be the same class of
+error this tool exists to prevent.
+
+The estimator also checks whether the build plus your *other* committed work
+overruns the allowance, and warns that 5-hour and weekly windows can stall a
+build that fits comfortably in a month.
+
+Full detail: [`docs/licensing-and-stacks.md`](docs/licensing-and-stacks.md).
+
+## Not a stack comparison tool
+
+Each report covers one stack, in one currency, and says so. Stack decisions are
+not made on cost alone — capability, team skills, governance, and integration
+matter more than a build-time figure — so the shipped examples each show a single
+scenario and there is no side-by-side mode in them.
 
 ## Install
 
@@ -57,13 +103,17 @@ python skill/build-work-estimator/scripts/render_report.py \
     /tmp/e.json -o /tmp/estimate --format both
 ```
 
-A complete worked example ships in
-[`examples/harbor-line-estimate.md`](examples/harbor-line-estimate.md) and
-[`.pdf`](examples/harbor-line-estimate.pdf).
+Two worked examples ship, deliberately different companies and projects rather
+than a comparison:
+
+| Scenario | Stack | Licensing | Demonstrates |
+| --- | --- | --- | --- |
+| [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | Claude Code | Seat (Claude Max) | A **Microsoft workload built in Claude Code** — billed in tokens, not credits — plus seat attribution and allowance overrun |
+| [Granite Peak Utilities](examples/granite-peak-estimate.md) ([pdf](examples/granite-peak-estimate.pdf)) | Copilot Studio | Consumption | A build **authored in Copilot Studio** — denominated in Copilot Credits throughout, with the reasoning-model surcharge broken out |
 
 ## What good output looks like
 
-The worked example produces a five-page report. The section that earns its keep:
+### Reserve adequacy — the section that earns its keep
 
 ```
 Base estimate     $508.69
@@ -81,9 +131,42 @@ build cost routinely spans more than 100× — so the usual failure is not a wro
 point estimate, it is a reserve too thin for the real spread, carried into a
 budget conversation unnoticed.
 
-For Microsoft work it also reports the reasoning-model surcharge separately. In
-the worked example that surcharge is **$140.68 of a $170.48 total** — 82% of the
-build's credit cost, from a setting that is easy to select without noticing.
+### Seat attribution — because a seat is not free
+
+From the Harbor Line scenario, on a Claude Max seat:
+
+```
+Share of a typical month's allowance     107%
+Seat cost per month                   $200.00
+Attributable cost of this build       $214.94
+Already committed to other work           45%
+Total committed                          152%
+
+Allowance overrun: exceeds by 52%.
+Overage exposure: $104.94.
+Build is concentrated — expect to hit 5-hour windows.
+```
+
+No extra money is invoiced, and the build still has a real cost: it consumes
+more than a month of a seat that was bought with real money, and it will stall
+against shorter windows before the month runs out.
+
+### Credits, never tokens — from the Granite Peak scenario
+
+A Copilot Studio build reports **19,617 Copilot Credits ($196.17)**, rising to
+**25,502 ($255.02)** with a 30% reserve. Of that total, **16,116 credits
+($161.16) is the reasoning-model surcharge alone** — 82% of the build's cost,
+from a single setting.
+
+Reasoning models bill the feature rate *plus* the premium tier, so selecting
+`standard` and then using a reasoning model does not get standard pricing. The
+premium tier is $100 per 1M tokens; Claude Opus 5 list input is $5. That 20×
+gap is why tier selection moves a Microsoft build estimate more than almost any
+scope decision.
+
+Every heading, total, and row label in that report is denominated in Copilot
+Credits. Tokens appear only in the Basis column, tracing back to Microsoft's
+published "10 CC per 1K tokens" rate so the figure stays verifiable.
 
 ## How it works
 
@@ -92,7 +175,8 @@ build's credit cost, from a setting that is easy to select without noticing.
 | 0 | `version_check.py` | Stops the run if the install is behind the marketplace |
 | 1 | `calibrate.py` | Measures your local sessions into a cost profile |
 | 2 | `estimate.py` | Prices a work breakdown; **requires** a reserve % |
-| 3 | `copilot_credits.py` | Build-time Copilot Credits for Microsoft work |
+| 2b | `licensing.py` | Seat vs consumption; allowance share, attribution, overrun |
+| 3 | `copilot_credits.py` / `github_copilot.py` | Build-time credits, per Microsoft stack |
 | 4 | `render_report.py` | Markdown + PDF |
 | 5 | `record_actual.py` | Records what the build really cost |
 | 6 | `contribute.py` | Optionally shares an anonymized result |

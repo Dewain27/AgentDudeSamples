@@ -1,13 +1,14 @@
 ---
-title: Build Work Estimate — Harbor Line Logistics -- dispatch modernization
+title: Build Work Estimate — Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
 author: Dewain Robinson
-estimate_id: est_20260903T091026_b91d9f
-generated: 2026-09-03T09:10:26Z
+build_stack: claude-code
+estimate_id: est_20260903T093307_718b2e
+generated: 2026-09-03T09:33:07Z
 ---
 
-# Build Work Estimate — Harbor Line Logistics -- dispatch modernization
+# Build Work Estimate — Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T091026_b91d9f` · **Generated:** 2026-09-03T09:10:26Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260903T093307_718b2e` · **Generated:** 2026-09-03T09:33:07Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -20,7 +21,7 @@ generated: 2026-09-03T09:10:26Z
 > are all outside its scope and are not represented in any figure below.
 >
 > **The figures are estimates and will be wrong.** They are derived from
-> historical token consumption patterns that may not resemble the work being
+> historical consumption patterns that may not resemble the work being
 > estimated. Observed cost for comparable work in the calibration data spans
 > more than 100x between the cheapest and most expensive instances. Treat the
 > range as the estimate; treat the point figure as the midpoint of a guess.
@@ -31,11 +32,25 @@ generated: 2026-09-03T09:10:26Z
 > own delivery patterns, model choices, and review overhead.
 >
 > Rates verified 2026-06-24 and change without notice.
-> Calibration source: `measured` · Generated 2026-09-03T09:10:26Z
+> Calibration source: `measured` · Generated 2026-09-03T09:33:07Z
+
+## Build stack — Claude Code
+
+**Metered in: USD (tokens).** Metered in input/output/cache tokens, priced per model.
+
+> The currency is decided by what you **build with**, not what you build **for**.
+> Building a Microsoft workload with Claude Code is metered in tokens; building
+> it in Copilot Studio is metered in Copilot Credits.
+
+> **This is not a stack comparison tool.** It reports one build stack, in that
+> stack's own currency. Technology stack decisions are not made on cost alone —
+> capability, existing skills, governance, integration, and support all matter
+> more than a build-time figure — and using this report to pick a stack would
+> be using it for something it was not designed to answer.
 
 ## Scope — this estimates the build, not the run
 
-This figure covers the agent turns consumed **building** the thing. It does not
+This figure covers the work of **building** the thing. It does not
 cover operating it afterwards.
 
 | Out of scope | Where to go instead |
@@ -71,8 +86,8 @@ for how wide the real spread is.
 
 | Item | Size | Files | Unknowns | Turns | Estimate | Range | n |
 | --- | --- | ---: | ---: | ---: | ---: | --- | ---: |
-| Dispatch scheduling API | medium (brownfield) | 11 | 2 | 696 | $256.20 | $56.45 – $1,309.21 | 5 |
-| Carrier rate-card importer | small | 4 | 1 | 165 | $60.72 | $33.12 – $238.54 | 6 |
+| Agent topic + tool authoring | medium (brownfield) | 11 | 2 | 696 | $256.20 | $56.45 – $1,309.21 | 5 |
+| Dataverse schema and rate-card importer | small | 4 | 1 | 165 | $60.72 | $33.12 – $238.54 | 6 |
 | Legacy AS400 field mapping research | exploration (brownfield) | 0 | 3 | 57 | $20.98 | $4.60 – $859.50 | 7 |
 | Driver mobile handoff screens | medium | 8 | 0 | 464 | $170.80 | $37.63 – $581.87 | 5 |
 
@@ -92,46 +107,44 @@ contracted rates must substitute its own.
 Observed ratios are shrunk toward 1.0 in proportion to sample size, so a single
 recorded actual cannot swing future estimates.
 
-## Build-time Copilot Credits
+## Licensing
 
-> These are the credits consumed **building** the agent. They say nothing about
-> what it will cost once users start talking to it. For that, use Microsoft's
-> [agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/).
+**Seat-based licensing (Claude Max).** Usage draws on an allowance already paid for,
+so no additional money changes hands for this build -- but the seat is not free.
 
-**Harness:** `github-copilot` — GitHub Copilot harness bills from the moment you start building. Creating a solution with natural language, previewing, testing, and generating evaluations all consume credits. Credits cover LLM tokens, tools (knowledge and MCPs), and the harness itself.
+| | |
+| --- | ---: |
+| Share of a typical month's allowance | **107%** |
+| Seat cost per month | $200.00 |
+| **Attributable cost of this build** | **$214.94** |
+| Already committed to other work | 45% |
+| **Total committed** | **152%** |
 
-| Build activity | Credits | At $0.01/CC | Basis |
-| --- | ---: | ---: | --- |
-| Authoring / natural-language solution creation | 6,300 | $63.00 | 140 turns x 4,500 tokens at premium tier |
-| Preview and test iterations | 420 | $4.20 | 35 runs x 6 interactions x 2 CC (Generative answer) |
-| Preview and test token consumption | 9,450 | $94.50 | 945,000 tokens at premium tier |
-| Evaluation generation and runs | 800 | $8.00 | 25 evals x 3,200 tokens at premium tier |
-| Agent flow actions during build | 78 | $0.78 | 600 actions at 13 CC per 100 |
-| **Total build credits** | **17,048** | **$170.48** | |
-| Reserve (25%) | 4,262 | $42.62 | required contingency |
-| **Budget ask** | **21,310** | **$213.10** | |
+The attributable cost is the seat's monthly price apportioned by the share of
+the allowance this build consumes. Nothing extra is invoiced, but this is the
+real cost of the capacity the build uses up.
 
-**Reasoning-model surcharge: 14,068 credits ($140.68).** Reasoning models bill the feature rate *plus* the premium token tier, so the effective tier is `premium` regardless of the `standard` tier selected.
+### Allowance overrun
 
-### Tier sensitivity
+**This build plus existing workload exceeds the allowance by 52%.**
 
-Tier selection is the highest-leverage variable in a Microsoft-side build estimate:
+Work will stall at the limit unless overage is enabled, at which point it
+bills on top of the seat. Overage exposure at the same rate: **$104.94**.
 
-| Tier | CC per 1K tokens | $ per 1M tokens |
-| --- | ---: | ---: |
-| basic | 0.1 | $1.00 |
-| standard | 1.5 | $15.00 |
-| premium ← in use | 10.0 | $100.00 |
+Options: spread the build across allowance periods, move part of it to
+consumption billing, add seats, or reduce the other committed work.
 
-### Not included
+### Window risk
 
-- Monthly production credit burn from end users
-- Capacity pack sizing and overage enforcement
-- Voice minutes
-- End-user Microsoft 365 Copilot licence offsets
-- Bring-your-own-model (including Azure Foundry), billed separately
+Seat allowances refill on **5-hour rolling and weekly** windows, not only monthly. A build that fits
+comfortably in a month can still exhaust a short window and stall.
 
-Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [pay-as-you-go](https://learn.microsoft.com/power-platform/admin/pay-as-you-go-meters#how-do-meters-work) · [reasoning](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#reasoning-model-billing-rates) · [harness](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview)
+**This build is marked as concentrated** — compressed into a short period.
+Monthly headroom will not protect it; expect to hit shorter windows and plan
+for pauses.
+
+Notional value at list rates: **$508.69** — what this build would cost on
+consumption billing. Shown for scale; it is not a charge.
 
 ## Assumptions and sensitivities
 
@@ -156,7 +169,7 @@ When this build is done, record what it actually cost. That is how the estimator
 gets better — and without it, it cannot.
 
 ```
-python record_actual.py est_20260903T091026_b91d9f --sessions <session-id> [...]
+python record_actual.py est_20260903T093307_718b2e --sessions <session-id> [...]
 ```
 
 ---

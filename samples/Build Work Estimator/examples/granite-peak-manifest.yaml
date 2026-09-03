@@ -1,0 +1,32 @@
+# Build Work Estimator -- Scenario B: building WITH Microsoft Copilot Studio
+# Author: Dewain Robinson
+#
+# Granite Peak Utilities is a FICTIONAL company. Every figure is invented.
+#
+# Here the agent is authored inside Copilot Studio itself, so the build is
+# metered in Copilot Credits. No tokens appear anywhere in this report --
+# Microsoft products do not bill in tokens.
+
+project: Granite Peak Utilities -- outage triage agent, built in Copilot Studio
+author: Dewain Robinson
+
+reserve_percent: 30
+
+build_stack: copilot-studio
+
+licensing:
+  model: consumption          # pay-as-you-go Copilot Credits
+  plan: Copilot Studio pay-as-you-go
+
+copilot_studio:
+  harness: github-copilot     # bills from the moment building starts
+  tier: standard
+  reasoning_model: true       # forces the premium token tier
+  authoring_turns: 160
+  tokens_per_turn: 4200
+  test_runs: 45
+  interactions_per_test_run: 6
+  interaction_type: generative_answer
+  eval_runs: 30
+  eval_tokens_per_run: 3000
+  agent_flow_actions: 900

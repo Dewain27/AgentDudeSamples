@@ -19,7 +19,15 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import copilot_credits  # noqa: E402
+import github_copilot  # noqa: E402
+import licensing  # noqa: E402
 import rates  # noqa: E402
+
+NOT_A_COMPARISON = """> **This is not a stack comparison tool.** It reports one build stack, in that
+> stack's own currency. Technology stack decisions are not made on cost alone —
+> capability, existing skills, governance, integration, and support all matter
+> more than a build-time figure — and using this report to pick a stack would
+> be using it for something it was not designed to answer."""
 
 AUTHOR = "Dewain Robinson"
 
@@ -34,7 +42,7 @@ DISCLAIMER = """> ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 > are all outside its scope and are not represented in any figure below.
 >
 > **The figures are estimates and will be wrong.** They are derived from
-> historical token consumption patterns that may not resemble the work being
+> historical consumption patterns that may not resemble the work being
 > estimated. Observed cost for comparable work in the calibration data spans
 > more than 100x between the cheapest and most expensive instances. Treat the
 > range as the estimate; treat the point figure as the midpoint of a guess.
@@ -63,7 +71,116 @@ def money(value):
     return "$" + format(round(float(value), 2), ",.2f")
 
 
+def build_header(result):
+    """Front matter, title, disclaimer, and the stack/scope banners."""
+    out = []
+    out.append("---")
+    out.append("title: Build Work Estimate — %s" % result["project"])
+    out.append("author: %s" % AUTHOR)
+    out.append("build_stack: %s" % result["build_stack"])
+    out.append("estimate_id: %s" % result["estimate_id"])
+    out.append("generated: %s" % result["generated"])
+    out.append("---")
+    out.append("")
+    out.append("# Build Work Estimate — %s" % result["project"])
+    out.append("")
+    out.append("**Author:** %s · **Estimate id:** `%s` · **Generated:** %s"
+               % (AUTHOR, result["estimate_id"], result["generated"]))
+    out.append("")
+    out.append(DISCLAIMER.format(
+        rate_date=rates.ANTHROPIC_VERIFIED,
+        calibration_source=(result.get("profile") or {}).get(
+            "source", "not applicable"),
+        timestamp=result["generated"]))
+    out.append("")
+    out.append("## Build stack — %s" % result["stack_label"])
+    out.append("")
+    out.append("**Metered in: %s.** %s"
+               % (result["stack_currency"], result["stack_note"]))
+    out.append("")
+    out.append("> The currency is decided by what you **build with**, not what "
+               "you build **for**.\n> Building a Microsoft workload with Claude "
+               "Code is metered in tokens; building\n> it in Copilot Studio is "
+               "metered in Copilot Credits.")
+    out.append("")
+    out.append(NOT_A_COMPARISON)
+    out.append("")
+    out.append("## Scope — this estimates the build, not the run")
+    out.append("")
+    out.append("This figure covers the work of **building** the thing. It does "
+               "not\ncover operating it afterwards.")
+    out.append("")
+    out.append(SCOPE_TABLE)
+    out.append("")
+    return out
+
+
+def build_stack_markdown(result):
+    """Report for a non-Claude-Code stack, in that stack's own currency."""
+    out = build_header(result)
+    detail = result["stack_detail"]
+
+    if result["build_stack"] == "copilot-studio":
+        out.append(copilot_credits.render_markdown(detail))
+    else:
+        out.append(github_copilot.render_markdown(detail))
+
+    licence = result.get("licensing") or {}
+    if licence.get("model") == licensing.SEAT:
+        out.append("## Licensing")
+        out.append("")
+        out.append("**Seat / allowance-based licensing (%s).** The consumption "
+                   "above draws on an\nallowance already paid for. No "
+                   "additional money changes hands until the\nallowance is "
+                   "exhausted — but the allowance itself was bought, so the "
+                   "capacity\nthis build uses up has a real cost."
+                   % (licence.get("plan") or "unspecified"))
+        out.append("")
+        if licence.get("seat_monthly_cost"):
+            out.append("Seat cost: **$%s/month** × %d seat%s. Committed to "
+                       "other work: **%.0f%%**."
+                       % (format(licence["seat_monthly_cost"], ",.2f"),
+                          licence.get("seats", 1),
+                          "" if licence.get("seats", 1) == 1 else "s",
+                          licence.get("other_workload_share", 0) * 100))
+            out.append("")
+    else:
+        out.append("## Licensing")
+        out.append("")
+        out.append("**Consumption billing.** Every unit consumed is billed, so "
+                   "the figures above\nare the expected charge.")
+        out.append("")
+
+    out.append("## Known limits")
+    out.append("")
+    out.append("1. **Build only.** Says nothing about what the built thing "
+               "costs to run.")
+    out.append("2. **Rates go stale.** Verified %s; re-verify against the "
+               "sources above." % rates.COPILOT_VERIFIED)
+    out.append("3. **This is a sample.** Modify it for your organization "
+               "before budgeting use.")
+    out.append("")
+    for warning in result.get("warnings") or []:
+        out.append("> WARNING: %s" % warning)
+    if result.get("warnings"):
+        out.append("")
+    out.append("## Close the loop")
+    out.append("")
+    out.append("```")
+    out.append("python record_actual.py %s --sessions <session-id> [...]"
+               % result["estimate_id"])
+    out.append("```")
+    out.append("")
+    out.append("---")
+    out.append("")
+    out.append("*%s*" % FOOTER)
+    out.append("")
+    return "\n".join(out)
+
+
 def build_markdown(result, credits=None):
+    if result.get("stack_detail") is not None:
+        return build_stack_markdown(result)
     p = result["profile"]
     source = p["source"]
     if source == "measured":
@@ -76,31 +193,7 @@ def build_markdown(result, credits=None):
                  "This is materially less reliable than a measured profile. "
                  "Run `calibrate.py` after some real work to improve it.")
 
-    out = []
-    out.append("---")
-    out.append("title: Build Work Estimate — %s" % result["project"])
-    out.append("author: %s" % AUTHOR)
-    out.append("estimate_id: %s" % result["estimate_id"])
-    out.append("generated: %s" % result["generated"])
-    out.append("---")
-    out.append("")
-    out.append("# Build Work Estimate — %s" % result["project"])
-    out.append("")
-    out.append("**Author:** %s · **Estimate id:** `%s` · **Generated:** %s"
-               % (AUTHOR, result["estimate_id"], result["generated"]))
-    out.append("")
-    out.append(DISCLAIMER.format(
-        rate_date=rates.ANTHROPIC_VERIFIED,
-        calibration_source=source,
-        timestamp=result["generated"]))
-    out.append("")
-    out.append("## Scope — this estimates the build, not the run")
-    out.append("")
-    out.append("This figure covers the agent turns consumed **building** the "
-               "thing. It does not\ncover operating it afterwards.")
-    out.append("")
-    out.append(SCOPE_TABLE)
-    out.append("")
+    out = build_header(result)
     out.append("## Summary")
     out.append("")
     out.append("| | Amount |")
@@ -180,8 +273,8 @@ def build_markdown(result, credits=None):
                    "future estimates.")
         out.append("")
 
-    if credits:
-        out.append(copilot_credits.render_markdown(credits))
+    if result.get("licensing"):
+        out.append(licensing.render_markdown(result["licensing"]))
 
     out.append("## Assumptions and sensitivities")
     out.append("")

@@ -112,7 +112,7 @@ def compute(config, reserve_percent):
             test_tokens = interactions * cfg["tokens_per_turn"]
             cc = rates.credits_for_tokens(test_tokens, effective_tier)
             lines.append(_line(
-                "Preview and test token consumption", cc,
+                "Preview and test model consumption", cc,
                 "%s tokens at %s tier" % (format(test_tokens, ","), effective_tier)))
             if reasoning:
                 surcharge += cc - rates.credits_for_tokens(test_tokens, tier)

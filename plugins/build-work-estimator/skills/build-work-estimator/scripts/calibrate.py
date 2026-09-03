@@ -249,6 +249,10 @@ def build_profile(sessions, generated=None):
         "source": "measured",
         "sessions": len(live),
         "date_range": [stamps[0][:10], stamps[-1][:10]] if stamps else None,
+        # Total measured spend over date_range. licensing.py divides this by
+        # the span to establish a monthly reference, which is the denominator
+        # for seat-allowance attribution.
+        "total_cost": round(total_cost, 4),
         "cost_per_main_turn": round(total_cost / total_turns, 6),
         "median_context_tokens": int(statistics.median(contexts)) if contexts else 0,
         "mean_output_tokens_per_turn": int(

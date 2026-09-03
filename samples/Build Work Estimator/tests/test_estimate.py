@@ -40,6 +40,8 @@ PROFILE = {
 MANIFEST = {
     "project": "Harbor Line dispatch",
     "reserve_percent": 25,
+    "build_stack": "claude-code",
+    "licensing": {"model": "consumption", "plan": "Claude Console"},
     "items": [{"name": "Dispatch API", "size": "medium", "files": 9,
                "unknowns": 2, "brownfield": False}],
 }

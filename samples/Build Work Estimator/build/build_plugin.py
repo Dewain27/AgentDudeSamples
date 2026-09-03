@@ -78,6 +78,7 @@ def copy_references():
         ("docs/methodology.md", "methodology.md"),
         ("docs/copilot-credits.md", "rates-copilot-credits.md"),
         ("docs/CONTRIBUTING-CALIBRATION.md", "contributing-calibration.md"),
+        ("docs/licensing-and-stacks.md", "licensing-and-stacks.md"),
     ]
     for src_rel, dst_name in pairs:
         src = os.path.join(SAMPLE, src_rel)
@@ -151,12 +152,11 @@ def copy_assets():
     assets = os.path.join(skill_root(), "assets")
     if not os.path.isdir(assets):
         os.makedirs(assets)
-    example = os.path.join(SAMPLE, "examples", "harbor-line-estimate.md")
-    if os.path.exists(example):
-        shutil.copyfile(example, os.path.join(assets, "harbor-line-estimate.md"))
-    manifest = os.path.join(SAMPLE, "examples", "harbor-line-manifest.yaml")
-    if os.path.exists(manifest):
-        shutil.copyfile(manifest, os.path.join(assets, "harbor-line-manifest.yaml"))
+    for name in ("harbor-line-estimate.md", "harbor-line-manifest.yaml",
+                 "granite-peak-estimate.md", "granite-peak-manifest.yaml"):
+        src = os.path.join(SAMPLE, "examples", name)
+        if os.path.exists(src):
+            shutil.copyfile(src, os.path.join(assets, name))
     baseline = os.path.join(SAMPLE, "calibration", "baseline.json")
     if os.path.exists(baseline):
         shutil.copyfile(baseline, os.path.join(assets, "baseline.json"))

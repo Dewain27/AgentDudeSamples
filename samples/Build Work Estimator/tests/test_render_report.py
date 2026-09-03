@@ -77,12 +77,29 @@ class TestMarkdown(unittest.TestCase):
         self.assertIn("no local session history was found", md)
         self.assertIn("materially less reliable", md)
 
-    def test_credits_section_included_when_supplied(self):
-        credits = cc.compute({"harness": "github-copilot", "tier": "standard",
-                              "authoring_turns": 50}, 25)
-        md = rr.build_markdown(self.result, credits)
-        self.assertIn("## Build-time Copilot Credits", md)
-        self.assertIn("Not included", md)
+    def test_stack_banner_names_the_currency(self):
+        self.assertIn("## Build stack — Claude Code", self.md)
+        self.assertIn("USD (tokens)", self.md)
+        self.assertIn("build with", self.md)
+
+    def test_report_disclaims_being_a_comparison_tool(self):
+        self.assertIn("not a stack comparison tool", self.md)
+        self.assertIn("not made on cost alone", self.md)
+
+    def test_licensing_section_present(self):
+        self.assertIn("## Licensing", self.md)
+        self.assertIn("Consumption billing", self.md)
+
+    def test_copilot_studio_stack_reports_credits_not_tokens(self):
+        m = manifest(build_stack="copilot-studio")
+        m["copilot_studio"] = {"harness": "github-copilot", "tier": "standard",
+                               "authoring_turns": 50}
+        md = rr.build_markdown(estimate.compute_stack(m, PROFILE))
+        self.assertIn("Copilot Credits", md)
+        self.assertIn("## Build stack — Microsoft Copilot Studio", md)
+        # A Microsoft-tooled build must never be priced in tokens.
+        self.assertNotIn("cost per agent turn", md.lower())
+        self.assertNotIn("$0.40", md)
 
 
 class TestFileOutput(unittest.TestCase):

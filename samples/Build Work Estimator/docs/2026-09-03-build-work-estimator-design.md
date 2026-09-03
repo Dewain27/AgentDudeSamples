@@ -1,7 +1,7 @@
 # Build Work Estimator — Design Spec
 
 **Author:** Dewain Robinson
-**Status:** Approved for implementation
+**Status:** Implemented. Revised 2026-09-03 for build-stack and licensing.
 **Date:** 2026-09-03
 **Sample:** `samples/Build Work Estimator/` → `plugins/build-work-estimator/`
 
@@ -29,9 +29,18 @@ guess, and guessing is reliably wrong. Its core idea is that **build cost is
 driven by turns and context size, not lines of code**, and that the constants
 should be *measured from the estimator's own usage history* rather than assumed.
 
-Where the build targets Microsoft technology, the estimate is additionally
-translated into **Copilot Credits** — again, only the credits consumed *while
-building*.
+The estimate is reported in **the currency of the stack the build is done with**
+— tokens and dollars for Claude Code, Copilot Credits for Copilot Studio, GitHub
+AI Credits for GitHub Copilot — and **how that stack is licensed** decides what
+the number means. Both are covered in `licensing-and-stacks.md`.
+
+> **Revision, 2026-09-03.** The first implementation keyed the currency off
+> `microsoft: true`, meaning *the target workload is Microsoft*. That was wrong:
+> the currency follows what you build **with**, not what you build **for**, and
+> using Claude Code to build a Copilot Studio agent bills in tokens. The key was
+> removed rather than kept working, and `estimate.py` rejects it with guidance.
+> The same revision added the licensing model — a seat is not free, so seat-based
+> builds carry an attributable share of the seat cost rather than reporting $0.
 
 ### 1.1 What this does NOT estimate
 
@@ -249,14 +258,27 @@ Manifest schema (`estimate.yaml`):
 
 ```yaml
 project: Harbor Line dispatch rewrite
-reserve_percent: 25          # REQUIRED — no default
-microsoft: true              # triggers build-time Copilot Credits analysis
-items:
+reserve_percent: 25            # REQUIRED — no default
+build_stack: claude-code       # claude-code | copilot-studio | github-copilot
+
+licensing:                     # REQUIRED
+  model: seat                  # seat | consumption
+  plan: Claude Max
+  seat_monthly_cost: 200       # REQUIRED for seat — a seat is not free
+  seats: 1
+  other_workload_share: 0.45   # REQUIRED for seat — already committed elsewhere
+  concentrated: true           # compressed into a short delivery window
+
+items:                         # claude-code stack only
   - name: Dispatch API
-    size: medium             # trivial | small | medium | large | exploration
+    size: medium               # trivial | small | medium | large | exploration
     files: 9
-    unknowns: 2              # 0-5; scales the range, not the point estimate
+    unknowns: 2                # 0-5; scales the range, not the point estimate
     brownfield: true
+
+# copilot-studio and github-copilot stacks carry their own activity blocks
+# (`copilot_studio:` / `github_copilot:`) instead of `items:`, because the
+# Claude-derived turn medians do not describe them.
 ```
 
 **Required-field enforcement.** `reserve_percent` is required in both paths.
@@ -292,10 +314,10 @@ Reported prominently, not buried. Given measured spreads exceeding 100× within 
 single bucket, an under-covering reserve is the primary failure mode this tool
 exists to catch.
 
-### 3.4 `copilot_credits.py` — build-time only
+### 3.4 `copilot_credits.py` — Copilot Studio, build-time only
 
-Runs only when `microsoft: true`. Models **credits consumed while building the
-agent**: authoring it, iterating on it, testing it, and generating its
+Runs when `build_stack: copilot-studio`. Models **credits consumed while
+building the agent**: authoring it, iterating on it, testing it, and generating its
 evaluations. It does **not** model production traffic.
 
 **Harness determines almost everything**, so the interview asks first:
@@ -338,6 +360,41 @@ Microsoft's own estimator for them.
 **Caveat carried into the report:** bring-your-own-model configurations
 (including Azure Foundry models) are billed separately and are **not** covered
 by these rates.
+
+### 3.4c `github_copilot.py` — GitHub Copilot, build-time only
+
+Runs when `build_stack: github-copilot`. **GitHub AI Credits are not Copilot
+Studio Copilot Credits** — both are $0.01, and they are separate meters on
+separate products with separate allowances. They never share a code path.
+
+Two billing modes, asked for explicitly: `ai-credits` (tokens priced at the
+model's published rates, converted to credits; pooled at billing-entity level on
+Business and Enterprise) and `premium-requests` (legacy; one request times a
+model multiplier against a monthly allowance). Per-model rates and multipliers
+are **not hardcoded** — GitHub changes them, and the user supplies the rate for
+the model they use. Code completions and next edit suggestions consume nothing.
+
+### 3.4d `licensing.py` — what the number means
+
+`consumption` billing makes the figure the expected charge. `seat` licensing
+does not, and **must not report $0**: the seat was bought with real money, so a
+build consuming a share of the allowance carries that share of the seat cost.
+
+```
+allowance_share   = build_notional_cost / typical_monthly_cost
+attributable_cost = seat_monthly_cost x seats x allowance_share
+total_committed   = allowance_share + other_workload_share
+```
+
+`typical_monthly_cost` comes from measured history extrapolated to 30 days.
+Below 14 days of history the denominator would be guesswork, so the module
+**declines to compute a share** rather than inventing one. `seat_monthly_cost`
+and `other_workload_share` are required for seat licensing; seat prices are not
+hardcoded because they change and vary by contract.
+
+Overrun beyond the allowance is reported with its overage exposure. Shorter
+5-hour and weekly windows are flagged separately, since a build that fits in a
+month can still stall inside one.
 
 ### 3.5 Feedback loop — actuals in, better estimates out
 
@@ -697,7 +754,8 @@ Stated in the sample README and the generated report:
 1. Rate tables + `version_check.py` (+ tests)
 2. `calibrate.py` (+ fixtures, tests)
 3. `estimate.py` including reserve enforcement and adequacy check (+ tests)
-4. `copilot_credits.py`, build-time model (+ tests)
+4. `copilot_credits.py` and `github_copilot.py`, build-time models, plus
+   `licensing.py` for seat attribution and overrun (+ tests)
 5. `render_report.py` with disclaimer and scope banner (+ tests)
 6. `record_actual.py` + ledger + shrinkage-corrected profile (+ tests)
 7. `contribute.py` + `calibration/aggregate.py` + `baseline.json`

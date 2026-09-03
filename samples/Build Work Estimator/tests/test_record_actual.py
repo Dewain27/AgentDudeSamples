@@ -26,6 +26,8 @@ PROFILE = {
 
 MANIFEST = {
     "project": "Fixture build", "reserve_percent": 20,
+    "build_stack": "claude-code",
+    "licensing": {"model": "consumption"},
     "items": [{"name": "thing", "size": "medium", "files": 9, "unknowns": 0}],
 }
 
