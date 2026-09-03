@@ -1,0 +1,314 @@
+# Kestrel Financial Group -- Advisor Intelligence Platform
+# Run A: built with CLAUDE CODE
+# Author: Dewain Robinson
+#
+# Kestrel Financial Group is FICTIONAL. See specification.md.
+#
+# This manifest and kestrel-github-copilot-manifest.yaml describe the SAME
+# programme with the SAME work breakdown. They differ only in the build
+# platform and its licensing. Everything on the target side is identical,
+# because the target does not change when you change the tool you build with.
+
+project: Kestrel Financial Group -- Advisor Intelligence Platform (phases 1-2)
+author: Dewain Robinson
+
+reserve_percent: 30
+
+build_platform: claude-code
+target_platform: both          # Copilot Studio agent, Azure application
+
+licensing:
+  model: seat
+  plan: Claude for Enterprise
+  seat_monthly_cost: 150
+  seats: 6                     # 6 engineers on the programme
+  duration_months: 5
+  other_workload_share: 0.30   # 30% of the allowance is other work
+  concentrated: false
+
+target:
+  harness: github-copilot      # bills for building, testing and evaluating
+  tier: standard
+  reasoning_model: true        # required by the suitability/disclosure logic
+
+  # Human validation in the Copilot Studio interface (specification s12).
+  # Collected to size interactive test volume; never priced as labour.
+  interactive_test_hours: 96
+  interactions_per_hour: 25
+
+  # Evaluation strategy (specification s11): 568 cases x 3 repeats.
+  # Six cycles: two to converge, two for compliance findings, two for
+  # regression after remediation.
+  eval_test_cases: 568
+  eval_repeats: 3
+  eval_cycles: 6
+  eval_tokens_per_case: 3500
+
+  agent_flow_actions: 1200
+
+  # Azure build-and-test consumption across dev, test and staging for the
+  # ~5 month programme. Runtime is explicitly out of scope.
+  azure_components:
+    - name: App Service and Functions (dev/test/staging)
+      usd: 2400
+      note: Linux plans, Functions Premium with VNet integration
+    - name: Cosmos DB (three environments)
+      usd: 3100
+      note: conversation, audit and disclosure containers
+    - name: Azure AI Search with semantic ranking
+      usd: 4200
+      note: five knowledge indexes, reindexing during build
+    - name: API Management
+      usd: 2800
+      note: developer tier in lower envs, standard in staging
+    - name: Service Bus, Storage, Key Vault
+      usd: 900
+      note: includes immutable archive staging
+    - name: Observability ingestion
+      usd: 1600
+      note: App Insights and Log Analytics during build and test
+    - name: Front Door and networking
+      usd: 1100
+      note: private endpoints, private DNS, hub-spoke peering
+
+items:
+  # --- Discovery -------------------------------------------------------
+  - name: Custodial core contract and rate-limit discovery
+    size: exploration
+    files: 0
+    unknowns: 4
+    brownfield: true
+
+  - name: Entitlement model mapping to book-of-business
+    size: exploration
+    files: 0
+    unknowns: 5
+    brownfield: true
+
+  # --- Agent definition (Copilot Studio) -------------------------------
+  - name: Agent foundation - instructions, orchestration, memory scoping
+    size: medium
+    files: 8
+    unknowns: 2
+    brownfield: false
+
+  - name: C1 Client position summary
+    size: large
+    files: 6
+    unknowns: 3
+    brownfield: false
+
+  - name: C2 Transaction enquiry
+    size: medium
+    files: 4
+    unknowns: 1
+    brownfield: false
+
+  - name: C3 Review pack assembly
+    size: large
+    files: 9
+    unknowns: 4
+    brownfield: false
+
+  - name: C4 Document retrieval and request
+    size: medium
+    files: 5
+    unknowns: 1
+    brownfield: false
+
+  - name: C5 Suitability record surfacing
+    size: medium
+    files: 5
+    unknowns: 3
+    brownfield: false
+
+  - name: C6 Disclosure orchestration
+    size: large
+    files: 10
+    unknowns: 4
+    brownfield: false
+
+  - name: C7 Service request triage
+    size: medium
+    files: 6
+    unknowns: 2
+    brownfield: false
+
+  - name: C8 Complaint detection and escalation
+    size: large
+    files: 7
+    unknowns: 4
+    brownfield: false
+
+  - name: C9 Market and product context
+    size: small
+    files: 4
+    unknowns: 1
+    brownfield: false
+
+  - name: Tool schemas, auth paths and error handling (18 tools)
+    size: large
+    files: 20
+    unknowns: 3
+    brownfield: false
+
+  - name: Write-path confirmation, idempotency and audit (7 write tools)
+    size: large
+    files: 12
+    unknowns: 4
+    brownfield: false
+
+  - name: Knowledge indexing pipeline and effective dating
+    size: medium
+    files: 8
+    unknowns: 3
+    brownfield: false
+
+  # --- Advisor console -------------------------------------------------
+  - name: Console shell, Entra ID auth, routing and role gating
+    size: medium
+    files: 9
+    unknowns: 1
+    brownfield: false
+
+  - name: Agent conversation surface with citation rendering
+    size: large
+    files: 10
+    unknowns: 3
+    brownfield: false
+
+  - name: Position and performance visualisation
+    size: large
+    files: 11
+    unknowns: 2
+    brownfield: false
+
+  - name: Review pack builder and preview
+    size: large
+    files: 14
+    unknowns: 4
+    brownfield: false
+
+  - name: Disclosure tracker and suitability panel
+    size: medium
+    files: 9
+    unknowns: 2
+    brownfield: false
+
+  - name: Service request queue and document library
+    size: medium
+    files: 11
+    unknowns: 1
+    brownfield: false
+
+  - name: Audit viewer, WCAG 2.2 AA conformance, telemetry
+    size: medium
+    files: 12
+    unknowns: 2
+    brownfield: false
+
+  # --- Client portal ---------------------------------------------------
+  - name: Client self-service portal (auth, accounts, documents, messaging)
+    size: large
+    files: 16
+    unknowns: 3
+    brownfield: false
+
+  # --- Backend for frontend --------------------------------------------
+  - name: Session and token brokering, agent invocation relay
+    size: large
+    files: 9
+    unknowns: 3
+    brownfield: false
+
+  - name: Aggregation endpoints for position and review views
+    size: medium
+    files: 7
+    unknowns: 2
+    brownfield: false
+
+  - name: Write-path confirmation orchestration
+    size: large
+    files: 8
+    unknowns: 4
+    brownfield: false
+
+  - name: Rate limiting, quota and circuit breaking
+    size: small
+    files: 5
+    unknowns: 1
+    brownfield: false
+
+  # --- Integration -----------------------------------------------------
+  - name: Custodial core integration (positions, transactions, batch)
+    size: large
+    files: 14
+    unknowns: 3
+    brownfield: true
+
+  - name: Dynamics 365 integration
+    size: medium
+    files: 8
+    unknowns: 2
+    brownfield: true
+
+  - name: Document management and e-signature integration
+    size: medium
+    files: 9
+    unknowns: 2
+    brownfield: true
+
+  - name: Market data and KYC screening integration
+    size: medium
+    files: 8
+    unknowns: 3
+    brownfield: true
+
+  - name: Supervision archive and notification fan-out
+    size: medium
+    files: 8
+    unknowns: 2
+    brownfield: false
+
+  - name: Disclosure rules service
+    size: large
+    files: 10
+    unknowns: 4
+    brownfield: false
+
+  # --- Azure platform --------------------------------------------------
+  - name: Landing zone extension, networking and private endpoints
+    size: medium
+    files: 12
+    unknowns: 2
+    brownfield: true
+
+  - name: API Management policies and gateway configuration
+    size: medium
+    files: 9
+    unknowns: 2
+    brownfield: false
+
+  - name: Cosmos data model, TTL and retention policies
+    size: medium
+    files: 8
+    unknowns: 2
+    brownfield: false
+
+  - name: AI Search indexes and semantic configuration
+    size: medium
+    files: 7
+    unknowns: 2
+    brownfield: false
+
+  - name: Observability, alerting and dashboards
+    size: small
+    files: 8
+    unknowns: 1
+    brownfield: false
+
+  - name: CI/CD and ALM for the agent definition and application
+    size: medium
+    files: 11
+    unknowns: 2
+    brownfield: false

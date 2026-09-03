@@ -176,13 +176,24 @@ class TestExecutiveSummary(unittest.TestCase):
         md = rr.build_markdown(estimate.compute_plan(m, PROFILE))
         self.assertIn("notional", md)
 
-    def test_seat_cost_is_reported_per_seat_and_total(self):
+    def test_seat_cost_reports_rate_seats_duration_and_total(self):
         m = manifest()
         m["licensing"] = {"model": "seat", "plan": "Team", "seats": 4,
-                          "seat_monthly_cost": 25,
+                          "seat_monthly_cost": 25, "duration_months": 5,
                           "other_workload_share": 0.2}
         md = rr.build_markdown(estimate.compute_plan(m, PROFILE))
-        self.assertIn("$25.00/month x 4 seats = $100.00/month", md)
+        self.assertIn("$25.00/month x 4 seats x 5 months", md)
+        self.assertIn("$500.00** over the build", md)
+
+    def test_seat_total_is_not_mislabelled_as_monthly(self):
+        m = manifest()
+        m["licensing"] = {"model": "seat", "plan": "Team", "seats": 6,
+                          "seat_monthly_cost": 150, "duration_months": 5,
+                          "other_workload_share": 0.3}
+        md = rr.build_markdown(estimate.compute_plan(m, PROFILE))
+        self.assertIn("$150.00/month", md)
+        self.assertNotIn("$750.00/month", md,
+                         "rate x duration was being labelled as a monthly rate")
 
     def test_target_range_comes_from_cycle_variation(self):
         # The default fixture plans a single cycle, so low == likely there.

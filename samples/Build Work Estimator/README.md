@@ -173,6 +173,24 @@ than a comparison:
 | [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | **Claude Code** → Copilot Studio, GitHub Copilot harness | Seat (Claude Max) | Both meters billing at once; 4 eval cycles; the 20-evals-per-day velocity cap forcing 24 days minimum |
 | [Granite Peak Utilities](examples/granite-peak-estimate.md) ([pdf](examples/granite-peak-estimate.pdf)) | **GitHub Copilot** → Copilot Studio, standard harness | Seat (Copilot Business) | Standard harness billing nothing for build or test, with the counterfactual shown; side-effects still billing |
 
+## A full worked scenario
+
+The examples above are minimal illustrations. For a programme-scale case, see
+[`scenarios/kestrel-financial/`](scenarios/kestrel-financial/): a regulated
+wealth-management agent plus web application on Copilot Studio and Azure, with
+a complete [product and technical specification](scenarios/kestrel-financial/specification.md)
+— nine agent capabilities, eighteen tools, twelve integrations, 568 evaluation
+cases across 6 cycles, 39 work items, 6 engineers, 5 months.
+
+It is estimated **twice**, once built with Claude Code and once with GitHub
+Copilot, sharing one work breakdown and one target. **Each report is
+standalone** — neither references the other, because platform choice is not a
+cost decision.
+
+That scenario is also what forced three gaps out of the estimator: a GitHub
+Copilot build could not accept a work breakdown at all, an Azure target could
+not be itemised, and seat attribution had no notion of team size or duration.
+
 ## What good output looks like
 
 Every report opens with an executive summary — the inputs that were given, then

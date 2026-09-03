@@ -92,6 +92,21 @@ def normalise(config):
     if out["seats"] < 1:
         raise LicensingError("licensing.seats must be at least 1.")
 
+    # A team build spends across many developer-months. Without duration the
+    # allowance denominator is one developer's single month, which makes any
+    # team-scale programme look like a catastrophic overrun.
+    raw_months = cfg.get("duration_months", 1)
+    if raw_months is None:
+        raw_months = 1
+    try:
+        out["duration_months"] = float(raw_months)
+    except (TypeError, ValueError):
+        raise LicensingError(
+            "licensing.duration_months must be a number, got %r" % raw_months)
+    if out["duration_months"] <= 0:
+        raise LicensingError(
+            "licensing.duration_months must be greater than zero.")
+
     # What fraction of the allowance period is already committed to other
     # work. Without this the overrun check is blind to everything else the
     # user does with the same seat.
@@ -162,15 +177,26 @@ def attribute(notional_cost, licensing, profile):
             "notional_cost": round(float(notional_cost), 2),
         }
 
-    seat_cost = licensing["seat_monthly_cost"] * licensing["seats"]
-    monthly = monthly_reference(profile)
+    seats = licensing["seats"]
+    months = licensing["duration_months"]
+    # Total seat spend over the whole build, not one seat for one month.
+    seat_cost = licensing["seat_monthly_cost"] * seats * months
+    per_seat_month = monthly_reference(profile)
+    # Available allowance is one developer-month times the number of
+    # developer-months the build actually runs for.
+    monthly = per_seat_month * seats * months if per_seat_month else None
 
     result = {
         "model": SEAT,
         "billed": False,
         "plan": licensing.get("plan") or "unspecified",
         "seat_monthly_cost": round(seat_cost, 2),
-        "seats": licensing["seats"],
+        "seat_rate_monthly": licensing["seat_monthly_cost"],
+        "seats": seats,
+        "duration_months": months,
+        "developer_months": round(seats * months, 2),
+        "per_seat_month_reference": round(per_seat_month, 2)
+        if per_seat_month else None,
         "notional_cost": round(float(notional_cost), 2),
         "monthly_reference": round(monthly, 2) if monthly else None,
         "other_workload_share": licensing["other_workload_share"],
@@ -232,8 +258,13 @@ def render_markdown(attribution):
     share = attribution["allowance_share"] * 100
     out.append("| | |")
     out.append("| --- | ---: |")
-    out.append("| Share of a typical month's allowance | **%.0f%%** |" % share)
-    out.append("| Seat cost per month | $%s |"
+    out.append("| Developer-months of allowance available | %s (%d seat%s x %s month%s) |"
+               % (format(attribution["developer_months"], ",g"),
+                  attribution["seats"], "" if attribution["seats"] == 1 else "s",
+                  format(attribution["duration_months"], ",g"),
+                  "" if attribution["duration_months"] == 1 else "s"))
+    out.append("| Share of that allowance | **%.0f%%** |" % share)
+    out.append("| Seat spend over the build | $%s |"
                % format(attribution["seat_monthly_cost"], ",.2f"))
     out.append("| **Attributable cost of this build** | **$%s** |"
                % format(attribution["attributable_cost"], ",.2f"))

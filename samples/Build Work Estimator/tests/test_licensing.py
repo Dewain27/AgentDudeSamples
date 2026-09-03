@@ -113,11 +113,49 @@ class TestSeatAttribution(unittest.TestCase):
         self.assertAlmostEqual(out["allowance_share"], 0.5, places=2)
         self.assertAlmostEqual(out["attributable_cost"], 100.0, places=0)
 
-    def test_seats_multiply_the_attributable_cost(self):
+    def test_attributable_cost_is_independent_of_team_size(self):
+        """The work costs what it costs, however many people do it.
+
+        seat_cost scales with seats x months, and allowance share scales
+        inversely, so they cancel:
+
+            attributable = rate x seats x months x build
+                           -------------------------------
+                           per_seat_month x seats x months
+
+        Adding people buys more allowance, not cheaper work. An earlier
+        version multiplied by seats and made a six-person team look six times
+        more expensive for identical scope.
+        """
+        solo = licensing.attribute(135.0, licensing.normalise(SEAT), PROFILE)
+        team_cfg = dict(SEAT)
+        team_cfg.update({"seats": 6, "duration_months": 5})
+        team = licensing.attribute(135.0, licensing.normalise(team_cfg), PROFILE)
+        self.assertAlmostEqual(team["attributable_cost"],
+                               solo["attributable_cost"], places=2)
+
+    def test_team_size_and_duration_buy_allowance_headroom(self):
+        team_cfg = dict(SEAT)
+        team_cfg.update({"seats": 6, "duration_months": 5})
+        # PROFILE gives a $270 per-seat-month reference, and SEAT already
+        # commits 50% of the allowance elsewhere. 30 developer-months is
+        # $8,100 of allowance, so a $3,000 build takes 37% and fits; the same
+        # build against one developer-month does not.
+        solo = licensing.attribute(3000.0, licensing.normalise(SEAT), PROFILE)
+        team = licensing.attribute(3000.0, licensing.normalise(team_cfg),
+                                   PROFILE)
+        self.assertTrue(solo["overruns"],
+                        "one developer-month cannot absorb a 9k build")
+        self.assertFalse(team["overruns"],
+                         "30 developer-months should absorb it")
+        self.assertLess(team["allowance_share"], solo["allowance_share"])
+        self.assertEqual(team["developer_months"], 30.0)
+
+    def test_duration_must_be_positive(self):
         cfg = dict(SEAT)
-        cfg["seats"] = 4
-        out = licensing.attribute(135.0, licensing.normalise(cfg), PROFILE)
-        self.assertAlmostEqual(out["attributable_cost"], 400.0, places=0)
+        cfg["duration_months"] = 0
+        with self.assertRaises(licensing.LicensingError):
+            licensing.normalise(cfg)
 
     def test_overrun_detected_against_other_workload(self):
         # 50% of the month, plus 50% already committed, is exactly full.

@@ -1,15 +1,15 @@
 ---
-title: Build Work Estimate — Harbor Line Logistics -- dispatch agent
+title: Build Work Estimate — Kestrel Financial Group -- Advisor Intelligence Platform (phases 1-2)
 author: Dewain Robinson
 build_platform: claude-code
-target_platform: copilot-studio
-estimate_id: est_20260903T000000_sample1
+target_platform: both
+estimate_id: est_20260903T000000_kestrelcc
 generated: 2026-09-03T00:00:00Z
 ---
 
-# Build Work Estimate — Harbor Line Logistics -- dispatch agent
+# Build Work Estimate — Kestrel Financial Group -- Advisor Intelligence Platform (phases 1-2)
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T000000_sample1` · **Generated:** 2026-09-03T00:00:00Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260903T000000_kestrelcc` · **Generated:** 2026-09-03T00:00:00Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -42,23 +42,23 @@ generated: 2026-09-03T00:00:00Z
 | Input | Value |
 | --- | --- |
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
-| **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
+| **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
-| Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
-| Evaluation cycles planned | 4 |
-| Contingency reserve | 25% |
+| Licensing | Seat — Claude for Enterprise, $150.00/month x 6 seats x 5 months = **$4,500.00** over the build |
+| Evaluation cycles planned | 6 |
+| Contingency reserve | 30% |
 | Calibration | Measured, 24 local sessions |
 
 ### Totals
 
 | | Build — USD | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | $230.67 | 28,418 | $514.85 |
-| **Likely** | **$890.21** | **32,290** | **$1,213.11** |
-| High | $5,230.98 | 40,035 | $5,631.33 |
-| **Likely + 25% reserve** | **$1,112.76** | **40,362** | **$1,516.38** |
+| Low | $6,509.34 | 416,820 | $26,777.54 |
+| **Likely** | **$19,524.04** | **480,024** | **$40,424.28** |
+| High | $111,462.62 | 606,432 | $133,626.94 |
+| **Likely + 30% reserve** | **$25,381.25** | **624,031** | **$52,551.56** |
 
-> **Plan for $1,213.11. Hold $1,516.38 including the 25% reserve.**
+> **Plan for $40,424.28. Hold $52,551.56 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -66,7 +66,7 @@ between.
 
 - Copilot Credits are converted at $0.01 each so the two meters can be shown in one column. They are separate budgets drawn on different accounts.
 - The build figure is **notional** — on seat licensing no additional money is invoiced. See Licensing below for the share of the seat this build actually consumes.
-- The build range comes from observed spread in comparable work; the target range from running 3 to 6 evaluation cycles instead of 4.
+- The build range comes from observed spread in comparable work; the target range from running 5 to 8 evaluation cycles instead of 6.
 
 Everything below explains how each of these figures was reached.
 
@@ -75,7 +75,7 @@ Everything below explains how each of these figures was reached.
 | | Platform | Metered in |
 | --- | --- | --- |
 | **Built with** | Claude Code | USD (tokens) |
-| **Built on** | Microsoft Copilot Studio | Copilot Credits |
+| **Built on** | Copilot Studio and Azure | Copilot Credits + Azure consumption |
 
 > These are different questions and different meters, and the same project spends
 > on **both**. The building happens in a coding agent authoring the agent
@@ -105,7 +105,7 @@ cover operating it afterwards.
 ## The build loop
 
 ```
-  Claude Code                   Microsoft Copilot Studio
+  Claude Code                   Copilot Studio and Azure
   ----------------------        ----------------------
   author definition   -->  deploy
                            preview / interactive test  <- human
@@ -114,34 +114,69 @@ cover operating it afterwards.
   (repeat)
 ```
 
-This estimate plans **4 evaluation cycles**. Each cycle after the first adds
+This estimate plans **6 evaluation cycles**. Each cycle after the first adds
 **25%** of the original build back as remediation, giving a build-side multiplier
-of **1.75x**. An estimate that prices only the first pass is planning for a build
+of **2.25x**. An estimate that prices only the first pass is planning for a build
 where every evaluation passes first time.
 
 ## Build — Claude Code
 
 | | Amount |
 | --- | ---: |
-| Base estimate (incl. remediation) | $890.21 |
-| Reserve (25%) | $222.55 |
-| **Budget ask** | **$1,112.76** |
-| Observed low | $230.67 |
-| Observed high | $5,230.98 |
+| Base estimate (incl. remediation) | $19,524.04 |
+| Reserve (30%) | $5,857.21 |
+| **Budget ask** | **$25,381.25** |
+| Observed low | $6,509.34 |
+| Observed high | $111,462.62 |
 
 ### Reserve adequacy
 
 **The reserve does not cover observed variance.**
 
-A **25%** reserve reaches $1,112.76. Comparable work has reached $5,230.98. Full coverage
-would require **488%**.
+A **30%** reserve reaches $25,381.25. Comparable work has reached $111,462.62. Full coverage
+would require **471%**.
 
 | Item | Size | Files | Turns | Estimate | Range | n |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
-| Agent instructions, topics and tool definitions | medium (brownfield) | 11 | 1,218 | $448.35 | $98.79 – $2,291.12 | 5 |
-| Dataverse schema and rate-card importer | small | 4 | 289 | $106.26 | $57.96 – $417.44 | 6 |
-| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 100 | $36.72 | $8.05 – $1,504.12 | 7 |
-| Driver mobile handoff screens | medium | 8 | 812 | $298.90 | $65.85 – $1,018.27 | 5 |
+| Custodial core contract and rate-limit discovery | exploration (brownfield) | 0 | 128 | $47.20 | $10.35 – $2,210.15 | 7 |
+| Entitlement model mapping to book-of-business | exploration (brownfield) | 0 | 128 | $47.20 | $10.35 – $2,486.43 | 7 |
+| Agent foundation - instructions, orchestration, memory scoping | medium | 8 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| C1 Client position summary | large | 6 | 1,980 | $728.64 | $303.59 – $4,044.74 | 3 |
+| C2 Transaction enquiry | medium | 4 | 1,044 | $384.30 | $84.67 – $1,636.52 | 5 |
+| C3 Review pack assembly | large | 9 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| C4 Document retrieval and request | medium | 5 | 1,044 | $384.30 | $84.67 – $1,636.52 | 5 |
+| C5 Suitability record surfacing | medium | 5 | 1,044 | $384.30 | $84.67 – $2,291.11 | 5 |
+| C6 Disclosure orchestration | large | 10 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| C7 Service request triage | medium | 6 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| C8 Complaint detection and escalation | large | 7 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| C9 Market and product context | small | 4 | 371 | $136.62 | $74.52 – $536.72 | 6 |
+| Tool schemas, auth paths and error handling (18 tools) | large | 20 | 1,980 | $728.64 | $303.59 – $4,044.74 | 3 |
+| Write-path confirmation, idempotency and audit (7 write tools) | large | 12 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| Knowledge indexing pipeline and effective dating | medium | 8 | 1,044 | $384.30 | $84.67 – $2,291.11 | 5 |
+| Console shell, Entra ID auth, routing and role gating | medium | 9 | 1,044 | $384.30 | $84.67 – $1,636.52 | 5 |
+| Agent conversation surface with citation rendering | large | 10 | 1,980 | $728.64 | $303.59 – $4,044.74 | 3 |
+| Position and performance visualisation | large | 11 | 1,980 | $728.64 | $303.59 – $3,466.91 | 3 |
+| Review pack builder and preview | large | 14 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| Disclosure tracker and suitability panel | medium | 9 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Service request queue and document library | medium | 11 | 1,044 | $384.30 | $84.67 – $1,636.52 | 5 |
+| Audit viewer, WCAG 2.2 AA conformance, telemetry | medium | 12 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Client self-service portal (auth, accounts, documents, messaging) | large | 16 | 1,980 | $728.64 | $303.59 – $4,044.74 | 3 |
+| Session and token brokering, agent invocation relay | large | 9 | 1,980 | $728.64 | $303.59 – $4,044.74 | 3 |
+| Aggregation endpoints for position and review views | medium | 7 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Write-path confirmation orchestration | large | 8 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| Rate limiting, quota and circuit breaking | small | 5 | 371 | $136.62 | $74.52 – $536.72 | 6 |
+| Custodial core integration (positions, transactions, batch) | large (brownfield) | 14 | 2,970 | $1,092.96 | $455.40 – $6,067.10 | 3 |
+| Dynamics 365 integration | medium (brownfield) | 8 | 1,566 | $576.45 | $127.01 – $2,945.72 | 5 |
+| Document management and e-signature integration | medium (brownfield) | 9 | 1,566 | $576.45 | $127.01 – $2,945.72 | 5 |
+| Market data and KYC screening integration | medium (brownfield) | 8 | 1,566 | $576.45 | $127.01 – $3,436.67 | 5 |
+| Supervision archive and notification fan-out | medium | 8 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Disclosure rules service | large | 10 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| Landing zone extension, networking and private endpoints | medium (brownfield) | 12 | 1,566 | $576.45 | $127.01 – $2,945.72 | 5 |
+| API Management policies and gateway configuration | medium | 9 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Cosmos data model, TTL and retention policies | medium | 8 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| AI Search indexes and semantic configuration | medium | 7 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Observability, alerting and dashboards | small | 8 | 371 | $136.62 | $74.52 – $536.72 | 6 |
+| CI/CD and ALM for the agent definition and application | medium | 11 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
 
 ### Calibration basis
 
@@ -152,17 +187,17 @@ rates must substitute its own.
 
 ## Licensing
 
-**Seat-based licensing (Claude Max).** Usage draws on an allowance already paid for,
+**Seat-based licensing (Claude for Enterprise).** Usage draws on an allowance already paid for,
 so no additional money changes hands for this build -- but the seat is not free.
 
 | | |
 | --- | ---: |
-| Developer-months of allowance available | 1 (1 seat x 1 month) |
-| Share of that allowance | **188%** |
-| Seat spend over the build | $200.00 |
-| **Attributable cost of this build** | **$376.15** |
-| Already committed to other work | 45% |
-| **Total committed** | **233%** |
+| Developer-months of allowance available | 30 (6 seats x 5 months) |
+| Share of that allowance | **137%** |
+| Seat spend over the build | $4,500.00 |
+| **Attributable cost of this build** | **$6,187.20** |
+| Already committed to other work | 30% |
+| **Total committed** | **167%** |
 
 The attributable cost is the seat's monthly price apportioned by the share of
 the allowance this build consumes. Nothing extra is invoiced, but this is the
@@ -170,10 +205,10 @@ real cost of the capacity the build uses up.
 
 ### Allowance overrun
 
-**This build plus existing workload exceeds the allowance by 133%.**
+**This build plus existing workload exceeds the allowance by 67%.**
 
 Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$266.15**.
+bills on top of the seat. Overage exposure at the same rate: **$3,037.20**.
 
 Options: spread the build across allowance periods, move part of it to
 consumption billing, add seats, or reduce the other committed work.
@@ -183,11 +218,7 @@ consumption billing, add seats, or reduce the other committed work.
 Seat allowances refill on **5-hour rolling and weekly** windows, not only monthly. A build that fits
 comfortably in a month can still exhaust a short window and stall.
 
-**This build is marked as concentrated** — compressed into a short period.
-Monthly headroom will not protect it; expect to hit shorter windows and plan
-for pauses.
-
-Notional value at list rates: **$890.21** — what this build would cost on
+Notional value at list rates: **$19,524.04** — what this build would cost on
 consumption billing. Shown for scale; it is not a charge.
 
 ## Target platform — Microsoft Copilot Studio
@@ -196,14 +227,14 @@ consumption billing. Shown for scale; it is not a charge.
 
 | Build-and-test activity | Credits | At $0.01/CC | Basis |
 | --- | ---: | ---: | --- |
-| Interactive validation in the Copilot Studio interface | 16,800 | $168.00 | 16.0 human hours x 25 interactions/hour = 400 interactions |
-| Evaluation runs | 15,360 | $153.60 | 40 cases x 3 repeats x 4 cycles = 480 runs |
-| Agent flow runs during build and test | 130 | $1.30 | 1,000 actions across 4 cycles at 13 CC per 100 |
-| **Total** | **32,290** | **$322.90** | |
-| Reserve (25%) | 8,072 | $80.73 | required contingency |
-| **Budget ask** | **40,362** | **$403.62** | |
+| Interactive validation in the Copilot Studio interface | 100,800 | $1,008.00 | 96.0 human hours x 25 interactions/hour = 2,400 interactions |
+| Evaluation runs | 378,288 | $3,782.88 | 568 cases x 3 repeats x 6 cycles = 10,224 runs |
+| Agent flow runs during build and test | 936 | $9.36 | 7,200 actions across 6 cycles at 13 CC per 100 |
+| **Total** | **480,024** | **$4,800.24** | |
+| Reserve (30%) | 144,007 | $1,440.07 | required contingency |
+| **Budget ask** | **624,031** | **$6,240.31** | |
 
-**Reasoning-model surcharge: 25,840 credits ($258.40).** Reasoning models bill the feature
+**Reasoning-model surcharge: 385,764 credits ($3,857.64).** Reasoning models bill the feature
 rate *plus* the premium token tier, so the effective tier is `premium` whatever
 the `standard` tier selected.
 
@@ -213,16 +244,16 @@ Evaluation is not a one-off gate. Microsoft's guidance is an explicit cycle —
 define tests, run evaluations, analyse results, improve the agent, repeat — with a
 target pass rate of 80–90% and near 100% on core tests.
 
-This estimate plans **4 cycles**: 480 evaluation runs in total, plus the
+This estimate plans **6 cycles**: 10,224 evaluation runs in total, plus the
 remediation each failed cycle sends back to the build platform.
 
 > **Velocity, not just cost.** Evaluations are capped at **20 per agent node per
-> day**, so this volume needs a minimum of **24 days** of elapsed time however much
+> day**, so this volume needs a minimum of **516 days** of elapsed time however much
 > budget is available.
 
 ### Human validation — a dependency, not a cost line
 
-**16.0 hours** of interactive validation are planned in the Copilot Studio
+**96.0 hours** of interactive validation are planned in the Copilot Studio
 interface. Those hours are collected to size the test volume above — they are
 **not** estimated as labour cost, consistent with this tool metering agent
 consumption rather than people.
@@ -242,6 +273,23 @@ For production runtime consumption use Microsoft's [agent usage estimator](https
 
 Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [harness billing](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview) · [evaluation limits](https://learn.microsoft.com/microsoft-copilot-studio/workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node) · [iteration guidance](https://learn.microsoft.com/microsoft-365/copilot/extensibility/evaluation-test-categories#iteration-loop)
 
+## Target platform — Azure
+
+Azure consumption during build and test, as supplied. Azure rates are not
+bundled here — they depend entirely on the services chosen.
+
+| Item | USD |
+| --- | ---: |
+| App Service and Functions (dev/test/staging) | $2,400.00 |
+| Cosmos DB (three environments) | $3,100.00 |
+| Azure AI Search with semantic ranking | $4,200.00 |
+| API Management | $2,800.00 |
+| Service Bus, Storage, Key Vault | $900.00 |
+| Observability ingestion | $1,600.00 |
+| Front Door and networking | $1,100.00 |
+| Reserve (30%) | $4,830.00 |
+| **Budget ask** | **$20,930.00** |
+
 ## Known limits
 
 1. **Build only.** Nothing here is the cost of running the agent once it is live.
@@ -254,7 +302,7 @@ Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/
 ## Close the loop
 
 ```
-python record_actual.py est_20260903T000000_sample1 --sessions <session-id> [...]
+python record_actual.py est_20260903T000000_kestrelcc --sessions <session-id> [...]
 ```
 
 ---
