@@ -226,16 +226,21 @@ def compute(config, reserve_percent, target="copilot-studio"):
                format(eval_runs, ",")),
             billed))
 
-    # --- billable side-effects, on any harness ----------------------------
+    # --- agent flow runs --------------------------------------------------
+    # Microsoft documents an explicit exemption: testing an agent flow in the
+    # flow designer or from the agent's test chat does not consume capacity
+    # for agent flow actions. An earlier version billed these on every
+    # harness, which over-charged every standard-harness build estimate.
     if cfg["agent_flow_actions"]:
         actions = int(cfg["agent_flow_actions"]) * cycles
         cc = actions / 100.0 * rates.feature_credits("agent_flow_per_100")
         result["lines"].append(_line(
             "Agent flow runs during build and test", cc,
-            "%s actions across %s cycle%s at %s CC per 100"
+            "%s actions across %s cycle%s at %s CC per 100 -- test runs in "
+            "the designer and test chat are exempt"
             % (format(actions, ","), cycles, "" if cycles == 1 else "s",
                rates.feature_credits("agent_flow_per_100")),
-            True))  # side-effects bill on every harness
+            billed))
 
     if cfg["content_processing_pages"]:
         pages = int(cfg["content_processing_pages"]) * cycles
@@ -280,8 +285,11 @@ def compute(config, reserve_percent, target="copilot-studio"):
         "dollars_per_credit": rates.DOLLARS_PER_CREDIT,
         "min_elapsed_days": min_days,
         "eval_cap_per_day": rates.MAX_EVALUATIONS_PER_NODE_PER_DAY,
+        "agent_flow_test_runs_exempt": rates.AGENT_FLOW_TEST_RUNS_EXEMPT,
         "excluded": [
             "Production runtime once the agent is live",
+            "Agent flow test runs in the designer or test chat (documented "
+            "exemption)",
             "Capacity pack sizing and overage enforcement",
             "End-user Microsoft 365 Copilot licence offsets",
             "Human hours for validation (collected to size test volume only)",

@@ -261,7 +261,11 @@ def build_summary(result):
         (k, round(build["usd_" + k] + tgt["usd_" + k], 2))
         for k in ("low", "likely", "high", "with_reserve"))
 
-    has_credits = tgt["credits_likely"] > 0
+    # Show the credits column whenever a Copilot Studio target is in scope,
+    # even when it bills zero. Hiding a zero reads as "no target estimated"
+    # rather than "the target costs nothing on this harness".
+    has_credits = tgt["credits_likely"] > 0 or any(
+        target["target"] == "copilot-studio" for target in result["targets"])
     out.append("### Totals")
     out.append("")
     header = "| | Build — %s |" % build["currency"]
@@ -302,7 +306,14 @@ def build_summary(result):
     out.append("")
 
     notes = []
-    if has_credits:
+    zero_target = has_credits and tgt["credits_likely"] == 0
+    if zero_target:
+        notes.append("The target column is **zero because of the harness**, "
+                     "not because nothing was estimated. On the standard "
+                     "harness, build, preview, test and evaluation in the "
+                     "interface are not billed, and agent flow test runs are "
+                     "explicitly exempt. See the target section below.")
+    if has_credits and not zero_target:
         notes.append("Copilot Credits are converted at $%.2f each so the two "
                      "meters can be shown in one column. They are separate "
                      "budgets drawn on different accounts."

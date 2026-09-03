@@ -1,7 +1,7 @@
 # Build-time Copilot Credits
 
 **Author:** Dewain Robinson
-**Rates verified:** 2026-09-03
+**Rates verified:** 2026-09-03 (re-verified against source; no changes)
 
 How this estimator translates a build into Copilot Credits, and — just as
 importantly — what it refuses to translate.

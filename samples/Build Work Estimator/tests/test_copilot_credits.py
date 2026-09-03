@@ -90,12 +90,8 @@ class TestHarness(unittest.TestCase):
         self.assertEqual(result["total_credits"], 0.0)
         self.assertIn("after publish", result["harness_note"])
 
-    def test_standard_harness_still_counts_billable_side_effects(self):
-        config = dict(BUILD)
-        config["harness"] = "standard"
-        config["agent_flow_actions"] = 500
-        result = cc.compute(config, 0)
-        self.assertAlmostEqual(result["total_credits"], 500 / 100.0 * 13, 2)
+    def test_agent_flow_test_run_exemption_is_recorded(self):
+        self.assertTrue(rates.AGENT_FLOW_TEST_RUNS_EXEMPT)
 
     def test_github_copilot_harness_bills_from_build_start(self):
         result = cc.compute(BUILD, 0)

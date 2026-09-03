@@ -21,11 +21,13 @@ STALE_AFTER_DAYS = 90
 # Anthropic — list price, USD per 1M tokens
 # --------------------------------------------------------------------------
 
-ANTHROPIC_VERIFIED = "2026-06-24"
+ANTHROPIC_VERIFIED = "2026-09-03"
 ANTHROPIC_SOURCE = "https://docs.claude.com/en/docs/about-claude/pricing"
 
 #: model id -> (input $/1M, output $/1M)
 ANTHROPIC_RATES = {
+    "claude-fable-5-1": (10.00, 50.00),
+    "claude-mythos-5-1": (10.00, 50.00),
     "claude-fable-5": (10.00, 50.00),
     "claude-mythos-5": (10.00, 50.00),
     "claude-opus-5": (5.00, 25.00),
@@ -37,12 +39,38 @@ ANTHROPIC_RATES = {
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-sonnet-4-5": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
+    # Retired models. Kept because historical sessions still calibrate
+    # against them; dropping a rate would silently produce unpriced records.
+    "claude-opus-4-1": (15.00, 75.00),
+    "claude-opus-4": (15.00, 75.00),
+    "claude-sonnet-4": (3.00, 15.00),
+    "claude-haiku-3-5": (0.80, 4.00),
 }
 
 # Multipliers applied to the model's *input* rate.
-CACHE_READ_MULT = 0.10
 CACHE_WRITE_5M_MULT = 1.25
 CACHE_WRITE_1H_MULT = 2.00
+
+#: Cache reads are 0.1x base input on every model EXCEPT Fable 5.1 and
+#: Mythos 5.1, which read at 0.025x. Cache reads dominate agentic spend, so a
+#: single global multiplier misprices those two models by 4x on the largest
+#: component of the bill.
+CACHE_READ_MULT = 0.10
+CACHE_READ_MULT_OVERRIDES = {
+    "claude-fable-5-1": 0.025,
+    "claude-mythos-5-1": 0.025,
+}
+
+
+def cache_read_mult(model):
+    """Cache-read multiplier for a model. Longest-prefix match."""
+    if not model:
+        return CACHE_READ_MULT
+    best = None
+    for known in CACHE_READ_MULT_OVERRIDES:
+        if model.startswith(known) and (best is None or len(known) > len(best)):
+            best = known
+    return CACHE_READ_MULT_OVERRIDES[best] if best else CACHE_READ_MULT
 
 
 def rate_for(model):
@@ -72,7 +100,7 @@ def price_response(model, input_tokens, cache_read, cache_write_5m,
     rin, rout = rates
     return (
         input_tokens * rin
-        + cache_read * rin * CACHE_READ_MULT
+        + cache_read * rin * cache_read_mult(model)
         + cache_write_5m * rin * CACHE_WRITE_5M_MULT
         + cache_write_1h * rin * CACHE_WRITE_1H_MULT
         + output_tokens * rout
@@ -82,6 +110,14 @@ def price_response(model, input_tokens, cache_read, cache_write_5m,
 # --------------------------------------------------------------------------
 # Anthropic published baselines -- the fallback when no local history exists
 # --------------------------------------------------------------------------
+
+#: Sonnet 5's $2/$10 launched as introductory pricing through 2026-08-31 and
+#: is now the standard price; the scheduled rise to $3/$15 will not occur.
+SONNET_5_PRICING_NOTE = (
+    "Claude Sonnet 5 at $2/$10 per MTok was introductory pricing through "
+    "2026-08-31 and is now the standard price. The increase to $3/$15 "
+    "scheduled for 2026-09-01 will not occur."
+)
 
 PUBLISHED_BASELINE_VERIFIED = "2026-09-03"
 PUBLISHED_BASELINE_SOURCE = "https://code.claude.com/docs/en/costs"
@@ -200,6 +236,10 @@ EVAL_RESULTS_RETENTION_DAYS = 89
 # allowances. Conflating them produces a plausible-looking wrong number.
 
 GITHUB_VERIFIED = "2026-09-03"
+#: Confirmed against the published models-and-pricing reference: "1 AI credit
+#: = $0.01 USD", and code completions and next edit suggestions are not
+#: billed in AI credits, remaining unlimited on all paid plans.
+GITHUB_RATES_ARE_PUBLISHED = True
 GITHUB_SOURCE = "https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing"
 GITHUB_LEGACY_SOURCE = "https://docs.github.com/copilot/concepts/billing/copilot-requests"
 GITHUB_PLANS_SOURCE = "https://docs.github.com/en/copilot/get-started/plans"
@@ -287,6 +327,12 @@ CC_TOKEN_TIERS = {
 
 #: Reasoning models bill the feature rate PLUS the premium token tier.
 CC_REASONING_TIER = "premium"
+
+#: Agent flow TEST runs are explicitly exempt: "Testing an agent flow in the
+#: flow designer or from the agent's test chat doesn't consume capacity for
+#: agent flow actions. Test runs aren't blocked by enforcement."
+#: Source: requirements-messages-management#agent-flow-enforcement
+AGENT_FLOW_TEST_RUNS_EXEMPT = True
 
 #: Runtime-only rates. Held here so documentation can cite them accurately and
 #: so tests can assert they are never reachable from a build estimate.

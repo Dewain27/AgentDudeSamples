@@ -409,6 +409,7 @@ was wired to `gh`.
 | Package | Used for | If absent |
 | --- | --- | --- |
 | `PyYAML` | Manifest parsing | Bundled parser takes over, asserted identical on the supported subset |
+| `pypdf` | Verifying PDF currency at build time | Skipped with a warning |
 | `markdown` + `playwright` | PDF rendering | Markdown still written; host creates the PDF natively |
 | `Pillow` | Icon generation at **build** time only | Not needed to run the skill |
 
