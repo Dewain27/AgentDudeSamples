@@ -272,6 +272,8 @@ def compute(config, reserve_percent, target="copilot-studio"):
         "effective_tier": effective_tier,
         "reasoning_model": reasoning,
         "reasoning_surcharge_credits": round(surcharge, 2) if billed else 0.0,
+        "reasoning_surcharge_dollars": round(
+            surcharge * rates.DOLLARS_PER_CREDIT, 2) if billed else 0.0,
         "eval_cycles": cycles,
         "eval_runs": eval_runs,
         "interactive_hours": hours,
@@ -280,6 +282,9 @@ def compute(config, reserve_percent, target="copilot-studio"):
         "total_dollars": round(total * rates.DOLLARS_PER_CREDIT, 2),
         "unbilled_credits": round(unbilled, 2),
         "reserve_credits": round(reserve, 2),
+        "reserve_dollars": round(reserve * rates.DOLLARS_PER_CREDIT, 2),
+        "unbilled_dollars": round(unbilled * rates.DOLLARS_PER_CREDIT, 2),
+        "agent_flow_actions_total": int(cfg["agent_flow_actions"] or 0) * cycles,
         "budget_credits": round(total + reserve, 2),
         "budget_dollars": round((total + reserve) * rates.DOLLARS_PER_CREDIT, 2),
         "dollars_per_credit": rates.DOLLARS_PER_CREDIT,
@@ -388,8 +393,7 @@ def render_markdown(result):
         out.append("| Reserve (%.0f%%) | %s | $%s | required contingency |"
                    % (result["reserve_percent"],
                       format(result["reserve_credits"], ",.0f"),
-                      format(result["reserve_credits"]
-                             * result["dollars_per_credit"], ",.2f")))
+                      format(result["reserve_dollars"], ",.2f")))
         out.append("| **Budget ask** | **%s** | **$%s** | |"
                    % (format(result["budget_credits"], ",.0f"),
                       format(result["budget_dollars"], ",.2f")))
@@ -401,8 +405,7 @@ def render_markdown(result):
                    "tier, so the effective tier is `premium` whatever\nthe "
                    "`%s` tier selected."
                    % (format(result["reasoning_surcharge_credits"], ",.0f"),
-                      format(result["reasoning_surcharge_credits"]
-                             * result["dollars_per_credit"], ",.2f"),
+                      format(result["reasoning_surcharge_dollars"], ",.2f"),
                       result["tier"]))
         out.append("")
 

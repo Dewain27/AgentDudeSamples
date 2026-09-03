@@ -54,12 +54,12 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — USD | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | $6,509.34 | 416,820 | $26,777.54 |
-| **Likely** | **$19,524.04** | **480,024** | **$40,424.28** |
-| High | $111,462.62 | 606,432 | $133,626.94 |
-| **Likely + 30% reserve** | **$25,381.25** | **624,031** | **$52,551.56** |
+| Low | $6,914.52 | 416,820 | $29,382.72 |
+| **Likely** | **$21,211.72** | **480,024** | **$44,311.96** |
+| High | $119,965.88 | 606,432 | $144,330.20 |
+| **Likely + 30% reserve** | **$27,575.24** | **624,031** | **$57,605.55** |
 
-> **Plan for $40,424.28. Hold $52,551.56 including the 30% reserve.**
+> **Plan for $44,311.96. Hold $57,605.55 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -129,22 +129,96 @@ This estimate plans **6 evaluation cycles**. Each cycle after the first adds
 of **2.25x**. An estimate that prices only the first pass is planning for a build
 where every evaluation passes first time.
 
+## Cost by component
+
+Each component's share of **both** meters. The build column is the work of authoring it; the credits column is the evaluation volume it generates on the target platform.
+
+| Component | Size | Turns | Build | Eval cases | Target credits | **Combined** |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Custodial core contract and rate-limit discovery | exploration | 128 | $47.20 | — | — | $47.20 |
+| Entitlement model mapping to book-of-business | exploration | 128 | $47.20 | — | — | $47.20 |
+| Agent foundation - instructions, orchestration, memory scoping | medium | 1,044 | $384.30 | 115 | 76,590 | $1,150.20 |
+| C1 Client position summary | large | 1,980 | $728.64 | 12 | 7,992 | $808.56 |
+| C2 Transaction enquiry | medium | 1,044 | $384.30 | 12 | 7,992 | $464.22 |
+| C3 Review pack assembly | large | 1,980 | $728.64 | 12 | 7,992 | $808.56 |
+| C4 Document retrieval and request | medium | 1,044 | $384.30 | 12 | 7,992 | $464.22 |
+| C5 Suitability record surfacing | medium | 1,044 | $384.30 | 52 | 34,632 | $730.62 |
+| C6 Disclosure orchestration | large | 1,980 | $728.64 | 102 | 67,932 | $1,407.96 |
+| C7 Service request triage | medium | 1,044 | $384.30 | 12 | 7,992 | $464.22 |
+| C8 Complaint detection and escalation | large | 1,980 | $728.64 | 57 | 37,962 | $1,108.26 |
+| C9 Market and product context | small | 371 | $136.62 | 12 | 7,992 | $216.54 |
+| Tool schemas, auth paths and error handling (18 tools) | large | 1,980 | $728.64 | 75 | 49,950 | $1,228.14 |
+| Write-path confirmation, idempotency and audit (7 write tools) | large | 1,980 | $728.64 | 35 | 23,310 | $961.74 |
+| Knowledge indexing pipeline and effective dating | medium | 1,044 | $384.30 | 60 | 39,960 | $783.90 |
+| Console shell, Entra ID auth, routing and role gating | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Agent conversation surface with citation rendering | large | 1,980 | $728.64 | — | — | $728.64 |
+| Position and performance visualisation | large | 1,980 | $728.64 | — | — | $728.64 |
+| Review pack builder and preview | large | 1,980 | $728.64 | — | — | $728.64 |
+| Disclosure tracker and suitability panel | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Service request queue and document library | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Audit viewer, WCAG 2.2 AA conformance, telemetry | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Client self-service portal (auth, accounts, documents, messaging) | large | 1,980 | $728.64 | — | — | $728.64 |
+| Session and token brokering, agent invocation relay | large | 1,980 | $728.64 | — | — | $728.64 |
+| Aggregation endpoints for position and review views | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Write-path confirmation orchestration | large | 1,980 | $728.64 | — | — | $728.64 |
+| Rate limiting, quota and circuit breaking | small | 371 | $136.62 | — | — | $136.62 |
+| Custodial core integration (positions, transactions, batch) | large | 2,970 | $1,092.96 | — | — | $1,092.96 |
+| Dynamics 365 integration | medium | 1,566 | $576.45 | — | — | $576.45 |
+| Document management and e-signature integration | medium | 1,566 | $576.45 | — | — | $576.45 |
+| Market data and KYC screening integration | medium | 1,566 | $576.45 | — | — | $576.45 |
+| Supervision archive and notification fan-out | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Disclosure rules service | large | 1,980 | $728.64 | — | — | $728.64 |
+| Landing zone extension, networking and private endpoints *(per env)* | medium | 2,740 | $1,008.76 | — | — | $1,008.76 |
+| API Management policies and gateway configuration *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
+| Cosmos data model, TTL and retention policies *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
+| AI Search indexes and semantic configuration *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
+| Observability, alerting and dashboards *(per env)* | small | 650 | $239.09 | — | — | $239.09 |
+| CI/CD and ALM for the agent definition and application *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
+| **Attributed total** | | 57,632 | **$21,211.80** | **568** | **378,288** | **$24,994.68** |
+
+A further **101,736 credits ($1,017.36)** are not attributable to a single component: interactive validation and agent flow runs exercise the solution as a whole, and splitting them would be invention rather than attribution.
+
+Components marked *(per env)* carry the environment work multiplier: they are authored once and applied into every environment. See Environments below.
+
+## Environments
+
+Four things multiply across environments, and they multiply differently.
+
+| Environment | Azure during build | Agent deployed | Notes |
+| --- | ---: | --- | --- |
+| dev | $4,200.00 | yes |  |
+| qa | $3,600.00 | yes |  |
+| test | $4,100.00 | yes |  |
+| prod | $6,400.00 | no | production — runtime is out of scope |
+| **4 environments** | **$18,300.00** | 3 exercised |  |
+
+### How each cost multiplies
+
+| Cost | Multiplication | Why |
+| --- | --- | --- |
+| Infrastructure and pipeline **work** | **x1.75** | Authored once, parameterised per environment. Each additional environment costs 25% of the original: config, secrets, pipeline stages, seed data, drift |
+| Azure **consumption** | **x4** | Resources run in every environment at once throughout the build. This does not decay — four environments is four bills |
+| Copilot Studio **credits** | x3 exercised | Only environments where the agent is deployed and tested consume build-time credits. Production is excluded, because exercising it there is runtime |
+
+Work marked `per_environment: true` in the breakdown carries the **x1.75**
+multiplier. Everything else is authored once.
+
 ## Build — Claude Code
 
 | | Amount |
 | --- | ---: |
-| Base estimate (incl. remediation) | $19,524.04 |
-| Reserve (30%) | $5,857.21 |
-| **Budget ask** | **$25,381.25** |
-| Observed low | $6,509.34 |
-| Observed high | $111,462.62 |
+| Base estimate (incl. remediation) | $21,211.72 |
+| Reserve (30%) | $6,363.52 |
+| **Budget ask** | **$27,575.24** |
+| Observed low | $6,914.52 |
+| Observed high | $119,965.88 |
 
 ### Reserve adequacy
 
 **The reserve does not cover observed variance.**
 
-A **30%** reserve reaches $25,381.25. Comparable work has reached $111,462.62. Full coverage
-would require **471%**.
+A **30%** reserve reaches $27,575.24. Comparable work has reached $119,965.88. Full coverage
+would require **466%**.
 
 | Item | Size | Files | Turns | Estimate | Range | n |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
@@ -181,12 +255,12 @@ would require **471%**.
 | Market data and KYC screening integration | medium (brownfield) | 8 | 1,566 | $576.45 | $127.01 – $3,436.67 | 5 |
 | Supervision archive and notification fan-out | medium | 8 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
 | Disclosure rules service | large | 10 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
-| Landing zone extension, networking and private endpoints | medium (brownfield) | 12 | 1,566 | $576.45 | $127.01 – $2,945.72 | 5 |
-| API Management policies and gateway configuration | medium | 9 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
-| Cosmos data model, TTL and retention policies | medium | 8 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
-| AI Search indexes and semantic configuration | medium | 7 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
-| Observability, alerting and dashboards | small | 8 | 371 | $136.62 | $74.52 – $536.72 | 6 |
-| CI/CD and ALM for the agent definition and application | medium | 11 | 1,044 | $384.30 | $84.67 – $1,963.82 | 5 |
+| Landing zone extension, networking and private endpoints | medium (brownfield) | 12 | 2,740 | $1,008.76 | $222.28 – $5,155.02 | 5 |
+| API Management policies and gateway configuration | medium | 9 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
+| Cosmos data model, TTL and retention policies | medium | 8 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
+| AI Search indexes and semantic configuration | medium | 7 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
+| Observability, alerting and dashboards | small | 8 | 650 | $239.09 | $130.41 – $939.26 | 6 |
+| CI/CD and ALM for the agent definition and application | medium | 11 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
 
 ### Calibration basis
 
@@ -203,11 +277,11 @@ so no additional money changes hands for this build -- but the seat is not free.
 | | |
 | --- | ---: |
 | Developer-months of allowance available | 30 (6 seats x 5 months) |
-| Share of that allowance | **137%** |
+| Share of that allowance | **149%** |
 | Seat spend over the build | $4,500.00 |
-| **Attributable cost of this build** | **$6,187.20** |
+| **Attributable cost of this build** | **$6,722.02** |
 | Already committed to other work | 30% |
-| **Total committed** | **167%** |
+| **Total committed** | **179%** |
 
 The attributable cost is the seat's monthly price apportioned by the share of
 the allowance this build consumes. Nothing extra is invoiced, but this is the
@@ -215,10 +289,10 @@ real cost of the capacity the build uses up.
 
 ### Allowance overrun
 
-**This build plus existing workload exceeds the allowance by 67%.**
+**This build plus existing workload exceeds the allowance by 79%.**
 
 Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$3,037.20**.
+bills on top of the seat. Overage exposure at the same rate: **$3,572.02**.
 
 Options: spread the build across allowance periods, move part of it to
 consumption billing, add seats, or reduce the other committed work.
@@ -228,7 +302,7 @@ consumption billing, add seats, or reduce the other committed work.
 Seat allowances refill on **5-hour rolling and weekly** windows, not only monthly. A build that fits
 comfortably in a month can still exhaust a short window and stall.
 
-Notional value at list rates: **$19,524.04** — what this build would cost on
+Notional value at list rates: **$21,211.72** — what this build would cost on
 consumption billing. Shown for scale; it is not a charge.
 
 ## Target platform — Microsoft Copilot Studio
@@ -291,15 +365,58 @@ bundled here — they depend entirely on the services chosen.
 
 | Item | USD |
 | --- | ---: |
-| App Service and Functions (dev/test/staging) | $2,400.00 |
-| Cosmos DB (three environments) | $3,100.00 |
-| Azure AI Search with semantic ranking | $4,200.00 |
-| API Management | $2,800.00 |
-| Service Bus, Storage, Key Vault | $900.00 |
-| Observability ingestion | $1,600.00 |
-| Front Door and networking | $1,100.00 |
-| Reserve (30%) | $4,830.00 |
-| **Budget ask** | **$20,930.00** |
+| dev environment | $4,200.00 |
+| qa environment | $3,600.00 |
+| test environment | $4,100.00 |
+| prod environment | $6,400.00 |
+| Reserve (30%) | $5,490.00 |
+| **Budget ask** | **$23,790.00** |
+
+## What is measured, and what is judgment
+
+This estimate mixes two kinds of input. They are not equally trustworthy, and
+the difference is not visible in the figures themselves.
+
+### Measured or sourced
+
+| Input | Basis |
+| --- | --- |
+| Cost per agent turn, bucket turn medians, cache behaviour | Derived from 24 real local sessions |
+| Every provider rate | Published, each carrying a source URL and a verification date |
+| Evaluation volume | Arithmetic on declared test cases, repeats and cycles |
+| Azure consumption | Figures supplied by you; nothing is bundled or inferred |
+
+### Judgment, not measurement
+
+These shape the result and **were never measured against anything**. They are
+stated here so a reader can see which parts of the number would move if someone
+measured them.
+
+| Factor | Value | What it does |
+| --- | --- | --- |
+| Brownfield factor | **1.50x** | Multiplies turns for work in an existing codebase. Judgment. Never measured against paired greenfield and brownfield work. |
+| Remediation share per cycle | **25%** | Each evaluation cycle after the first adds this share of the build back as rework. Judgment. Real remediation depends on what the evaluations actually find. |
+| Unknowns range widening | **+25% per unknown** | Widens the upper bound of an item per declared unknown. Judgment. The declared unknown count is itself a subjective input. |
+| Environment provisioning share | **25% per extra environment** | Cost of applying infrastructure and pipeline work into each environment beyond the first. Judgment. Override it with `environments.provisioning_share` if you have a real figure. |
+| Evaluation cycle range | **-1 / +2 cycles** | Produces the low and high bounds on the target side. Judgment. Nobody knows how many cycles a build will need until it runs. |
+| Correction shrinkage k | **k = 3** | Pulls recorded actuals toward 1.0 so one data point cannot swing later estimates. Judgment, but a deliberately conservative one: it only ever reduces the influence of thin data. |
+
+> **Nothing here is invented at report time.** Every figure above is either
+> measured, supplied by you, or one of the listed factors applied to those. Where
+> the estimator cannot attribute a cost honestly — target credits with no declared
+> evaluation cases, for instance — it says so rather than distributing the total
+> to make the table look complete.
+
+### Provenance of every figure
+
+Every money figure and every grouped number above has been checked against the
+estimator's own derivation ledger. Each one is either measured from session
+history, a published rate carrying a source URL and verification date, a value you
+declared in the manifest, or arithmetic on those.
+
+**Nothing in this report is asserted without a derivation.** The check is
+mechanical and runs on every build; a figure the estimator cannot account for
+fails validation rather than being printed.
 
 ## Known limits
 

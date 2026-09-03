@@ -78,8 +78,9 @@ class TestAgentSkillsPackage(unittest.TestCase):
 
     def test_references_are_consolidated(self):
         refs = [n for n in self.entries if n.startswith("references/")]
-        self.assertEqual(sorted(refs),
-                         ["references/methodology.md", "references/rates.md"])
+        self.assertEqual(sorted(refs), ["references/reference.md"],
+                         "references are consolidated to one file to stay "
+                         "inside the companion-file budget")
 
 
 class TestCoworkPackage(unittest.TestCase):
@@ -145,13 +146,15 @@ class TestPackagedExamplesAreCurrent(unittest.TestCase):
                 fh.read(),
                 "the packaged worked example is stale in the Cowork package")
 
-    def test_packaged_manifest_matches_the_committed_manifest(self):
-        committed = os.path.join(
-            SAMPLE, "examples", "harbor-line-manifest.yaml")
-        with open(committed) as fh:
-            self.assertEqual(
-                self._inner(STANDARD, "assets/harbor-line-manifest.yaml"),
-                fh.read())
+    def test_manifest_shape_travels_in_skill_md_not_as_an_asset(self):
+        """The example manifest is redundant against a hard file budget."""
+        with zipfile.ZipFile(STANDARD) as archive:
+            names = archive.namelist()
+            self.assertNotIn("assets/harbor-line-manifest.yaml", names)
+            skill = archive.read("SKILL.md").decode("utf-8")
+        self.assertIn("specification:", skill)
+        self.assertIn("build_platform:", skill)
+        self.assertIn("target_platform:", skill)
 
 
 class TestSandboxInstructions(unittest.TestCase):
@@ -188,13 +191,32 @@ class TestPackagedSkillRuns(unittest.TestCase):
         try:
             with zipfile.ZipFile(STANDARD) as archive:
                 archive.extractall(directory)
+            # Write the manifest inline rather than relying on a packaged
+            # asset: this proves the package can estimate anything, not just
+            # the one example that happens to ship with it.
+            manifest = os.path.join(directory, "m.yaml")
+            with open(manifest, "w") as fh:
+                fh.write(
+                    "project: Packaged run\n"
+                    "specification:\n"
+                    "  functional: none\n"
+                    "  technical: none\n"
+                    "reserve_percent: 20\n"
+                    "build_platform: claude-code\n"
+                    "target_platform: copilot-studio\n"
+                    "licensing:\n"
+                    "  model: consumption\n"
+                    "target:\n"
+                    "  harness: standard\n"
+                    "items:\n"
+                    "  - name: A component\n"
+                    "    size: small\n"
+                    "    files: 3\n")
             out = os.path.join(directory, "e.json")
             proc = subprocess.run(
                 [sys.executable, os.path.join(directory, "scripts",
                                               "estimate.py"),
-                 "--manifest", os.path.join(directory, "assets",
-                                            "harbor-line-manifest.yaml"),
-                 "--out", out],
+                 "--manifest", manifest, "--no-ledger", "--out", out],
                 capture_output=True, text=True)
             self.assertEqual(proc.returncode, 0,
                              "packaged estimate failed:\n%s" % proc.stderr)
@@ -203,6 +225,8 @@ class TestPackagedSkillRuns(unittest.TestCase):
             self.assertEqual(result["build_platform"], "claude-code")
             self.assertEqual(result["target_platform"], "copilot-studio")
             self.assertGreater(result["build"]["base"], 0)
+            self.assertTrue(result["specification"]["absent"],
+                            "a `none` specification must still estimate")
         finally:
             import shutil
             shutil.rmtree(directory, ignore_errors=True)

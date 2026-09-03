@@ -54,12 +54,12 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — GitHub AI Credits | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | 33,960 | 416,820 | $20,607.80 |
-| **Likely** | **101,853** | **480,024** | **$21,918.77** |
-| High | 581,476 | 606,432 | $27,979.08 |
-| **Likely + 30% reserve** | **132,408** | **624,031** | **$28,494.39** |
+| Low | 36,072 | 416,820 | $22,828.92 |
+| **Likely** | **110,657** | **480,024** | **$24,206.81** |
+| High | 625,834 | 606,432 | $30,622.66 |
+| **Likely + 30% reserve** | **143,854** | **624,031** | **$31,468.85** |
 
-> **Plan for $21,918.77. Hold $28,494.39 including the 30% reserve.**
+> **Plan for $24,206.81. Hold $31,468.85 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -129,6 +129,29 @@ This estimate plans **6 evaluation cycles**. Each cycle after the first adds
 of **2.25x**. An estimate that prices only the first pass is planning for a build
 where every evaluation passes first time.
 
+## Environments
+
+Four things multiply across environments, and they multiply differently.
+
+| Environment | Azure during build | Agent deployed | Notes |
+| --- | ---: | --- | --- |
+| dev | $4,200.00 | yes |  |
+| qa | $3,600.00 | yes |  |
+| test | $4,100.00 | yes |  |
+| prod | $6,400.00 | no | production — runtime is out of scope |
+| **4 environments** | **$18,300.00** | 3 exercised |  |
+
+### How each cost multiplies
+
+| Cost | Multiplication | Why |
+| --- | --- | --- |
+| Infrastructure and pipeline **work** | **x1.75** | Authored once, parameterised per environment. Each additional environment costs 25% of the original: config, secrets, pipeline stages, seed data, drift |
+| Azure **consumption** | **x4** | Resources run in every environment at once throughout the build. This does not decay — four environments is four bills |
+| Copilot Studio **credits** | x3 exercised | Only environments where the agent is deployed and tested consume build-time credits. Production is excluded, because exercising it there is runtime |
+
+Work marked `per_environment: true` in the breakdown carries the **x1.75**
+multiplier. Everything else is authored once.
+
 ## Build cost — GitHub Copilot
 
 > Metered in **GitHub AI Credits**. This is a different meter from Copilot Studio Copilot
@@ -138,12 +161,12 @@ where every evaluation passes first time.
 
 | Build activity | Github Ai Credits | Basis |
 | --- | ---: | --- |
-| Chat and agent interactions | 101,853 | 23,577 interactions, 141,462,000 tokens (15% output) at $5.00/$25.00 per 1M, less 10% Auto discount |
-| **Total** | **101,853** | |
-| Reserve (30%) | 30,556 | required contingency |
-| **Budget ask** | **132,408** | |
+| Chat and agent interactions | 110,657 | 25,615 interactions, 153,690,000 tokens (15% output) at $5.00/$25.00 per 1M, less 10% Auto discount |
+| **Total** | **110,657** | |
+| Reserve (30%) | 33,197 | required contingency |
+| **Budget ask** | **143,854** | |
 
-At $0.01 per credit that is **$1,018.53** total, **$1,324.08** with reserve.
+At $0.01 per credit that is **$1,106.57** total, **$1,438.54** with reserve.
 
 ### Not metered
 
@@ -215,15 +238,58 @@ bundled here — they depend entirely on the services chosen.
 
 | Item | USD |
 | --- | ---: |
-| App Service and Functions (dev/test/staging) | $2,400.00 |
-| Cosmos DB (three environments) | $3,100.00 |
-| Azure AI Search with semantic ranking | $4,200.00 |
-| API Management | $2,800.00 |
-| Service Bus, Storage, Key Vault | $900.00 |
-| Observability ingestion | $1,600.00 |
-| Front Door and networking | $1,100.00 |
-| Reserve (30%) | $4,830.00 |
-| **Budget ask** | **$20,930.00** |
+| dev environment | $4,200.00 |
+| qa environment | $3,600.00 |
+| test environment | $4,100.00 |
+| prod environment | $6,400.00 |
+| Reserve (30%) | $5,490.00 |
+| **Budget ask** | **$23,790.00** |
+
+## What is measured, and what is judgment
+
+This estimate mixes two kinds of input. They are not equally trustworthy, and
+the difference is not visible in the figures themselves.
+
+### Measured or sourced
+
+| Input | Basis |
+| --- | --- |
+| Cost per agent turn, bucket turn medians, cache behaviour | Derived from 24 real local sessions |
+| Every provider rate | Published, each carrying a source URL and a verification date |
+| Evaluation volume | Arithmetic on declared test cases, repeats and cycles |
+| Azure consumption | Figures supplied by you; nothing is bundled or inferred |
+
+### Judgment, not measurement
+
+These shape the result and **were never measured against anything**. They are
+stated here so a reader can see which parts of the number would move if someone
+measured them.
+
+| Factor | Value | What it does |
+| --- | --- | --- |
+| Brownfield factor | **1.50x** | Multiplies turns for work in an existing codebase. Judgment. Never measured against paired greenfield and brownfield work. |
+| Remediation share per cycle | **25%** | Each evaluation cycle after the first adds this share of the build back as rework. Judgment. Real remediation depends on what the evaluations actually find. |
+| Unknowns range widening | **+25% per unknown** | Widens the upper bound of an item per declared unknown. Judgment. The declared unknown count is itself a subjective input. |
+| Environment provisioning share | **25% per extra environment** | Cost of applying infrastructure and pipeline work into each environment beyond the first. Judgment. Override it with `environments.provisioning_share` if you have a real figure. |
+| Evaluation cycle range | **-1 / +2 cycles** | Produces the low and high bounds on the target side. Judgment. Nobody knows how many cycles a build will need until it runs. |
+| Correction shrinkage k | **k = 3** | Pulls recorded actuals toward 1.0 so one data point cannot swing later estimates. Judgment, but a deliberately conservative one: it only ever reduces the influence of thin data. |
+
+> **Nothing here is invented at report time.** Every figure above is either
+> measured, supplied by you, or one of the listed factors applied to those. Where
+> the estimator cannot attribute a cost honestly — target credits with no declared
+> evaluation cases, for instance — it says so rather than distributing the total
+> to make the table look complete.
+
+### Provenance of every figure
+
+Every money figure and every grouped number above has been checked against the
+estimator's own derivation ledger. Each one is either measured from session
+history, a published rate carrying a source URL and verification date, a value you
+declared in the manifest, or arithmetic on those.
+
+**Nothing in this report is asserted without a derivation.** The check is
+mechanical and runs on every build; a figure the estimator cannot account for
+fails validation rather than being printed.
 
 ## Known limits
 

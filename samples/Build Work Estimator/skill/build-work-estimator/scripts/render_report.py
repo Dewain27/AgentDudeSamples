@@ -22,6 +22,8 @@ import copilot_credits  # noqa: E402
 import github_copilot  # noqa: E402
 import target_platform as tp  # noqa: E402
 import licensing  # noqa: E402
+import assumptions as assumptions_mod  # noqa: E402
+import environments as env_mod  # noqa: E402
 import rates  # noqa: E402
 import specification as spec_mod  # noqa: E402
 
@@ -131,7 +133,15 @@ def build_context(result):
 
 
 def _build_totals(result):
-    """Low / likely / high / with-reserve for the build side, in USD."""
+    """Read the RECORDED build totals. The renderer does not compute."""
+    recorded = (result.get("totals") or {}).get("build")
+    if recorded:
+        return recorded
+    return _build_totals_legacy(result)
+
+
+def _build_totals_legacy(result):
+    """Fallback for the pre-plan report shapes."""
     build, detail = result.get("build"), result.get("build_detail")
     reserve = result["reserve_percent"]
     if build:
@@ -164,7 +174,15 @@ def _build_totals(result):
 
 
 def _target_totals(result):
-    """Low / likely / high / with-reserve summed across targets, in USD."""
+    """Read the RECORDED target totals. The renderer does not compute."""
+    recorded = (result.get("totals") or {}).get("target")
+    if recorded:
+        return recorded
+    return _target_totals_legacy(result)
+
+
+def _target_totals_legacy(result):
+    """Fallback for the pre-plan report shapes."""
     low = likely = high = with_reserve = 0.0
     credits_low = credits_likely = credits_high = credits_reserve = 0.0
     for target in result["targets"]:
@@ -227,7 +245,9 @@ def build_summary(result):
         rate = licence.get("seat_rate_monthly")
         if rate is None:
             rate = licence.get("seat_monthly_cost", 0)
-        total = rate * seats * months
+        total = licence.get("seat_total_over_build")
+        if total is None:
+            total = rate * seats * months
         out.append("| Licensing | Seat — %s, $%s/month x %d seat%s x %s month%s "
                    "= **$%s** over the build |"
                    % (licence.get("plan") or "unspecified",
@@ -264,7 +284,7 @@ def build_summary(result):
     # --- the four numbers ---------------------------------------------
     build = _build_totals(result)
     tgt = _target_totals(result)
-    combined = dict(
+    combined = (result.get("totals") or {}).get("combined") or dict(
         (k, round(build["usd_" + k] + tgt["usd_" + k], 2))
         for k in ("low", "likely", "high", "with_reserve"))
 
@@ -360,6 +380,79 @@ def build_summary(result):
     return out
 
 
+def build_component_costs(result):
+    """Render the RECORDED per-component attribution. No arithmetic here."""
+    data = result.get("component_costs")
+    if not data or not data["components"]:
+        return []
+
+    out = ["## Cost by component", ""]
+    out.append("Each component's share of **both** meters. The build column "
+               "is the work of authoring it; the credits column is the "
+               "evaluation volume it generates on the target platform.")
+    out.append("")
+
+    if not data["attributable"]:
+        out.append("> **No component declared its evaluation cases**, so "
+                   "target credits are not attributed here — they appear only "
+                   "as a solution-wide total. Adding `eval_cases:` to each "
+                   "item shows which components actually drive the credit "
+                   "burn. They are not distributed by guesswork.")
+        out.append("")
+
+    header = "| Component | Size | Turns | Build |"
+    divider = "| --- | --- | ---: | ---: |"
+    if data["attributable"]:
+        header += " Eval cases | Target credits | **Combined** |"
+        divider += " ---: | ---: | ---: |"
+    out.append(header)
+    out.append(divider)
+
+    for row in data["components"]:
+        cells = ["%s%s" % (row["name"],
+                           " *(per env)*" if row["per_environment"] else ""),
+                 row["size"], format(row["turns"], ","),
+                 money(row["build_cost"])]
+        if data["attributable"]:
+            cells += [format(row["eval_cases"], ",") if row["eval_cases"]
+                      else "—",
+                      format(row["target_credits"], ",.0f")
+                      if row["target_credits"] else "—",
+                      money(row["combined_usd"])]
+        out.append("| " + " | ".join(cells) + " |")
+
+    if data["attributable"]:
+        out.append("| **Attributed total** | | %s | **%s** | **%s** | **%s** "
+                   "| **%s** |"
+                   % (format(data["turns_total"], ","),
+                      money(data["build_total"]),
+                      format(data["total_eval_cases"], ","),
+                      format(data["eval_credits"], ",.0f"),
+                      money(data["attributed_combined"])))
+        if data["shared_credits"]:
+            out.append("")
+            out.append("A further **%s credits (%s)** are not attributable to "
+                       "a single component: interactive validation and agent "
+                       "flow runs exercise the solution as a whole, and "
+                       "splitting them would be invention rather than "
+                       "attribution."
+                       % (format(data["shared_credits"], ",.0f"),
+                          money(data["shared_dollars"])))
+    else:
+        out.append("| **Total** | | %s | **%s** |"
+                   % (format(data["turns_total"], ","),
+                      money(data["build_total"])))
+    out.append("")
+
+    if any(c["per_environment"] for c in data["components"]):
+        envs = result.get("environments") or {}
+        out.append("Components marked *(per env)* carry the environment work "
+                   "multiplier: they are authored once and applied into every "
+                   "environment. See Environments below.")
+        out.append("")
+    return out
+
+
 def build_plan_markdown(result):
     """Combined report: build platform + target platform, both meters."""
     out = build_header(result)
@@ -394,6 +487,11 @@ def build_plan_markdown(result):
                   result["remediation_share"] * 100,
                   result["remediation_factor"]))
     out.append("")
+
+    out.extend(build_component_costs(result))
+
+    if result.get("environments"):
+        out.append(env_mod.render_markdown(result["environments"]))
 
     if build:
         out.append("## Build — %s" % result["build_platform_label"])
@@ -465,6 +563,11 @@ def build_plan_markdown(result):
 
     for target in result["targets"]:
         out.append(tp.render_markdown(target))
+
+    body_so_far = "\n".join(out)
+    problems = assumptions_mod.validate(body_so_far, result)
+    out.append(assumptions_mod.render_markdown(result))
+    out.append(assumptions_mod.render_provenance(result, problems))
 
     out.append("## Known limits")
     out.append("")
@@ -660,6 +763,7 @@ def build_markdown(result, credits=None):
     if result.get("licensing"):
         out.append(licensing.render_markdown(result["licensing"]))
 
+    out.append(assumptions_mod.render_markdown(result))
     out.append("## Assumptions and sensitivities")
     out.append("")
     out.append("- Turn counts come from the calibration profile, and are the "
@@ -739,8 +843,7 @@ pre { background: #f2f4f7; padding: 10px 12px; border-radius: 3px;
 """
 
 FOOTER_TEMPLATE = (
-    '<div style="font-size:7pt;color:#8a8f98;width:100%;padding:0 0.75in;'
-    'font-family:Helvetica,Arial,sans-serif;">'
+    '<div style="font-size:7pt;color:#8a8f98;width:100%;padding:0 0.75in;' 'font-family:Helvetica,Arial,sans-serif;">'
     '<span style="float:left;">' + FOOTER + '</span>'
     '<span style="float:right;">'
     '<span class="pageNumber"></span> / <span class="totalPages"></span>'
@@ -793,6 +896,8 @@ def main(argv=None):
     ap.add_argument("-o", "--out", default="build-work-estimate")
     ap.add_argument("--format", choices=["md", "pdf", "both"], default="both")
     ap.add_argument("--credits-json", default=None)
+    ap.add_argument("--strict", action="store_true",
+                    help="fail if any figure cannot be traced to a derivation")
     args = ap.parse_args(argv)
 
     with open(args.estimate_json, "r") as fh:
@@ -803,6 +908,17 @@ def main(argv=None):
             credits = json.load(fh)
 
     md_text = build_markdown(result, credits)
+
+    # Quality gate: a figure the estimator cannot account for must not ship.
+    problems = assumptions_mod.validate(md_text, result)
+    if problems:
+        print("PROVENANCE VALIDATION FAILED — %d figure%s cannot be traced:"
+              % (len(problems), "" if len(problems) == 1 else "s"),
+              file=sys.stderr)
+        for problem in problems:
+            print("  - %s" % problem, file=sys.stderr)
+        if args.strict:
+            return 2
     written = []
 
     if args.format in ("md", "both"):
