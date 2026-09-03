@@ -54,12 +54,12 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — USD | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | $6,914.52 | 416,820 | $29,382.72 |
-| **Likely** | **$21,211.72** | **480,024** | **$44,311.96** |
-| High | $119,965.88 | 606,432 | $144,330.20 |
-| **Likely + 30% reserve** | **$27,575.24** | **624,031** | **$57,605.55** |
+| Low | $7,581.38 | 416,820 | $30,049.58 |
+| **Likely** | **$23,236.24** | **480,024** | **$46,336.48** |
+| High | $131,631.21 | 606,432 | $155,995.53 |
+| **Likely + 30% reserve** | **$30,207.11** | **624,031** | **$60,237.42** |
 
-> **Plan for $44,311.96. Hold $57,605.55 including the 30% reserve.**
+> **Plan for $46,336.48. Hold $60,237.42 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -174,7 +174,11 @@ Each component's share of **both** meters. The build column is the work of autho
 | AI Search indexes and semantic configuration *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
 | Observability, alerting and dashboards *(per env)* | small | 650 | $239.09 | — | — | $239.09 |
 | CI/CD and ALM for the agent definition and application *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
-| **Attributed total** | | 57,632 | **$21,211.80** | **568** | **378,288** | **$24,994.68** |
+| Backup, restore and disaster recovery runbooks (RPO/RTO) | large | 1,980 | $728.64 | — | — | $728.64 |
+| Load and performance testing to 900 concurrent sessions | medium | 1,044 | $384.30 | — | — | $384.30 |
+| Customer-managed key encryption for Cosmos and Storage *(per env)* | medium | 1,827 | $672.52 | — | — | $672.52 |
+| Region-pinned inference and data-residency verification *(per env)* | small | 650 | $239.09 | — | — | $239.09 |
+| **Attributed total** | | 63,133 | **$23,236.35** | **568** | **378,288** | **$27,019.23** |
 
 A further **101,736 credits ($1,017.36)** are not attributable to a single component: interactive validation and agent flow runs exercise the solution as a whole, and splitting them would be invention rather than attribution.
 
@@ -207,17 +211,17 @@ multiplier. Everything else is authored once.
 
 | | Amount |
 | --- | ---: |
-| Base estimate (incl. remediation) | $21,211.72 |
-| Reserve (30%) | $6,363.52 |
-| **Budget ask** | **$27,575.24** |
-| Observed low | $6,914.52 |
-| Observed high | $119,965.88 |
+| Base estimate (incl. remediation) | $23,236.24 |
+| Reserve (30%) | $6,970.87 |
+| **Budget ask** | **$30,207.11** |
+| Observed low | $7,581.38 |
+| Observed high | $131,631.21 |
 
 ### Reserve adequacy
 
 **The reserve does not cover observed variance.**
 
-A **30%** reserve reaches $27,575.24. Comparable work has reached $119,965.88. Full coverage
+A **30%** reserve reaches $30,207.11. Comparable work has reached $131,631.21. Full coverage
 would require **466%**.
 
 | Item | Size | Files | Turns | Estimate | Range | n |
@@ -261,6 +265,10 @@ would require **466%**.
 | AI Search indexes and semantic configuration | medium | 7 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
 | Observability, alerting and dashboards | small | 8 | 650 | $239.09 | $130.41 – $939.26 | 6 |
 | CI/CD and ALM for the agent definition and application | medium | 11 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
+| Backup, restore and disaster recovery runbooks (RPO/RTO) | large | 10 | 1,980 | $728.64 | $303.59 – $4,622.56 | 3 |
+| Load and performance testing to 900 concurrent sessions | medium | 7 | 1,044 | $384.30 | $84.67 – $2,291.11 | 5 |
+| Customer-managed key encryption for Cosmos and Storage | medium | 6 | 1,827 | $672.52 | $148.19 – $3,436.67 | 5 |
+| Region-pinned inference and data-residency verification | small | 5 | 650 | $239.09 | $130.41 – $1,314.97 | 6 |
 
 ### Calibration basis
 
@@ -277,11 +285,11 @@ so no additional money changes hands for this build -- but the seat is not free.
 | | |
 | --- | ---: |
 | Developer-months of allowance available | 30 (6 seats x 5 months) |
-| Share of that allowance | **149%** |
+| Share of that allowance | **164%** |
 | Seat spend over the build | $4,500.00 |
-| **Attributable cost of this build** | **$6,722.02** |
+| **Attributable cost of this build** | **$7,363.60** |
 | Already committed to other work | 30% |
-| **Total committed** | **179%** |
+| **Total committed** | **194%** |
 
 The attributable cost is the seat's monthly price apportioned by the share of
 the allowance this build consumes. Nothing extra is invoiced, but this is the
@@ -289,10 +297,10 @@ real cost of the capacity the build uses up.
 
 ### Allowance overrun
 
-**This build plus existing workload exceeds the allowance by 79%.**
+**This build plus existing workload exceeds the allowance by 94%.**
 
 Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$3,572.02**.
+bills on top of the seat. Overage exposure at the same rate: **$4,213.60**.
 
 Options: spread the build across allowance periods, move part of it to
 consumption billing, add seats, or reduce the other committed work.
@@ -302,7 +310,7 @@ consumption billing, add seats, or reduce the other committed work.
 Seat allowances refill on **5-hour rolling and weekly** windows, not only monthly. A build that fits
 comfortably in a month can still exhaust a short window and stall.
 
-Notional value at list rates: **$21,211.72** — what this build would cost on
+Notional value at list rates: **$23,236.24** — what this build would cost on
 consumption billing. Shown for scale; it is not a charge.
 
 ## Target platform — Microsoft Copilot Studio

@@ -54,12 +54,12 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — GitHub AI Credits | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | 36,072 | 416,820 | $22,828.92 |
-| **Likely** | **110,657** | **480,024** | **$24,206.81** |
-| High | 625,834 | 606,432 | $30,622.66 |
-| **Likely + 30% reserve** | **143,854** | **624,031** | **$31,468.85** |
+| Low | 39,550 | 416,820 | $22,863.70 |
+| **Likely** | **121,219** | **480,024** | **$24,312.43** |
+| High | 686,694 | 606,432 | $31,231.26 |
+| **Likely + 30% reserve** | **157,585** | **624,031** | **$31,606.16** |
 
-> **Plan for $24,206.81. Hold $31,468.85 including the 30% reserve.**
+> **Plan for $24,312.43. Hold $31,606.16 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -161,12 +161,12 @@ multiplier. Everything else is authored once.
 
 | Build activity | Github Ai Credits | Basis |
 | --- | ---: | --- |
-| Chat and agent interactions | 110,657 | 25,615 interactions, 153,690,000 tokens (15% output) at $5.00/$25.00 per 1M, less 10% Auto discount |
-| **Total** | **110,657** | |
-| Reserve (30%) | 33,197 | required contingency |
-| **Budget ask** | **143,854** | |
+| Chat and agent interactions | 121,219 | 28,060 interactions, 168,360,000 tokens (15% output) at $5.00/$25.00 per 1M, less 10% Auto discount |
+| **Total** | **121,219** | |
+| Reserve (30%) | 36,366 | required contingency |
+| **Budget ask** | **157,585** | |
 
-At $0.01 per credit that is **$1,106.57** total, **$1,438.54** with reserve.
+At $0.01 per credit that is **$1,212.19** total, **$1,575.85** with reserve.
 
 ### Not metered
 

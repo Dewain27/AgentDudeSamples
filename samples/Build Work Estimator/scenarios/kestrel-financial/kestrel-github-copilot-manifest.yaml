@@ -370,3 +370,52 @@ items:
     files: 11
     unknowns: 2
     brownfield: false
+
+  # --- Resilience, security and residency ------------------------------
+  # These four items close gaps found by running the Build Work Researcher's
+  # acceptance gate against this specification (see the researcher design
+  # spec, section 11). Each is a component the specification requires but the
+  # breakdown above did not own. None adds behavioural eval cases: the 568
+  # cases in specification s11 evaluate the agent's responses, whereas DR
+  # failover, load, key management and residency are infrastructure and NFR
+  # work verified by other means. Sizes here are declared judgement, not
+  # measured -- exactly the input the researcher leaves to a human.
+
+  # Finding N5: RPO 15 min / RTO 4 hours. Geo-redundant backup for Cosmos and
+  # Storage, point-in-time restore, failover runbooks, and a drill that proves
+  # the objectives. Authored once against the production/DR pair, so not
+  # per-environment.
+  - name: Backup, restore and disaster recovery runbooks (RPO/RTO)
+    size: large
+    files: 10
+    unknowns: 4
+    brownfield: false
+
+  # Finding N6: 900 concurrent advisor sessions (specification N1/N6). Load
+  # model, scripted scenarios, runs against staging, and tuning to the p95
+  # 2.5s target. Exercised against test/staging, so not per-environment.
+  - name: Load and performance testing to 900 concurrent sessions
+    size: medium
+    files: 7
+    unknowns: 3
+    brownfield: false
+
+  # Finding N9: encryption at rest with customer-managed keys. Key Vault is
+  # already provisioned above, but wiring CMK into Cosmos and Storage, plus
+  # rotation and verification, was unowned. Applied in each environment.
+  - name: Customer-managed key encryption for Cosmos and Storage
+    per_environment: true
+    size: medium
+    files: 6
+    unknowns: 2
+    brownfield: false
+
+  # Finding S10/N8: region-pinned inference and data-residency enforcement.
+  # Pin the inference endpoint per environment, block cross-region egress, and
+  # produce the residency evidence compliance requires.
+  - name: Region-pinned inference and data-residency verification
+    per_environment: true
+    size: small
+    files: 5
+    unknowns: 3
+    brownfield: false

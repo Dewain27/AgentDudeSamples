@@ -344,3 +344,22 @@ specification I wrote myself, which is the easiest possible case — I knew
 where I had been thin. The honest next test is a specification written by
 someone else, and until that happens the finding above should be read as
 *"the gap exists"* rather than *"the skill is validated"*.
+
+### What happened to the findings
+
+The four real findings were then added to both Kestrel manifests as declared
+work items, closing the gap the gate exposed. The breakdown went from 39 items
+to 43, and both estimates were regenerated:
+
+| Run | Plan-for, before | Plan-for, after |
+| --- | --- | --- |
+| Built with Claude Code | $44,311.96 | $46,336.48 |
+| Built with GitHub Copilot | $24,206.81 | $24,312.43 |
+
+The Claude Code run moves more because its build side is priced in Anthropic
+token cost, while the GitHub Copilot run prices the same four items on the much
+cheaper AI-credits meter. None of the four adds behavioural eval cases, so the
+568-case suite from specification s11 is unchanged — DR failover, load, key
+management and residency are infrastructure and NFR work verified by other
+means, which is the §2 boundary holding in practice: the researcher named
+missing components, a human sized them, and nothing it produced was a number.
