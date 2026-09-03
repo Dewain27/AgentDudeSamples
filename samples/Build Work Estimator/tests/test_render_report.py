@@ -28,7 +28,7 @@ class TestMarkdown(unittest.TestCase):
         self.assertIn("SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE", self.md)
         body = self.md.split("---", 2)[-1]
         disclaimer_at = body.index("SAMPLE — BUILD ESTIMATE ONLY")
-        summary_at = body.index("## Summary")
+        summary_at = body.index("## Estimate summary")
         self.assertLess(disclaimer_at, summary_at,
                         "disclaimer must precede any figure")
 
@@ -115,6 +115,93 @@ class TestMarkdown(unittest.TestCase):
         self.assertIn("build and test in the interface are not billed", md)
         self.assertIn("correct result, not a missing one", md)
         self.assertIn("Had this been the GitHub Copilot harness", md)
+
+
+class TestExecutiveSummary(unittest.TestCase):
+    """The section a reader looks at first must stand on its own."""
+
+    def setUp(self):
+        self.result = estimate.compute_plan(manifest(), PROFILE)
+        self.md = rr.build_markdown(self.result)
+
+    def test_summary_precedes_the_detail(self):
+        body = self.md.split("---", 2)[-1]
+        self.assertLess(body.index("## Estimate summary"),
+                        body.index("## The build loop"),
+                        "the summary must come before the detail")
+
+    def test_key_inputs_are_restated(self):
+        self.assertIn("### What was estimated", self.md)
+        self.assertIn("(development tool)", self.md)
+        self.assertIn("(target environment)", self.md)
+        self.assertIn("Target harness", self.md)
+        self.assertIn("Evaluation cycles planned", self.md)
+        self.assertIn("Contingency reserve", self.md)
+
+    def test_four_totals_rows_present(self):
+        for row in ("| Low |", "| **Likely** |", "| High |",
+                    "reserve** |"):
+            self.assertIn(row, self.md, "missing totals row: %s" % row)
+
+    def test_headline_states_plan_and_hold(self):
+        self.assertRegex(self.md, r"\*\*Plan for \$[\d,]+\.\d\d\. "
+                                  r"Hold \$[\d,]+\.\d\d")
+
+    def test_combined_column_sums_the_two_meters(self):
+        build = rr._build_totals(self.result)
+        target = rr._target_totals(self.result)
+        for key in ("low", "likely", "high", "with_reserve"):
+            combined = round(build["usd_" + key] + target["usd_" + key], 2)
+            self.assertIn(rr.money(combined), self.md,
+                          "combined %s figure missing from the summary" % key)
+
+    def test_ordering_is_low_then_likely_then_high(self):
+        build = rr._build_totals(self.result)
+        self.assertLessEqual(build["usd_low"], build["usd_likely"])
+        self.assertLessEqual(build["usd_likely"], build["usd_high"])
+
+    def test_reserve_row_exceeds_the_likely_row(self):
+        build = rr._build_totals(self.result)
+        self.assertGreater(build["usd_with_reserve"], build["usd_likely"])
+
+    def test_credit_conversion_is_disclosed(self):
+        self.assertIn("converted at $0.01", self.md)
+        self.assertIn("separate budgets", self.md)
+
+    def test_seat_build_figure_is_labelled_notional(self):
+        m = manifest()
+        m["licensing"] = {"model": "seat", "plan": "Claude Max",
+                          "seat_monthly_cost": 200, "seats": 1,
+                          "other_workload_share": 0.4}
+        md = rr.build_markdown(estimate.compute_plan(m, PROFILE))
+        self.assertIn("notional", md)
+
+    def test_seat_cost_is_reported_per_seat_and_total(self):
+        m = manifest()
+        m["licensing"] = {"model": "seat", "plan": "Team", "seats": 4,
+                          "seat_monthly_cost": 25,
+                          "other_workload_share": 0.2}
+        md = rr.build_markdown(estimate.compute_plan(m, PROFILE))
+        self.assertIn("$25.00/month x 4 seats = $100.00/month", md)
+
+    def test_target_range_comes_from_cycle_variation(self):
+        # The default fixture plans a single cycle, so low == likely there.
+        # Use a multi-cycle plan to exercise the range properly.
+        m = manifest()
+        m["target"] = dict(m["target"], eval_cycles=4, eval_test_cases=40)
+        result = estimate.compute_plan(m, PROFILE)
+        span = result["targets"][0]["range"]
+        self.assertLess(span["low_cycles"], span["likely_cycles"])
+        self.assertGreater(span["high_cycles"], span["likely_cycles"])
+        self.assertLess(span["low_credits"], span["high_credits"])
+        self.assertIn("evaluation cycles instead of",
+                      rr.build_markdown(result))
+
+    def test_single_cycle_plan_still_produces_a_summary(self):
+        span = self.result["targets"][0]["range"]
+        self.assertEqual(span["low_cycles"], 1)
+        self.assertEqual(span["likely_cycles"], 1)
+        self.assertIn("### Totals", self.md)
 
 
 class TestFileOutput(unittest.TestCase):

@@ -64,6 +64,14 @@ DEFAULTS = {
 }
 
 
+#: How the planned cycle count is varied to produce a range. Cycle count is
+#: the dominant uncertainty on the target side: the volume of preview and
+#: evaluation work follows directly from how many times the loop runs, and
+#: nobody knows that up front.
+CYCLES_LOW_DELTA = -1
+CYCLES_HIGH_DELTA = 2
+
+
 class TargetPlatformError(Exception):
     """Raised for input the user must fix."""
 
@@ -253,6 +261,37 @@ def compute(config, reserve_percent, target="copilot-studio"):
         ],
     })
     return result
+
+
+def compute_range(config, reserve_percent, target="copilot-studio"):
+    """Low / likely / high for the target side.
+
+    The range comes from cycle count, not from a fudge factor. If the
+    evaluations pass sooner you run fewer cycles; if the agent needs more work
+    you run more, and every extra cycle re-runs the whole test volume.
+    """
+    cfg = dict(config or {})
+    likely_cycles = max(1, int(cfg.get("eval_cycles", 1) or 1))
+
+    def at(cycles):
+        variant = dict(cfg)
+        variant["eval_cycles"] = max(1, cycles)
+        return compute(variant, reserve_percent, target=target)
+
+    likely = at(likely_cycles)
+    low = at(likely_cycles + CYCLES_LOW_DELTA)
+    high = at(likely_cycles + CYCLES_HIGH_DELTA)
+
+    likely["range"] = {
+        "low_cycles": max(1, likely_cycles + CYCLES_LOW_DELTA),
+        "likely_cycles": likely_cycles,
+        "high_cycles": likely_cycles + CYCLES_HIGH_DELTA,
+        "low_credits": low["total_credits"],
+        "high_credits": high["total_credits"],
+        "low_dollars": low["total_dollars"],
+        "high_dollars": high["total_dollars"],
+    }
+    return likely
 
 
 def render_markdown(result):

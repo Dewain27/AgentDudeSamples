@@ -96,6 +96,12 @@ def build_header(result):
             "source", "not applicable"),
         timestamp=result["generated"]))
     out.append("")
+    return out
+
+
+def build_context(result):
+    """Framing that follows the summary: what the platforms mean, and scope."""
+    out = []
     out.append("## Platforms")
     out.append("")
     out.append("| | Platform | Metered in |")
@@ -123,50 +129,206 @@ def build_header(result):
     return out
 
 
+def _build_totals(result):
+    """Low / likely / high / with-reserve for the build side, in USD."""
+    build, detail = result.get("build"), result.get("build_detail")
+    reserve = result["reserve_percent"]
+    if build:
+        return {
+            "currency": "USD",
+            "low": build["low"], "likely": build["base"], "high": build["high"],
+            "with_reserve": build["budget_ask"],
+            "usd_low": build["low"], "usd_likely": build["base"],
+            "usd_high": build["high"], "usd_with_reserve": build["budget_ask"],
+            "notional": (build.get("licensing") or {}).get("model") == "seat",
+        }
+    units = (detail or {}).get("total_units", 0) or 0
+    rate = rates.DOLLARS_PER_GITHUB_AI_CREDIT
+    with_reserve = (detail or {}).get("budget_units", units)
+    # A GitHub Copilot build has no measured spread of its own; the declared
+    # interaction volume is the estimate. Say so rather than invent a range.
+    return {
+        "currency": "GitHub AI Credits",
+        "low": units, "likely": units, "high": units,
+        "with_reserve": with_reserve,
+        "usd_low": round(units * rate, 2), "usd_likely": round(units * rate, 2),
+        "usd_high": round(units * rate, 2),
+        "usd_with_reserve": round(with_reserve * rate, 2),
+        "notional": (result.get("licensing") or {}).get("model") == "seat",
+        "no_range": True,
+    }
+
+
+def _target_totals(result):
+    """Low / likely / high / with-reserve summed across targets, in USD."""
+    low = likely = high = with_reserve = 0.0
+    credits_low = credits_likely = credits_high = credits_reserve = 0.0
+    for target in result["targets"]:
+        if target["target"] == "azure":
+            low += target["total_dollars"]
+            likely += target["total_dollars"]
+            high += target["total_dollars"]
+            with_reserve += target["budget_dollars"]
+            continue
+        span = target.get("range") or {}
+        credits_low += span.get("low_credits", target["total_credits"])
+        credits_likely += target["total_credits"]
+        credits_high += span.get("high_credits", target["total_credits"])
+        credits_reserve += target["budget_credits"]
+        low += span.get("low_dollars", target["total_dollars"])
+        likely += target["total_dollars"]
+        high += span.get("high_dollars", target["total_dollars"])
+        with_reserve += target["budget_dollars"]
+    return {
+        "credits_low": credits_low, "credits_likely": credits_likely,
+        "credits_high": credits_high, "credits_with_reserve": credits_reserve,
+        "usd_low": round(low, 2), "usd_likely": round(likely, 2),
+        "usd_high": round(high, 2), "usd_with_reserve": round(with_reserve, 2),
+    }
+
+
+def build_summary(result):
+    """The section a reader looks at first: inputs, then the four numbers."""
+    out = ["## Estimate summary", ""]
+
+    # --- what was estimated -------------------------------------------
+    licence = (result.get("build") or {}).get("licensing") \
+        or result.get("licensing") or {}
+    target = result["targets"][0] if result["targets"] else {}
+    profile = (result.get("profile") or {})
+
+    out.append("### What was estimated")
+    out.append("")
+    out.append("| Input | Value |")
+    out.append("| --- | --- |")
+    out.append("| **Built with** (development tool) | %s — metered in %s |"
+               % (result["build_platform_label"], result["build_currency"]))
+    out.append("| **Built on** (target environment) | %s — metered in %s |"
+               % (result["target_platform_label"], result["target_currency"]))
+    if target.get("harness"):
+        out.append("| Target harness | `%s` — %s |"
+                   % (target["harness"],
+                      "bills for build, test and evaluation"
+                      if target.get("bills_during_build")
+                      else "does not bill for build or test"))
+    if licence.get("model") == "seat":
+        # Two shapes reach here. licensing.attribute() stores the TOTAL across
+        # seats; licensing.normalise() stores the PER-SEAT figure. Dividing
+        # both misreports one of them, so discriminate explicitly.
+        seats = max(1, licence.get("seats", 1))
+        is_attribution = "billed" in licence
+        total = licence.get("seat_monthly_cost", 0)
+        per_seat = (total / seats) if is_attribution else total
+        out.append("| Licensing | Seat — %s, $%s/month x %d seat%s = $%s/month |"
+                   % (licence.get("plan") or "unspecified",
+                      format(per_seat, ",.2f"), seats,
+                      "" if seats == 1 else "s",
+                      format(per_seat * seats, ",.2f")))
+    elif licence.get("model"):
+        out.append("| Licensing | Consumption — every unit bills |")
+    out.append("| Evaluation cycles planned | %d |" % result["eval_cycles"])
+    out.append("| Contingency reserve | %.0f%% |" % result["reserve_percent"])
+    if profile.get("source") == "measured":
+        out.append("| Calibration | Measured, %d local session%s |"
+                   % (profile.get("sessions", 0),
+                      "" if profile.get("sessions") == 1 else "s"))
+    elif profile.get("source") == "not applicable":
+        out.append("| Calibration | Not applicable — the build platform is "
+                   "not metered from local session history |")
+    elif profile.get("source"):
+        out.append("| Calibration | %s |" % profile["source"])
+    out.append("")
+
+    # --- the four numbers ---------------------------------------------
+    build = _build_totals(result)
+    tgt = _target_totals(result)
+    combined = dict(
+        (k, round(build["usd_" + k] + tgt["usd_" + k], 2))
+        for k in ("low", "likely", "high", "with_reserve"))
+
+    has_credits = tgt["credits_likely"] > 0
+    out.append("### Totals")
+    out.append("")
+    header = "| | Build — %s |" % build["currency"]
+    divider = "| --- | ---: |"
+    if has_credits:
+        header += " Target — Copilot Credits |"
+        divider += " ---: |"
+    header += " **Combined (USD)** |"
+    divider += " ---: |"
+    out.append(header)
+    out.append(divider)
+
+    def row(label, bkey, ckey, ukey, bold=False):
+        wrap = (lambda s: "**%s**" % s) if bold else (lambda s: s)
+        cells = [wrap(label)]
+        cells.append(wrap(money(build[bkey]) if build["currency"] == "USD"
+                          else format(build[bkey], ",.0f")))
+        if has_credits:
+            cells.append(wrap(format(tgt[ckey], ",.0f")))
+        cells.append(wrap(money(combined[ukey])))
+        return "| " + " | ".join(cells) + " |"
+
+    out.append(row("Low", "low", "credits_low", "low"))
+    out.append(row("Likely", "likely", "credits_likely", "likely", bold=True))
+    out.append(row("High", "high", "credits_high", "high"))
+    out.append(row("Likely + %.0f%% reserve" % result["reserve_percent"],
+                   "with_reserve", "credits_with_reserve", "with_reserve",
+                   bold=True))
+    out.append("")
+
+    out.append("> **Plan for %s. Hold %s including the %.0f%% reserve.**"
+               % (money(combined["likely"]), money(combined["with_reserve"]),
+                  result["reserve_percent"]))
+    out.append("")
+    out.append("**Two meters, not two options.** The build and target figures "
+               "are spent on the same\nproject over the same period and add "
+               "together; they are not alternatives to choose\nbetween.")
+    out.append("")
+
+    notes = []
+    if has_credits:
+        notes.append("Copilot Credits are converted at $%.2f each so the two "
+                     "meters can be shown in one column. They are separate "
+                     "budgets drawn on different accounts."
+                     % rates.DOLLARS_PER_CREDIT)
+    if build.get("notional"):
+        notes.append("The build figure is **notional** — on seat licensing no "
+                     "additional money is invoiced. See Licensing below for "
+                     "the share of the seat this build actually consumes.")
+    if build.get("no_range"):
+        notes.append("The build side has no measured spread of its own: the "
+                     "declared interaction volume is the estimate. Only the "
+                     "target side varies here.")
+    else:
+        notes.append("The build range comes from observed spread in comparable "
+                     "work; the target range from running %d to %d evaluation "
+                     "cycles instead of %d."
+                     % ((result["targets"][0].get("range") or {}).get(
+                            "low_cycles", result["eval_cycles"]),
+                        (result["targets"][0].get("range") or {}).get(
+                            "high_cycles", result["eval_cycles"]),
+                        result["eval_cycles"])
+                     if result["targets"] else
+                     "The build range comes from observed spread in "
+                     "comparable work.")
+    for note in notes:
+        out.append("- %s" % note)
+    out.append("")
+    out.append("Everything below explains how each of these figures was "
+               "reached.")
+    out.append("")
+    return out
+
+
 def build_plan_markdown(result):
     """Combined report: build platform + target platform, both meters."""
     out = build_header(result)
-
-    out.append("## Summary")
-    out.append("")
-    out.append("| Component | Meter | Total | With %.0f%% reserve |"
-               % result["reserve_percent"])
-    out.append("| --- | --- | ---: | ---: |")
+    out.extend(build_summary(result))
+    out.extend(build_context(result))
 
     build = result.get("build")
     detail = result.get("build_detail")
-    if build:
-        out.append("| Build — authoring and remediation | %s | %s | %s |"
-                   % (result["build_currency"], money(build["base"]),
-                      money(build["budget_ask"])))
-    elif detail:
-        out.append("| Build — authoring and remediation | %s | %s | %s |"
-                   % (result["build_currency"],
-                      format(detail["total_units"], ",.0f"),
-                      format(detail["budget_units"], ",.0f")))
-    for target in result["targets"]:
-        if target["target"] == "azure":
-            out.append("| Target — build and test on Azure | USD | %s | %s |"
-                       % (money(target["total_dollars"]),
-                          money(target["budget_dollars"])))
-        elif target["bills_during_build"]:
-            out.append("| Target — preview, test and evaluation | Copilot "
-                       "Credits | %s | %s |"
-                       % (format(target["total_credits"], ",.0f"),
-                          format(target["budget_credits"], ",.0f")))
-        else:
-            # Standard harness: preview/test/eval are unbilled, but billable
-            # side-effects still land. Showing a bare 0 would understate it.
-            note = ("billable side-effects only — preview, test and evaluation "
-                    "are unbilled on the standard harness")
-            out.append("| Target — %s | Copilot Credits | %s | %s |"
-                       % (note, format(target["total_credits"], ",.0f"),
-                          format(target["budget_credits"], ",.0f")))
-    out.append("")
-    out.append("**Two meters, not two options.** The figures above are spent "
-               "on the same project\nover the same period and add together; "
-               "they are not alternatives to choose between.")
-    out.append("")
 
     out.append("## The build loop")
     out.append("")
@@ -296,7 +458,7 @@ def build_plan_markdown(result):
 
 def build_stack_markdown(result):
     """Report for a non-Claude-Code stack, in that stack's own currency."""
-    out = build_header(result)
+    out = build_header(result) + build_context(result)
     detail = result["stack_detail"]
 
     if result["build_stack"] == "copilot-studio":
@@ -374,7 +536,7 @@ def build_markdown(result, credits=None):
                  "This is materially less reliable than a measured profile. "
                  "Run `calibrate.py` after some real work to improve it.")
 
-    out = build_header(result)
+    out = build_header(result) + build_context(result)
     out.append("## Summary")
     out.append("")
     out.append("| | Amount |")
