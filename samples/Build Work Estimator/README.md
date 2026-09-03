@@ -34,6 +34,25 @@ actually cost.
 Asked for any of those, the skill declines and redirects rather than
 improvising a number.
 
+## It always asks what the estimate was sized from
+
+Before anything else, the estimator asks for a **functional** and a **technical**
+specification. `none` is an acceptable answer — early estimates are legitimate —
+but the question cannot go unanswered, because silence looks identical in the
+output to a build that rested on agreed scope.
+
+| Status | Confidence in sizing |
+| --- | --- |
+| `approved` | high — sizes rest on agreed scope |
+| `in-review` | medium — scope may still move |
+| `draft` | low — sizes will move as it settles |
+| `none` | **very low** — sizes are informed guesses |
+
+Without a specification the report opens with a prominent warning: the turn
+medians behind the numbers are measured, but what they are applied to is not.
+Writing the specification and re-running is named as the single
+highest-value improvement available.
+
 ## Two platforms, two meters
 
 The estimator asks two questions up front, because they are different questions

@@ -50,7 +50,27 @@ medians. With no history it falls back to published baselines and says so.
 
 Aggregates only — no paths, project names, or content leave the machine.
 
-### 1b. Ask the three opening questions — do not assume any of them
+### 1b. Ask what this was sized from — ALWAYS
+
+**Before anything else, ask for both specifications.** An estimate without one
+behind it is sizing from vibes: the turn medians are measured, but what they get
+applied to is not.
+
+| Field | Ask |
+| --- | --- |
+| `specification.functional` | Path, URL, or short description — what the thing does |
+| `specification.technical` | Path, URL, or short description — how it is built |
+| `specification.status` | `approved` · `in-review` · `draft` · `none` |
+
+**`none` is an acceptable answer. Silence is not.** Early estimates are
+legitimate and useful; an unanswered question is not, because it looks identical
+in the output to a build that rested on agreed scope.
+
+When neither exists, say so plainly, produce the estimate, and let the report
+carry its low-confidence warning. Offer to help write the specification — it is
+the single highest-value thing that would improve the number.
+
+### 1c. Ask the three platform questions — do not assume any of them
 
 **Q1. What are you BUILDING WITH?** — `build_platform`
 
@@ -92,7 +112,7 @@ platform and the target platform at the same time. Report both.
 **GitHub AI Credits are not Copilot Studio Copilot Credits.** Both are $0.01 per
 credit; separate meters, separate products, separate allowances.
 
-### 1c. When `target_platform` is `ai-recommend`
+### 1d. When `target_platform` is `ai-recommend`
 
 Do not silently pick one. Interview for requirements, then recommend:
 
@@ -106,7 +126,7 @@ State a recommendation **with its reasoning**, get the user's agreement, then se
 `target_platform` to the agreed value and estimate that one. The estimator
 refuses to run while the value is still `ai-recommend`.
 
-### 1d. Licensing — what the number means
+### 1e. Licensing — what the number means
 
 | `licensing.model` | What to report |
 | --- | --- |
@@ -133,6 +153,12 @@ Manifest shape:
 
 ```yaml
 project: Dispatch modernization
+
+specification:                 # REQUIRED -- `none` is an answer, silence is not
+  functional: docs/functional-spec.md
+  technical: docs/technical-spec.md
+  status: approved             # approved | in-review | draft | none
+
 reserve_percent: 25            # REQUIRED
 build_platform: claude-code       # claude-code | github-copilot
 target_platform: copilot-studio   # copilot-studio | azure | both | ai-recommend
@@ -255,6 +281,8 @@ typed phrase; do not attempt to bypass or pre-answer that prompt.
 
 ## How to talk about the numbers
 
+- **Lead with the sizing confidence.** An estimate with no specification behind
+  it should be described that way in the first sentence, not buried.
 - **Always give the range**, not just the point figure. Measured spreads within
   a single size class exceed 100×.
 - **Lead with the reserve adequacy finding** when the reserve does not cover the
@@ -282,6 +310,7 @@ typed phrase; do not attempt to bypass or pre-answer that prompt.
 | `scripts/version_check.py` | Version gate |
 | `scripts/calibrate.py` | Measures local history into a profile |
 | `scripts/estimate.py` | The estimate model and reserve enforcement |
+| `scripts/specification.py` | What the estimate was sized from, and its confidence |
 | `scripts/licensing.py` | Seat vs consumption, allowance attribution, overrun |
 | `scripts/target_platform.py` | Target-side preview, test and evaluation cost |
 | `scripts/copilot_credits.py` | Copilot Studio credit rate helpers |

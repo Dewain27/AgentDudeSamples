@@ -12,6 +12,11 @@
 project: Kestrel Financial Group -- Advisor Intelligence Platform (phases 1-2)
 author: Dewain Robinson
 
+specification:
+  functional: specification.md sections 1-4 (product and functional scope)
+  technical: specification.md sections 5-9 (integration, Azure, data, NFRs, compliance)
+  status: approved
+
 reserve_percent: 30
 
 build_platform: claude-code

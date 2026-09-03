@@ -11,6 +11,11 @@
 project: Harbor Line Logistics -- dispatch agent
 author: Dewain Robinson
 
+specification:
+  functional: Harbor Line dispatch requirements (illustrative)
+  technical: Copilot Studio agent design note (illustrative)
+  status: draft
+
 reserve_percent: 25
 
 build_platform: claude-code        # what does the building

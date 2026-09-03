@@ -45,6 +45,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — GitHub Copilot Enterprise, $39.00/month x 6 seats x 5 months = **$1,170.00** over the build |
+| Specification | `approved` — confidence in sizing: **high** |
 | Evaluation cycles planned | 6 |
 | Contingency reserve | 30% |
 | Work sizing | Turn counts from measured Claude Code calibration (24 sessions), used as a work-size proxy |
@@ -69,6 +70,15 @@ between.
 - The build side is sized from the same work breakdown using turn medians measured on Claude Code. Turn count is treated as a property of the work rather than of the tool; the price per turn is not. That is an assumption, not a measurement of GitHub Copilot.
 
 Everything below explains how each of these figures was reached.
+
+## What this was sized from
+
+| | Reference |
+| --- | --- |
+| Functional specification | specification.md sections 1-4 (product and functional scope) |
+| Technical specification | specification.md sections 5-9 (integration, Azure, data, NFRs, compliance) |
+| Status | `approved` — Signed off. Sizes rest on agreed scope. |
+| Confidence in sizing | **high** |
 
 ## Platforms
 
