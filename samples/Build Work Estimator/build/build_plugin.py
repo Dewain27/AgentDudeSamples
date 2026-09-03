@@ -78,7 +78,7 @@ def copy_references():
         ("docs/methodology.md", "methodology.md"),
         ("docs/copilot-credits.md", "rates-copilot-credits.md"),
         ("docs/CONTRIBUTING-CALIBRATION.md", "contributing-calibration.md"),
-        ("docs/licensing-and-stacks.md", "licensing-and-stacks.md"),
+        ("docs/platforms-and-licensing.md", "platforms-and-licensing.md"),
     ]
     for src_rel, dst_name in pairs:
         src = os.path.join(SAMPLE, src_rel)

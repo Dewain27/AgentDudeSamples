@@ -1,33 +1,50 @@
-# Build Work Estimator -- Scenario A: building WITH Claude Code
+# Build Work Estimator -- Scenario A
 # Author: Dewain Robinson
 #
 # Harbor Line Logistics is a FICTIONAL company. Every figure is invented.
 #
-# NOTE WHAT THIS DEMONSTRATES: the thing being built is a Microsoft workload --
-# a Copilot Studio dispatch agent -- but the BUILD is done in Claude Code.
-# The currency follows the build stack, so this is metered in tokens, not
-# Copilot Credits. Building a Microsoft workload does not make it a Microsoft
-# build.
+# BUILT WITH Claude Code, BUILT ON Copilot Studio. Two different questions,
+# two different meters, both spent on this one project. Copilot Studio is
+# where the agent is deployed, previewed, evaluated and validated -- the
+# authoring happens in the coding agent.
 
-project: Harbor Line Logistics -- Copilot Studio dispatch agent, built in Claude Code
+project: Harbor Line Logistics -- dispatch agent
 author: Dewain Robinson
 
-# REQUIRED. No default.
 reserve_percent: 25
 
-# What we BUILD WITH. Not what we build FOR.
-build_stack: claude-code
+build_platform: claude-code        # what does the building
+target_platform: copilot-studio    # where it is deployed and evaluated
 
 licensing:
-  model: seat                 # seat | consumption
+  model: seat
   plan: Claude Max
-  seat_monthly_cost: 200      # REQUIRED for seat -- a seat is not free
+  seat_monthly_cost: 200
   seats: 1
-  other_workload_share: 0.45  # 45% of the allowance already spoken for
-  concentrated: true          # compressed into a short delivery window
+  other_workload_share: 0.45
+  concentrated: true
+
+target:
+  # REQUIRED. Decides whether ANY build/test/eval work is billed.
+  harness: github-copilot    # bills for building, testing and evaluating
+  tier: standard
+  reasoning_model: true
+
+  # Human validation in the Copilot Studio interface. Hours are collected to
+  # size the test volume -- never estimated as labour cost.
+  interactive_test_hours: 16
+  interactions_per_hour: 25
+
+  # Evaluations are always planned, along with remediation and retesting.
+  eval_test_cases: 40
+  eval_repeats: 3
+  eval_cycles: 4
+  eval_tokens_per_case: 3000
+
+  agent_flow_actions: 250
 
 items:
-  - name: Agent topic + tool authoring
+  - name: Agent instructions, topics and tool definitions
     size: medium
     files: 11
     unknowns: 2

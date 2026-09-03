@@ -1,14 +1,15 @@
 ---
-title: Build Work Estimate — Granite Peak Utilities -- outage triage agent, built in Copilot Studio
+title: Build Work Estimate — Granite Peak Utilities -- outage triage agent
 author: Dewain Robinson
-build_stack: copilot-studio
-estimate_id: est_20260903T093307_fc766b
-generated: 2026-09-03T09:33:07Z
+build_platform: github-copilot
+target_platform: copilot-studio
+estimate_id: est_20260903T100519_b8435b
+generated: 2026-09-03T10:05:19Z
 ---
 
-# Build Work Estimate — Granite Peak Utilities -- outage triage agent, built in Copilot Studio
+# Build Work Estimate — Granite Peak Utilities -- outage triage agent
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T093307_fc766b` · **Generated:** 2026-09-03T09:33:07Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260903T100519_b8435b` · **Generated:** 2026-09-03T10:05:19Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -32,21 +33,26 @@ generated: 2026-09-03T09:33:07Z
 > own delivery patterns, model choices, and review overhead.
 >
 > Rates verified 2026-06-24 and change without notice.
-> Calibration source: `not applicable` · Generated 2026-09-03T09:33:07Z
+> Calibration source: `not applicable` · Generated 2026-09-03T10:05:19Z
 
-## Build stack — Microsoft Copilot Studio
+## Platforms
 
-**Metered in: Copilot Credits.** Metered in Copilot Credits. Not tokens, and not GitHub AI Credits -- a separate meter that happens to share a rate.
+| | Platform | Metered in |
+| --- | --- | --- |
+| **Built with** | GitHub Copilot | GitHub AI Credits |
+| **Built on** | Microsoft Copilot Studio | Copilot Credits |
 
-> The currency is decided by what you **build with**, not what you build **for**.
-> Building a Microsoft workload with Claude Code is metered in tokens; building
-> it in Copilot Studio is metered in Copilot Credits.
+> These are different questions and different meters, and the same project spends
+> on **both**. The building happens in a coding agent authoring the agent
+> definition; the target platform is where it is deployed, previewed, evaluated
+> and validated. Copilot Studio is a destination, not a build tool.
 
-> **This is not a stack comparison tool.** It reports one build stack, in that
-> stack's own currency. Technology stack decisions are not made on cost alone —
-> capability, existing skills, governance, integration, and support all matter
-> more than a build-time figure — and using this report to pick a stack would
-> be using it for something it was not designed to answer.
+> **This is not a platform comparison tool.** It reports one chosen build
+> platform and one chosen target, each in its own meter. Platform decisions are
+> not made on cost alone — capability, existing skills, governance, integration,
+> and support all matter more than a build-time figure — and using this report
+> to pick a platform would be using it for something it was not designed to
+> answer.
 
 ## Scope — this estimates the build, not the run
 
@@ -61,62 +67,126 @@ cover operating it afterwards.
 | Human labour — PM, design, QA time | Your delivery estimation process |
 | Ongoing maintenance and support after delivery | A run cost, not a build cost |
 
-## Build-time Copilot Credits
+## Summary
 
-> These are the credits consumed **building** the agent. They say nothing about
-> what it will cost once users start talking to it. For that, use Microsoft's
-> [agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/).
+| Component | Meter | Total | With 30% reserve |
+| --- | --- | ---: | ---: |
+| Build — authoring and remediation | GitHub AI Credits | 900 | 1,170 |
+| Target — billable side-effects only — preview, test and evaluation are unbilled on the standard harness | Copilot Credits | 156 | 203 |
 
-**Harness:** `github-copilot` — GitHub Copilot harness bills from the moment you start building. Creating a solution with natural language, previewing, testing, and generating evaluations all consume credits. Credits cover LLM tokens, tools (knowledge and MCPs), and the harness itself.
+**Two meters, not two options.** The figures above are spent on the same project
+over the same period and add together; they are not alternatives to choose between.
 
-| Build activity | Credits | At $0.01/CC | Basis |
+## The build loop
+
+```
+  GitHub Copilot                Microsoft Copilot Studio
+  ----------------------        ----------------------
+  author definition   -->  deploy
+                           preview / interactive test  <- human
+                           run evaluations
+  remediate           <--  evaluations fail
+  (repeat)
+```
+
+This estimate plans **3 evaluation cycles**. Each cycle after the first adds
+**25%** of the original build back as remediation, giving a build-side multiplier
+of **1.50x**. An estimate that prices only the first pass is planning for a build
+where every evaluation passes first time.
+
+## Build cost — GitHub Copilot
+
+> Metered in **premium requests**. This is a different meter from Copilot Studio Copilot
+> Credits, even though both are $0.01 per credit.
+
+**Billing model:** Legacy premium requests — Each interaction costs one premium request multiplied by the model's multiplier, drawn from a monthly plan allowance. Eligible Copilot Pro and Pro+ subscribers on existing annual plans remain on this model until their plan expires.
+
+| Build activity | Premium Requests | Basis |
+| --- | ---: | --- |
+| Premium requests | 900 | 900 interactions x 1.00 model multiplier |
+| **Total** | **900** | |
+| Reserve (30%) | 270 | required contingency |
+| **Budget ask** | **1,170** | |
+
+Against a monthly allowance of 1,500 premium requests, this build consumes **78%**.
+
+### Not metered
+
+These consume no credits and are unlimited on paid plans, so they contribute
+nothing to this estimate however heavily they are used:
+
+- Code completions
+- Next edit suggestions
+
+Rates verified 2026-09-03. Sources: [models and pricing](https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing) · [legacy premium requests](https://docs.github.com/copilot/concepts/billing/copilot-requests) · [plans](https://docs.github.com/en/copilot/get-started/plans)
+
+## Target platform — Microsoft Copilot Studio
+
+**Target harness:** `standard` — Standard harness bills after publish, and embedded test chat messages are not billed. Build-time credits are therefore near zero. Non-zero only where the build exercises billable side-effects (agent flow runs, AI Builder or content-processing calls) against a published agent.
+
+> **On the standard harness, build and test in the interface are not billed.**
+> Billing starts after publish and embedded test chat does not count, so the work
+> below consumes no credits. That is a correct result, not a missing one.
+
+Had this been the GitHub Copilot harness, the same volume of preview and
+evaluation work would have cost roughly **6,048 credits ($60.48)** — worth knowing
+before choosing a harness.
+
+| Build-and-test activity | Credits | At $0.01/CC | Basis |
 | --- | ---: | ---: | --- |
-| Authoring / natural-language solution creation | 6,720 | $67.20 | 160 turns x 4,200 tokens at premium tier |
-| Preview and test iterations | 540 | $5.40 | 45 runs x 6 interactions x 2 CC (Generative answer) |
-| Preview and test model consumption | 11,340 | $113.40 | 1,134,000 tokens at premium tier |
-| Evaluation generation and runs | 900 | $9.00 | 30 evals x 3,000 tokens at premium tier |
-| Agent flow actions during build | 117 | $1.17 | 900 actions at 13 CC per 100 |
-| **Total build credits** | **19,617** | **$196.17** | |
-| Reserve (30%) | 5,885 | $58.85 | required contingency |
-| **Budget ask** | **25,502** | **$255.02** | |
+| Agent flow runs during build and test | 156 | $1.56 | 1,200 actions across 3 cycles at 13 CC per 100 |
+| **Total** | **156** | **$1.56** | |
+| Reserve (30%) | 47 | $0.47 | required contingency |
+| **Budget ask** | **203** | **$2.03** | |
 
-**Reasoning-model surcharge: 16,116 credits ($161.16).** Reasoning models bill the feature rate *plus* the premium token tier, so the effective tier is `premium` regardless of the `standard` tier selected.
+### The evaluation loop
 
-### Tier sensitivity
+Evaluation is not a one-off gate. Microsoft's guidance is an explicit cycle —
+define tests, run evaluations, analyse results, improve the agent, repeat — with a
+target pass rate of 80–90% and near 100% on core tests.
 
-Tier selection is the highest-leverage variable in a Microsoft-side build estimate:
+This estimate plans **3 cycles**: 315 evaluation runs in total, plus the
+remediation each failed cycle sends back to the build platform.
 
-| Tier | CC per 1K tokens | $ per 1M tokens |
-| --- | ---: | ---: |
-| basic | 0.1 | $1.00 |
-| standard | 1.5 | $15.00 |
-| premium ← in use | 10.0 | $100.00 |
+> **Velocity, not just cost.** Evaluations are capped at **20 per agent node per
+> day**, so this volume needs a minimum of **18 days** of elapsed time however much
+> budget is available.
+
+### Human validation — a dependency, not a cost line
+
+**20.0 hours** of interactive validation are planned in the Copilot Studio
+interface. Those hours are collected to size the test volume above — they are
+**not** estimated as labour cost, consistent with this tool metering agent
+consumption rather than people.
+
+Someone must go into the interface, confirm behaviour, and make configuration
+changes between cycles. That step gates the loop, and no amount of build budget
+removes it.
 
 ### Not included
 
-- Monthly production credit burn from end users
+- Production runtime once the agent is live
 - Capacity pack sizing and overage enforcement
-- Voice minutes
 - End-user Microsoft 365 Copilot licence offsets
-- Bring-your-own-model (including Azure Foundry), billed separately
+- Human hours for validation (collected to size test volume only)
 
-Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [pay-as-you-go](https://learn.microsoft.com/power-platform/admin/pay-as-you-go-meters#how-do-meters-work) · [reasoning](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#reasoning-model-billing-rates) · [harness](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview)
+For production runtime consumption use Microsoft's [agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/).
 
-## Licensing
-
-**Consumption billing.** Every unit consumed is billed, so the figures above
-are the expected charge.
+Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [harness billing](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview) · [evaluation limits](https://learn.microsoft.com/microsoft-copilot-studio/workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node) · [iteration guidance](https://learn.microsoft.com/microsoft-365/copilot/extensibility/evaluation-test-categories#iteration-loop)
 
 ## Known limits
 
-1. **Build only.** Says nothing about what the built thing costs to run.
-2. **Rates go stale.** Verified 2026-09-03; re-verify against the sources above.
-3. **This is a sample.** Modify it for your organization before budgeting use.
+1. **Build only.** Nothing here is the cost of running the agent once it is live.
+2. **Human validation is a dependency, not a line item.** Hours are collected to
+   size test volume, never estimated as labour.
+3. **Turn counts are the weakest input**, and thin buckets are flagged above.
+4. **Rates go stale.** Re-verify against the sources cited.
+5. **This is a sample.** Modify it for your organization before budgeting use.
 
 ## Close the loop
 
 ```
-python record_actual.py est_20260903T093307_fc766b --sessions <session-id> [...]
+python record_actual.py est_20260903T100519_b8435b --sessions <session-id> [...]
 ```
 
 ---

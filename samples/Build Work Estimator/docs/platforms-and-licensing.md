@@ -1,33 +1,81 @@
-# Build stacks and licensing
+# Platforms and licensing
 
 **Author:** Dewain Robinson
 
 Two questions decide what a build estimate says. Getting either wrong produces
 a number that looks reasonable and is wrong.
 
-1. **What are you building WITH?** — decides the *currency*.
-2. **How is that licensed?** — decides what the number *means*.
+1. **What are you building WITH?** — the build platform, decides the build-side meter.
+2. **What are you building ON?** — the target platform, decides the target-side meter.
+3. **How is that licensed?** — decides what the numbers *mean*.
+
+They are additive, not alternatives: the same project spends on both meters at
+the same time.
 
 ---
 
-## 1. The stack decides the currency
+## 1. Two platforms, two meters
 
-The tool you build with determines how the build is metered. **The workload you
-build for does not.**
+**Copilot Studio is not a build platform.** An AI-assisted build happens in a
+coding agent — Claude Code or GitHub Copilot — authoring the agent definition.
+Copilot Studio is where the result is deployed, previewed, evaluated, and
+validated by a human. Microsoft's own VS Code extension documentation says so
+directly, naming *"GitHub Copilot, Claude Code, or your favorite agent"* as the
+harnesses used to create and update Copilot Studio agent components, under a
+heading titled **Agent-driven development**.
 
-| You build with | You build for | Metered in |
+| | Values | Meter |
 | --- | --- | --- |
-| Claude Code | A Copilot Studio agent | **Tokens → USD** |
-| Copilot Studio | A Copilot Studio agent | **Copilot Credits** |
-| GitHub Copilot | A .NET service | **GitHub AI Credits** |
-| Claude Code | A .NET service | **Tokens → USD** |
+| `build_platform` | `claude-code` · `github-copilot` | Tokens → USD, or GitHub AI Credits |
+| `target_platform` | `copilot-studio` · `azure` · `both` · `ai-recommend` | Copilot Credits, or Azure consumption |
 
-Using Claude Code to build a Microsoft workload is extremely common, and it
-bills in tokens. An earlier version of this estimator keyed off `microsoft: true`
-— meaning *the target is Microsoft* — and priced those builds in Copilot Credits.
-That was wrong, and the manifest key was removed rather than kept working.
+Two earlier versions of this estimator got this wrong. The first keyed off
+`microsoft: true` — meaning *the target is Microsoft* — and priced those builds
+in Copilot Credits. The second treated `copilot-studio` as a build stack, which
+models a workflow nobody performs. Both keys were removed rather than kept
+working, and both are rejected with guidance.
 
-Set `build_stack:` to one of `claude-code`, `copilot-studio`, `github-copilot`.
+### The target harness decides whether any of it bills
+
+Required whenever the target is Copilot Studio:
+
+| Harness | Build, preview, test, evaluate |
+| --- | --- |
+| `standard` | **Not billed.** Billing starts after publish; embedded test chat does not count |
+| `github-copilot` | **Billed from the moment building starts** |
+
+A standard-harness target legitimately returns near-zero target-side cost. The
+report says so plainly and shows what the same work would have cost on the other
+harness, so the difference is visible rather than hidden. Billable side-effects
+— agent flow runs, content processing — still bill on either harness.
+
+### The evaluation loop is the cost driver
+
+```
+  build platform            target platform
+  ---------------           ----------------
+  author definition   -->   deploy
+                            preview / interactive test   <- human, in the UI
+                            run evaluations
+  remediate           <--   evaluations fail
+  (repeat)
+```
+
+Microsoft's guidance is explicit that evaluation is a continuous cycle, targeting
+an 80–90% pass rate with near 100% on core tests, and that a test set should be
+run multiple times for response variability. So an estimate must plan for
+cycles, not a single pass: each cycle after the first adds remediation back onto
+the build platform, and re-runs the evaluations on the target.
+
+**Evaluations are capped at 20 per agent node per day.** A large test set
+therefore sets a minimum elapsed time no amount of budget shortens — the report
+states that separately from cost.
+
+**Human validation is a dependency, not a cost line.** Someone must work in the
+Copilot Studio interface between cycles to confirm behaviour and adjust
+configuration. Planned hours are collected to size the interactive test volume;
+they are never priced as labour, consistent with this tool metering agent
+consumption rather than people.
 
 ### Microsoft products do not bill in tokens
 

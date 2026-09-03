@@ -1,32 +1,47 @@
-# Build Work Estimator -- Scenario B: building WITH Microsoft Copilot Studio
+# Build Work Estimator -- Scenario B
 # Author: Dewain Robinson
 #
 # Granite Peak Utilities is a FICTIONAL company. Every figure is invented.
 #
-# Here the agent is authored inside Copilot Studio itself, so the build is
-# metered in Copilot Credits. No tokens appear anywhere in this report --
-# Microsoft products do not bill in tokens.
+# BUILT WITH GitHub Copilot, BUILT ON Copilot Studio using the STANDARD
+# harness. The standard harness does not bill for building or testing in the
+# interface -- billing starts after publish and test chat is unbilled -- so
+# the target-side figure here is genuinely zero. That is a correct result,
+# and the report shows what the same work would have cost on the GitHub
+# Copilot harness so the difference is visible.
 
-project: Granite Peak Utilities -- outage triage agent, built in Copilot Studio
+project: Granite Peak Utilities -- outage triage agent
 author: Dewain Robinson
 
 reserve_percent: 30
 
-build_stack: copilot-studio
+build_platform: github-copilot     # what does the building
+target_platform: copilot-studio    # where it is deployed and evaluated
 
 licensing:
-  model: consumption          # pay-as-you-go Copilot Credits
-  plan: Copilot Studio pay-as-you-go
+  model: seat
+  plan: GitHub Copilot Business
+  seat_monthly_cost: 19
+  seats: 3
+  other_workload_share: 0.55
 
-copilot_studio:
-  harness: github-copilot     # bills from the moment building starts
+github_copilot:
+  billing_mode: premium-requests   # ai-credits | premium-requests
+  interactions: 900
+  model_multiplier: 1.0
+  monthly_allowance: 1500
+
+target:
+  harness: standard                # does NOT bill for build or test chat
   tier: standard
-  reasoning_model: true       # forces the premium token tier
-  authoring_turns: 160
-  tokens_per_turn: 4200
-  test_runs: 45
-  interactions_per_test_run: 6
-  interaction_type: generative_answer
-  eval_runs: 30
-  eval_tokens_per_run: 3000
-  agent_flow_actions: 900
+  reasoning_model: false
+
+  interactive_test_hours: 20
+  interactions_per_hour: 25
+
+  eval_test_cases: 35
+  eval_repeats: 3
+  eval_cycles: 3
+  eval_tokens_per_case: 3000
+
+  agent_flow_actions: 400

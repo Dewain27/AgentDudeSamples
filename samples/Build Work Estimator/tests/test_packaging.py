@@ -163,8 +163,9 @@ class TestPackagedSkillRuns(unittest.TestCase):
                              "packaged estimate failed:\n%s" % proc.stderr)
             with open(out) as fh:
                 result = json.load(fh)
-            self.assertEqual(result["build_stack"], "claude-code")
-            self.assertGreater(result["base"], 0)
+            self.assertEqual(result["build_platform"], "claude-code")
+            self.assertEqual(result["target_platform"], "copilot-studio")
+            self.assertGreater(result["build"]["base"], 0)
         finally:
             import shutil
             shutil.rmtree(directory, ignore_errors=True)
