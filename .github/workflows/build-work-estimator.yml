@@ -1,0 +1,102 @@
+# CI for the Build Work Estimator sample.
+#
+# Author: Dewain Robinson
+#
+# Path-scoped on purpose: this runs only when THIS sample or its generated
+# plugin changes. Other samples in the repo have their own lifecycles and are
+# not affected by, and do not affect, anything here.
+#
+# The governance this enforces: generated artifacts must never lag the code
+# that produces them. Committed sample output that is quietly wrong reads as
+# authoritative, which is worse than shipping no sample at all.
+
+name: Build Work Estimator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'samples/Build Work Estimator/**'
+      - 'plugins/build-work-estimator/**'
+      - '.github/workflows/build-work-estimator.yml'
+  pull_request:
+    paths:
+      - 'samples/Build Work Estimator/**'
+      - 'plugins/build-work-estimator/**'
+      - '.github/workflows/build-work-estimator.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: samples/Build Work Estimator
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'   # the floor the sample supports
+
+      - name: Install optional dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # All of these are OPTIONAL at run time. They are installed here so
+          # CI exercises the full path, including PDF rendering; the sample is
+          # separately tested with them absent.
+          pip install pyyaml markdown pypdf pillow playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Tests
+        run: cd tests && python -m unittest discover -p 'test_*.py' -v
+
+      - name: Runs without optional dependencies
+        run: |
+          # Sandboxed hosts have no package installation. Prove the estimator
+          # still produces a full estimate with PyYAML unavailable.
+          pip uninstall -y pyyaml
+          python skill/build-work-estimator/scripts/environment.py
+          python skill/build-work-estimator/scripts/estimate.py \
+            --manifest examples/harbor-line-manifest.yaml \
+            --profile examples/calibration-profile.json \
+            --no-ledger --out /tmp/nodeps.json
+          python -c "import json,sys; d=json.load(open('/tmp/nodeps.json')); \
+            sys.exit(0 if d['build']['base'] > 0 else 1)"
+          pip install pyyaml
+
+      - name: Worked examples are current
+        run: |
+          # Fails if the committed examples drift from the code that makes
+          # them, or if a PDF is left behind at old numbers.
+          python build/regenerate_examples.py --check
+
+      - name: Generated plugin is current
+        run: |
+          python build/build_plugin.py
+          cd "$GITHUB_WORKSPACE"
+          if ! git diff --exit-code -- plugins/build-work-estimator; then
+            echo "::error::plugins/build-work-estimator is stale. Run \
+              'python build/build_plugin.py' and commit the result."
+            exit 1
+          fi
+
+      - name: Host packages rebuild and validate
+        run: |
+          # Zips embed timestamps and are not byte-reproducible, so the
+          # packaging tests compare CONTENTS rather than bytes.
+          python build/build_host_packages.py
+          cd tests && python -m unittest test_packaging -v
+
+      - name: Authorship and rate staleness
+        run: |
+          python -c "
+          import sys
+          sys.path.insert(0, 'skill/build-work-estimator/scripts')
+          import rates
+          warnings = rates.staleness_warnings()
+          for w in warnings:
+              print('::warning::' + w)
+          print('%d rate table(s) past their verification window' % len(warnings))
+          "

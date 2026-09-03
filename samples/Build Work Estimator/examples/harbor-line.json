@@ -1,0 +1,219 @@
+{
+  "estimate_id": "est_20260903T000000_sample1",
+  "generated": "2026-09-03T00:00:00Z",
+  "author": "Dewain Robinson",
+  "project": "Harbor Line Logistics -- dispatch agent",
+  "build_platform": "claude-code",
+  "build_platform_label": "Claude Code",
+  "build_currency": "USD (tokens)",
+  "target_platform": "copilot-studio",
+  "target_platform_label": "Microsoft Copilot Studio",
+  "target_currency": "Copilot Credits",
+  "reserve_percent": 25.0,
+  "eval_cycles": 4,
+  "remediation_factor": 1.75,
+  "remediation_share": 0.25,
+  "licensing": {
+    "model": "seat",
+    "plan": "Claude Max",
+    "seat_monthly_cost": 200.0,
+    "seats": 1,
+    "other_workload_share": 0.45,
+    "concentrated": true
+  },
+  "build_detail": null,
+  "targets": [
+    {
+      "target": "copilot-studio",
+      "reserve_percent": 25.0,
+      "lines": [
+        {
+          "label": "Interactive validation in the Copilot Studio interface",
+          "credits": 16800.0,
+          "dollars": 168.0,
+          "unbilled_credits": 0.0,
+          "billed": true,
+          "detail": "16.0 human hours x 25 interactions/hour = 400 interactions"
+        },
+        {
+          "label": "Evaluation runs",
+          "credits": 15360.0,
+          "dollars": 153.6,
+          "unbilled_credits": 0.0,
+          "billed": true,
+          "detail": "40 cases x 3 repeats x 4 cycles = 480 runs"
+        },
+        {
+          "label": "Agent flow runs during build and test",
+          "credits": 130.0,
+          "dollars": 1.3,
+          "unbilled_credits": 0.0,
+          "billed": true,
+          "detail": "1,000 actions across 4 cycles at 13 CC per 100"
+        }
+      ],
+      "verified": "2026-09-03",
+      "runtime_estimator": "https://microsoft.github.io/copilot-studio-estimator/",
+      "sources": {
+        "billing_rates": "https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates",
+        "harness": "https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview",
+        "eval_limits": "https://learn.microsoft.com/microsoft-copilot-studio/workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node",
+        "eval_guidance": "https://learn.microsoft.com/microsoft-365/copilot/extensibility/evaluation-test-categories#iteration-loop"
+      },
+      "harness": "github-copilot",
+      "harness_note": "GitHub Copilot harness bills from the moment you start building. Creating a solution with natural language, previewing, testing, and generating evaluations all consume credits. Credits cover LLM tokens, tools (knowledge and MCPs), and the harness itself.",
+      "bills_during_build": true,
+      "currency": "Copilot Credits",
+      "tier": "standard",
+      "effective_tier": "premium",
+      "reasoning_model": true,
+      "reasoning_surcharge_credits": 25840.0,
+      "eval_cycles": 4,
+      "eval_runs": 480,
+      "interactive_hours": 16.0,
+      "interactive_interactions": 400,
+      "total_credits": 32290.0,
+      "total_dollars": 322.9,
+      "unbilled_credits": 0.0,
+      "reserve_credits": 8072.5,
+      "budget_credits": 40362.5,
+      "budget_dollars": 403.62,
+      "dollars_per_credit": 0.01,
+      "min_elapsed_days": 24,
+      "eval_cap_per_day": 20,
+      "excluded": [
+        "Production runtime once the agent is live",
+        "Capacity pack sizing and overage enforcement",
+        "End-user Microsoft 365 Copilot licence offsets",
+        "Human hours for validation (collected to size test volume only)"
+      ]
+    }
+  ],
+  "warnings": [],
+  "build": {
+    "estimate_id": "est_20260903T102733_4d2003",
+    "generated": "2026-09-03T10:27:33Z",
+    "author": "Dewain Robinson",
+    "project": "Harbor Line Logistics -- dispatch agent",
+    "items": [
+      {
+        "name": "Agent instructions, topics and tool definitions",
+        "size": "medium",
+        "bucket": "medium",
+        "files": 11,
+        "unknowns": 2,
+        "brownfield": true,
+        "n": 5,
+        "turns": 1218,
+        "cost": 448.35,
+        "low": 98.79,
+        "high": 2291.12
+      },
+      {
+        "name": "Dataverse schema and rate-card importer",
+        "size": "small",
+        "bucket": "small",
+        "files": 4,
+        "unknowns": 1,
+        "brownfield": false,
+        "n": 6,
+        "turns": 289,
+        "cost": 106.26,
+        "low": 57.96,
+        "high": 417.44
+      },
+      {
+        "name": "Legacy AS400 field mapping research",
+        "size": "exploration",
+        "bucket": "exploration",
+        "files": 0,
+        "unknowns": 3,
+        "brownfield": true,
+        "n": 7,
+        "turns": 100,
+        "cost": 36.72,
+        "low": 8.05,
+        "high": 1504.12
+      },
+      {
+        "name": "Driver mobile handoff screens",
+        "size": "medium",
+        "bucket": "medium",
+        "files": 8,
+        "unknowns": 0,
+        "brownfield": false,
+        "n": 5,
+        "turns": 812,
+        "cost": 298.9,
+        "low": 65.85,
+        "high": 1018.27
+      }
+    ],
+    "base": 890.21,
+    "low": 230.67,
+    "high": 5230.98,
+    "reserve": 222.55,
+    "reserve_percent": 25.0,
+    "budget_ask": 1112.76,
+    "adequacy": {
+      "reserve_percent": 25.0,
+      "budget_ask": 1112.76,
+      "high": 5230.98,
+      "covers_high": false,
+      "required_percent": 487.6
+    },
+    "corrections": [
+      {
+        "bucket": "medium",
+        "n": 3,
+        "median_ratio": 1.35,
+        "shrunk_ratio": 1.175,
+        "applied": true
+      }
+    ],
+    "profile": {
+      "source": "measured",
+      "sessions": 24,
+      "generated": "2026-08-30T00:00:00Z",
+      "date_range": [
+        "2026-06-01",
+        "2026-08-30"
+      ],
+      "cost_per_main_turn": 0.32
+    },
+    "thin_buckets": [],
+    "warnings": [],
+    "licensing": {
+      "model": "seat",
+      "billed": false,
+      "plan": "Claude Max",
+      "seat_monthly_cost": 200.0,
+      "seats": 1,
+      "notional_cost": 890.21,
+      "monthly_reference": 473.33,
+      "other_workload_share": 0.45,
+      "concentrated": true,
+      "windows": [
+        "5-hour rolling",
+        "weekly"
+      ],
+      "allowance_share": 1.8807,
+      "total_committed_share": 2.3307,
+      "attributable_cost": 376.15,
+      "overruns": true,
+      "headroom_share": 0.0,
+      "overrun_by": 1.3307,
+      "overrun_cost": 266.15
+    }
+  },
+  "profile": {
+    "source": "measured",
+    "sessions": 24,
+    "generated": "2026-08-30T00:00:00Z",
+    "date_range": [
+      "2026-06-01",
+      "2026-08-30"
+    ],
+    "cost_per_main_turn": 0.32
+  }
+}

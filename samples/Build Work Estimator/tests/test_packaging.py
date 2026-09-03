@@ -117,6 +117,43 @@ class TestCoworkPackage(unittest.TestCase):
         self.assertEqual(self.manifest["developer"]["name"], "Dewain Robinson")
 
 
+class TestPackagedExamplesAreCurrent(unittest.TestCase):
+    """Zips are not byte-reproducible, so compare CONTENTS not bytes."""
+
+    def _inner(self, zip_path, suffix):
+        with zipfile.ZipFile(zip_path) as archive:
+            name = [n for n in archive.namelist() if n.endswith(suffix)]
+            self.assertTrue(name, "package is missing %s" % suffix)
+            return archive.read(name[0]).decode("utf-8")
+
+    def test_standard_package_carries_the_committed_example(self):
+        committed = os.path.join(
+            SAMPLE, "examples", "harbor-line-estimate.md")
+        with open(committed) as fh:
+            self.assertEqual(
+                self._inner(STANDARD, "assets/harbor-line-estimate.md"),
+                fh.read(),
+                "the packaged worked example is stale; run "
+                "build/regenerate_examples.py then build_host_packages.py")
+
+    def test_cowork_package_carries_the_committed_example(self):
+        committed = os.path.join(
+            SAMPLE, "examples", "harbor-line-estimate.md")
+        with open(committed) as fh:
+            self.assertEqual(
+                self._inner(COWORK, "assets/harbor-line-estimate.md"),
+                fh.read(),
+                "the packaged worked example is stale in the Cowork package")
+
+    def test_packaged_manifest_matches_the_committed_manifest(self):
+        committed = os.path.join(
+            SAMPLE, "examples", "harbor-line-manifest.yaml")
+        with open(committed) as fh:
+            self.assertEqual(
+                self._inner(STANDARD, "assets/harbor-line-manifest.yaml"),
+                fh.read())
+
+
 class TestSandboxInstructions(unittest.TestCase):
     """Packaged SKILL.md must not tell a browserless host to launch a browser."""
 

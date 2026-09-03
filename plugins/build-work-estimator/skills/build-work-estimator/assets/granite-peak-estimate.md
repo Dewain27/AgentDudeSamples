@@ -3,13 +3,13 @@ title: Build Work Estimate — Granite Peak Utilities -- outage triage agent
 author: Dewain Robinson
 build_platform: github-copilot
 target_platform: copilot-studio
-estimate_id: est_20260903T100519_b8435b
-generated: 2026-09-03T10:05:19Z
+estimate_id: est_20260903T000000_sample2
+generated: 2026-09-03T00:00:00Z
 ---
 
 # Build Work Estimate — Granite Peak Utilities -- outage triage agent
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T100519_b8435b` · **Generated:** 2026-09-03T10:05:19Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260903T000000_sample2` · **Generated:** 2026-09-03T00:00:00Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -33,7 +33,7 @@ generated: 2026-09-03T10:05:19Z
 > own delivery patterns, model choices, and review overhead.
 >
 > Rates verified 2026-06-24 and change without notice.
-> Calibration source: `not applicable` · Generated 2026-09-03T10:05:19Z
+> Calibration source: `not applicable` · Generated 2026-09-03T00:00:00Z
 
 ## Platforms
 
@@ -186,7 +186,7 @@ Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/
 ## Close the loop
 
 ```
-python record_actual.py est_20260903T100519_b8435b --sessions <session-id> [...]
+python record_actual.py est_20260903T000000_sample2 --sessions <session-id> [...]
 ```
 
 ---
