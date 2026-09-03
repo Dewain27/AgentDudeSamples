@@ -139,6 +139,7 @@ def compute(config, reserve_percent):
     credits = discounted / rates.DOLLARS_PER_GITHUB_AI_CREDIT
 
     result.update({
+        "total_tokens": int(total_tokens),
         "unit": "GitHub AI Credit",
         "dollars_per_credit": rates.DOLLARS_PER_GITHUB_AI_CREDIT,
         "input_tokens": int(input_tokens),

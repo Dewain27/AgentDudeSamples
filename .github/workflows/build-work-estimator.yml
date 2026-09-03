@@ -66,6 +66,11 @@ jobs:
             sys.exit(0 if d['build']['base'] > 0 else 1)"
           pip install pyyaml
 
+      - name: Every figure traces to a derivation
+        run: |
+          # No number ships unless the estimator can say where it came from.
+          cd tests && python -m unittest test_provenance -v
+
       - name: Worked examples and scenarios are current
         run: |
           # Fails if committed examples or scenario runs drift from the code

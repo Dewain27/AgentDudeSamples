@@ -64,6 +64,7 @@ def normalise(config):
 
     out = {"model": model, "plan": str(cfg.get("plan", "") or "").strip()}
 
+
     if model == CONSUMPTION:
         return out
 
@@ -135,6 +136,11 @@ def normalise(config):
             % out["other_workload_share"])
 
     out["concentrated"] = bool(cfg.get("concentrated", False))
+    # Recorded rather than recomputed at render time: a figure the renderer
+    # invents is a figure nobody can account for.
+    out["seat_rate_monthly"] = out["seat_monthly_cost"]
+    out["seat_total_over_build"] = round(
+        out["seat_monthly_cost"] * out["seats"] * out["duration_months"], 2)
     return out
 
 

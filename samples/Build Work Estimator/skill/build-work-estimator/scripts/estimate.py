@@ -25,6 +25,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import calibrate  # noqa: E402
+import environments as env_mod  # noqa: E402
 import licensing  # noqa: E402
 import miniyaml  # noqa: E402
 import rates  # noqa: E402
@@ -121,6 +122,13 @@ def normalise_items(raw_items):
             "files": int(entry.get("files", 0) or 0),
             "unknowns": unknowns,
             "brownfield": bool(entry.get("brownfield", False)),
+            # Infrastructure and pipeline work is authored once but applied
+            # per environment; everything else is authored once.
+            "per_environment": bool(entry.get("per_environment", False)),
+            # Evaluation cases attributable to this component. When any item
+            # declares them, target credits attribute per component instead of
+            # arriving as one undifferentiated pool.
+            "eval_cases": int(entry.get("eval_cases", 0) or 0),
         })
     return items
 
@@ -385,8 +393,8 @@ def validate_platforms(manifest):
             target, target_key)
 
 
-def compute(manifest, profile):
-    """Estimate a Claude Code build. Other stacks route through compute_stack."""
+def compute(manifest, profile, env_multiplier=1.0):
+    """Estimate a Claude Code build. Other platforms route through compute_plan."""
     reserve_pct = validate_reserve(manifest.get("reserve_percent"))
     items = normalise_items(manifest.get("items"))
     index = bucket_index(profile)
@@ -411,6 +419,8 @@ def compute(manifest, profile):
         if item["brownfield"]:
             turns *= BROWNFIELD_FACTOR
         turns *= factor
+        if item["per_environment"]:
+            turns *= env_multiplier
 
         cost = turns * per_turn
         median = row["median_cost"] or cost or 1.0
@@ -425,6 +435,8 @@ def compute(manifest, profile):
             "name": item["name"], "size": item["size"], "bucket": bucket,
             "files": item["files"], "unknowns": item["unknowns"],
             "brownfield": item["brownfield"], "n": row["n"],
+            "per_environment": item["per_environment"],
+            "eval_cases": item["eval_cases"],
             "turns": round(turns), "cost": round(cost, 2),
             "low": round(item_low, 2), "high": round(item_high, 2),
         })
@@ -487,12 +499,41 @@ def compute_plan(manifest, profile):
     except spec_mod.SpecificationError as exc:
         raise EstimateError(str(exc))
 
+    try:
+        envs = env_mod.normalise(manifest.get("environments"))
+    except env_mod.EnvironmentError_ as exc:
+        raise EstimateError(str(exc))
+
     target_cfg = dict(manifest.get("target") or {})
     cycles = max(1, int(target_cfg.get("eval_cycles", 1) or 1))
 
+    # When components declare their own evaluation cases, the target volume is
+    # derived from the breakdown rather than asserted as a lump sum -- which is
+    # what lets credits attribute back to each component.
+    declared_items = normalise_items(manifest.get("items")) \
+        if manifest.get("items") else []
+    item_eval_cases = sum(i["eval_cases"] for i in declared_items)
+    if item_eval_cases:
+        target_cfg["eval_test_cases"] = item_eval_cases
+
+    # Azure components describe ONE environment; environments multiply them.
+    components = target_cfg.get("azure_components") or []
+    explicit = [e for e in envs["environments"] if e["azure_usd"]]
+    if explicit:
+        target_cfg["azure_components"] = [
+            {"name": "%s environment" % e["name"], "usd": e["azure_usd"],
+             "note": "per-environment build and test consumption"}
+            for e in envs["environments"] if e["azure_usd"]]
+    elif components and envs["count"] > 1:
+        target_cfg["azure_components"] = [
+            dict(c, usd=float(c.get("usd") or 0.0) * envs["count"],
+                 note="%s x %d environments"
+                      % (c.get("note", "per environment"), envs["count"]))
+            for c in components]
+
     # --- build side -------------------------------------------------------
     if build_key == "claude-code":
-        base = compute(manifest, profile)
+        base = compute(manifest, profile, envs["work_multiplier"])
         build_detail = None
         build_currency_total = base["base"]
     else:
@@ -503,7 +544,7 @@ def compute_plan(manifest, profile):
             # Size the GitHub Copilot build from the SAME work breakdown the
             # Claude Code path uses, so two estimates of one scenario are
             # actually estimating the same scenario.
-            sizing = compute(manifest, profile)
+            sizing = compute(manifest, profile, envs["work_multiplier"])
             gh_cfg["interactions"] = sizing["total_turns"]
             sized_from_items = {
                 "total_turns": sizing["total_turns"],
@@ -565,6 +606,7 @@ def compute_plan(manifest, profile):
         "remediation_share": REMEDIATION_SHARE,
         "licensing": licence,
         "specification": specification,
+        "environments": envs,
         "build_detail": build_detail,
         "targets": targets,
         "warnings": rates.staleness_warnings(),
@@ -607,6 +649,118 @@ def compute_plan(manifest, profile):
         else:
             result["profile"] = {"source": "not applicable"}
 
+    return _record_totals(result)
+
+
+def _record_totals(result):
+    """Compute and RECORD every figure the report will display.
+
+    The renderer must not compute. Anything it shows has to exist here first,
+    because a number the estimator never recorded is a number nobody can
+    account for -- and the provenance validator will reject it.
+    """
+    reserve_pct = result["reserve_percent"]
+    build, detail = result.get("build"), result.get("build_detail")
+    gh_rate = rates.DOLLARS_PER_GITHUB_AI_CREDIT
+    cc_rate = rates.DOLLARS_PER_CREDIT
+
+    if build:
+        side = {
+            "currency": "USD", "unit": "USD",
+            "low": build["low"], "likely": build["base"],
+            "high": build["high"], "with_reserve": build["budget_ask"],
+            "usd_low": build["low"], "usd_likely": build["base"],
+            "usd_high": build["high"], "usd_with_reserve": build["budget_ask"],
+            "notional": (build.get("licensing") or {}).get("model") == "seat",
+            "sized_from_items": False, "no_range": False,
+        }
+    else:
+        detail = detail or {}
+        units = detail.get("total_units", 0) or 0
+        reserved = detail.get("budget_units", units)
+        low = detail.get("low_units", units)
+        high = detail.get("high_units", units)
+        side = {
+            "currency": "GitHub AI Credits", "unit": "credits",
+            "low": low, "likely": units, "high": high,
+            "with_reserve": reserved,
+            "usd_low": round(low * gh_rate, 2),
+            "usd_likely": round(units * gh_rate, 2),
+            "usd_high": round(high * gh_rate, 2),
+            "usd_with_reserve": round(reserved * gh_rate, 2),
+            "notional": (result.get("licensing") or {}).get("model") == "seat",
+            "sized_from_items": bool(detail.get("sized_from_items")),
+            "no_range": not detail.get("sized_from_items"),
+        }
+
+    tgt = {"credits_low": 0.0, "credits_likely": 0.0, "credits_high": 0.0,
+           "credits_with_reserve": 0.0, "usd_low": 0.0, "usd_likely": 0.0,
+           "usd_high": 0.0, "usd_with_reserve": 0.0}
+    for target in result["targets"]:
+        if target["target"] == "azure":
+            for key in ("low", "likely", "high"):
+                tgt["usd_" + key] += target["total_dollars"]
+            tgt["usd_with_reserve"] += target["budget_dollars"]
+            continue
+        span = target.get("range") or {}
+        tgt["credits_low"] += span.get("low_credits", target["total_credits"])
+        tgt["credits_likely"] += target["total_credits"]
+        tgt["credits_high"] += span.get("high_credits", target["total_credits"])
+        tgt["credits_with_reserve"] += target["budget_credits"]
+        tgt["usd_low"] += span.get("low_dollars", target["total_dollars"])
+        tgt["usd_likely"] += target["total_dollars"]
+        tgt["usd_high"] += span.get("high_dollars", target["total_dollars"])
+        tgt["usd_with_reserve"] += target["budget_dollars"]
+    for key in list(tgt):
+        tgt[key] = round(tgt[key], 2)
+
+    combined = dict(
+        (key, round(side["usd_" + key] + tgt["usd_" + key], 2))
+        for key in ("low", "likely", "high", "with_reserve"))
+
+    # Per-component attribution. Only the evaluation line attributes: the rest
+    # is exercised across the solution, and splitting it would be invention.
+    eval_credits = shared_credits = 0.0
+    for target in result["targets"]:
+        if target["target"] == "azure":
+            continue
+        for line in target.get("lines", []):
+            if line["label"].startswith("Evaluation runs"):
+                eval_credits += line["credits"]
+            else:
+                shared_credits += line["credits"]
+
+    components = []
+    rows = (build or {}).get("items") or []
+    total_cases = sum(r.get("eval_cases", 0) for r in rows)
+    for row in rows:
+        cases = row.get("eval_cases", 0)
+        credits = round(eval_credits * cases / total_cases, 2) \
+            if total_cases and cases else 0.0
+        components.append({
+            "name": row["name"], "size": row["size"], "turns": row["turns"],
+            "build_cost": row["cost"], "eval_cases": cases,
+            "target_credits": credits,
+            "combined_usd": round(row["cost"] + credits * cc_rate, 2),
+            "per_environment": row.get("per_environment", False),
+        })
+
+    result["totals"] = {
+        "build": side, "target": tgt, "combined": combined,
+        "reserve_percent": reserve_pct,
+    }
+    result["component_costs"] = {
+        "components": components,
+        "attributable": bool(total_cases),
+        "total_eval_cases": total_cases,
+        "eval_credits": round(eval_credits, 2),
+        "shared_credits": round(shared_credits, 2),
+        "shared_dollars": round(shared_credits * cc_rate, 2),
+        "build_total": round(sum(c["build_cost"] for c in components), 2),
+        "turns_total": int(sum(c["turns"] for c in components)),
+        "attributed_combined": round(
+            sum(c["combined_usd"] for c in components), 2),
+    }
     return result
 
 

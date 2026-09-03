@@ -76,6 +76,25 @@ target:
       usd: 1100
       note: private endpoints, private DNS, hub-spoke peering
 
+# Four environments, per specification s10. Azure figures are per environment
+# for the ~5 month build; production carries no build-time agent testing
+# because exercising it there is runtime.
+environments:
+  provisioning_share: 0.25
+  list:
+    - name: dev
+      azure_usd: 4200
+      agent_deployed: true
+    - name: qa
+      azure_usd: 3600
+      agent_deployed: true
+    - name: test
+      azure_usd: 4100
+      agent_deployed: true
+    - name: prod
+      azure_usd: 6400
+      production: true
+
 items:
   # --- Discovery -------------------------------------------------------
   - name: Custodial core contract and rate-limit discovery
@@ -92,78 +111,91 @@ items:
 
   # --- Agent definition (Copilot Studio) -------------------------------
   - name: Agent foundation - instructions, orchestration, memory scoping
+    eval_cases: 115
     size: medium
     files: 8
     unknowns: 2
     brownfield: false
 
   - name: C1 Client position summary
+    eval_cases: 12
     size: large
     files: 6
     unknowns: 3
     brownfield: false
 
   - name: C2 Transaction enquiry
+    eval_cases: 12
     size: medium
     files: 4
     unknowns: 1
     brownfield: false
 
   - name: C3 Review pack assembly
+    eval_cases: 12
     size: large
     files: 9
     unknowns: 4
     brownfield: false
 
   - name: C4 Document retrieval and request
+    eval_cases: 12
     size: medium
     files: 5
     unknowns: 1
     brownfield: false
 
   - name: C5 Suitability record surfacing
+    eval_cases: 52
     size: medium
     files: 5
     unknowns: 3
     brownfield: false
 
   - name: C6 Disclosure orchestration
+    eval_cases: 102
     size: large
     files: 10
     unknowns: 4
     brownfield: false
 
   - name: C7 Service request triage
+    eval_cases: 12
     size: medium
     files: 6
     unknowns: 2
     brownfield: false
 
   - name: C8 Complaint detection and escalation
+    eval_cases: 57
     size: large
     files: 7
     unknowns: 4
     brownfield: false
 
   - name: C9 Market and product context
+    eval_cases: 12
     size: small
     files: 4
     unknowns: 1
     brownfield: false
 
   - name: Tool schemas, auth paths and error handling (18 tools)
+    eval_cases: 75
     size: large
     files: 20
     unknowns: 3
     brownfield: false
 
   - name: Write-path confirmation, idempotency and audit (7 write tools)
+    eval_cases: 35
     size: large
     files: 12
     unknowns: 4
     brownfield: false
 
   - name: Knowledge indexing pipeline and effective dating
+    eval_cases: 60
     size: medium
     files: 8
     unknowns: 3
@@ -283,36 +315,42 @@ items:
 
   # --- Azure platform --------------------------------------------------
   - name: Landing zone extension, networking and private endpoints
+    per_environment: true
     size: medium
     files: 12
     unknowns: 2
     brownfield: true
 
   - name: API Management policies and gateway configuration
+    per_environment: true
     size: medium
     files: 9
     unknowns: 2
     brownfield: false
 
   - name: Cosmos data model, TTL and retention policies
+    per_environment: true
     size: medium
     files: 8
     unknowns: 2
     brownfield: false
 
   - name: AI Search indexes and semantic configuration
+    per_environment: true
     size: medium
     files: 7
     unknowns: 2
     brownfield: false
 
   - name: Observability, alerting and dashboards
+    per_environment: true
     size: small
     files: 8
     unknowns: 1
     brownfield: false
 
   - name: CI/CD and ALM for the agent definition and application
+    per_environment: true
     size: medium
     files: 11
     unknowns: 2

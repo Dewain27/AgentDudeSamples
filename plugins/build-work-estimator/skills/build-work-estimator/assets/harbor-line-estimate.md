@@ -132,6 +132,29 @@ This estimate plans **4 evaluation cycles**. Each cycle after the first adds
 of **1.75x**. An estimate that prices only the first pass is planning for a build
 where every evaluation passes first time.
 
+## Cost by component
+
+Each component's share of **both** meters. The build column is the work of authoring it; the credits column is the evaluation volume it generates on the target platform.
+
+> **No component declared its evaluation cases**, so target credits are not attributed here — they appear only as a solution-wide total. Adding `eval_cases:` to each item shows which components actually drive the credit burn. They are not distributed by guesswork.
+
+| Component | Size | Turns | Build |
+| --- | --- | ---: | ---: |
+| Agent instructions, topics and tool definitions | medium | 1,218 | $448.35 |
+| Dataverse schema and rate-card importer | small | 289 | $106.26 |
+| Legacy AS400 field mapping research | exploration | 100 | $36.72 |
+| Driver mobile handoff screens | medium | 812 | $298.90 |
+| **Total** | | 2,419 | **$890.23** |
+
+## Environments
+
+> **No environments were declared.** This estimate prices the solution as if it
+> were built once, into one place. A real delivery provisions dev, QA, test and
+> production — each needing infrastructure applied, pipelines wired, configuration
+> and secrets set, data seeded, and the agent deployed.
+
+Declaring them is the single largest correction available to this estimate.
+
 ## Build — Claude Code
 
 | | Amount |
@@ -255,6 +278,52 @@ removes it.
 For production runtime consumption use Microsoft's [agent usage estimator](https://microsoft.github.io/copilot-studio-estimator/).
 
 Rates verified 2026-09-03. Sources: [billing rates](https://learn.microsoft.com/microsoft-copilot-studio/requirements-messages-management#copilot-credits-billing-rates) · [harness billing](https://learn.microsoft.com/microsoft-copilot-studio/agents-experience/billing-credit-overview) · [evaluation limits](https://learn.microsoft.com/microsoft-copilot-studio/workflows-experience/agent-node-workflow#test-and-evaluate-an-agent-node) · [iteration guidance](https://learn.microsoft.com/microsoft-365/copilot/extensibility/evaluation-test-categories#iteration-loop)
+
+## What is measured, and what is judgment
+
+This estimate mixes two kinds of input. They are not equally trustworthy, and
+the difference is not visible in the figures themselves.
+
+### Measured or sourced
+
+| Input | Basis |
+| --- | --- |
+| Cost per agent turn, bucket turn medians, cache behaviour | Derived from 24 real local sessions |
+| Every provider rate | Published, each carrying a source URL and a verification date |
+| Evaluation volume | Arithmetic on declared test cases, repeats and cycles |
+| Azure consumption | Figures supplied by you; nothing is bundled or inferred |
+
+### Judgment, not measurement
+
+These shape the result and **were never measured against anything**. They are
+stated here so a reader can see which parts of the number would move if someone
+measured them.
+
+| Factor | Value | What it does |
+| --- | --- | --- |
+| Brownfield factor | **1.50x** | Multiplies turns for work in an existing codebase. Judgment. Never measured against paired greenfield and brownfield work. |
+| Remediation share per cycle | **25%** | Each evaluation cycle after the first adds this share of the build back as rework. Judgment. Real remediation depends on what the evaluations actually find. |
+| Unknowns range widening | **+25% per unknown** | Widens the upper bound of an item per declared unknown. Judgment. The declared unknown count is itself a subjective input. |
+| Environment provisioning share | **25% per extra environment** | Cost of applying infrastructure and pipeline work into each environment beyond the first. Judgment. Override it with `environments.provisioning_share` if you have a real figure. |
+| Evaluation cycle range | **-1 / +2 cycles** | Produces the low and high bounds on the target side. Judgment. Nobody knows how many cycles a build will need until it runs. |
+| Correction shrinkage k | **k = 3** | Pulls recorded actuals toward 1.0 so one data point cannot swing later estimates. Judgment, but a deliberately conservative one: it only ever reduces the influence of thin data. |
+
+> **Nothing here is invented at report time.** Every figure above is either
+> measured, supplied by you, or one of the listed factors applied to those. Where
+> the estimator cannot attribute a cost honestly — target credits with no declared
+> evaluation cases, for instance — it says so rather than distributing the total
+> to make the table look complete.
+
+### Provenance of every figure
+
+Every money figure and every grouped number above has been checked against the
+estimator's own derivation ledger. Each one is either measured from session
+history, a published rate carrying a source URL and verification date, a value you
+declared in the manifest, or arithmetic on those.
+
+**Nothing in this report is asserted without a derivation.** The check is
+mechanical and runs on every build; a figure the estimator cannot account for
+fails validation rather than being printed.
 
 ## Known limits
 

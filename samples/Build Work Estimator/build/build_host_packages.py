@@ -65,14 +65,19 @@ COWORK_ID = str(uuid.uuid5(uuid.NAMESPACE_URL,
                            "https://github.com/Dewain27/AgentDudeSamples/" + NAME))
 
 # References consolidated for packaging: 5 files -> 2.
+# One consolidated reference. The skill grew four modules and hit the
+# documented 20-companion ceiling with zero headroom; splitting references
+# bought nothing a reader values and cost the budget that new capability needs.
 REFERENCE_GROUPS = {
-    "rates.md": ["rates-anthropic.md", "rates-copilot-credits.md"],
-    "methodology.md": ["methodology.md", "platforms-and-licensing.md",
-                       "contributing-calibration.md"],
+    "reference.md": ["methodology.md", "platforms-and-licensing.md",
+                     "rates-anthropic.md", "rates-copilot-credits.md",
+                     "contributing-calibration.md"],
 }
 
 # Only one worked example ships in packages; both stay in the repo sample.
-PACKAGED_ASSETS = ("harbor-line-estimate.md", "harbor-line-manifest.yaml")
+# SKILL.md already carries the complete manifest shape, so shipping the
+# example manifest as well is redundant against a hard file budget.
+PACKAGED_ASSETS = ("harbor-line-estimate.md",)
 
 OLD_PDF_BLOCK = """```bash
 python scripts/render_report.py estimate.json -o build-estimate --format both
