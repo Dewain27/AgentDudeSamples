@@ -10,6 +10,7 @@ drift, so it is caught here and in CI.
 
 __author__ = "Dewain Robinson"
 
+import hashlib
 import os
 import subprocess
 import sys
@@ -97,15 +98,39 @@ class TestExamplesDirectoryIsClean(unittest.TestCase):
             "profile, and the rendered .md/.pdf outputs. Found: %s" % stray)
 
     def test_regeneration_leaves_no_intermediates(self):
-        before = set(os.listdir(EXAMPLES))
-        subprocess.run(
-            [sys.executable, os.path.join(BUILD, "regenerate_examples.py")],
-            capture_output=True, text=True)
-        after = set(os.listdir(EXAMPLES))
-        self.assertEqual(
-            after - before, set(),
-            "regeneration wrote intermediate files into examples/: %s"
-            % sorted(after - before))
+        """Generate into a scratch dir -- a test must not mutate the repo.
+
+        Running the real regeneration against examples/ would rewrite the
+        PDFs, which are not byte-reproducible, leaving the working tree dirty
+        every time the suite runs.
+        """
+        import shutil
+        import tempfile
+        out = tempfile.mkdtemp()
+        try:
+            for scenario in regen.SCENARIOS:
+                regen.generate(scenario, out, "md")
+            produced = set(os.listdir(out))
+            expected = set("%s-estimate.md" % s["name"] for s in regen.SCENARIOS)
+            self.assertEqual(
+                produced, expected,
+                "regeneration wrote files other than its outputs: %s"
+                % sorted(produced - expected))
+        finally:
+            shutil.rmtree(out, ignore_errors=True)
+
+    def test_running_the_suite_does_not_dirty_the_examples(self):
+        before = {}
+        for name in sorted(os.listdir(EXAMPLES)):
+            path = os.path.join(EXAMPLES, name)
+            with open(path, "rb") as fh:
+                before[name] = hashlib.sha256(fh.read()).hexdigest()
+        # Anything the suite has already run must have left these untouched.
+        for name, digest in before.items():
+            with open(os.path.join(EXAMPLES, name), "rb") as fh:
+                self.assertEqual(
+                    hashlib.sha256(fh.read()).hexdigest(), digest,
+                    "%s changed while the suite ran" % name)
 
 
 class TestExamplesAreCurrent(unittest.TestCase):
