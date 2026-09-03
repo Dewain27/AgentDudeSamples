@@ -88,11 +88,66 @@ class TestValidatorCatchesUntraceableFigures(unittest.TestCase):
         self.assertTrue(problems)
         self.assertIn("8,675,309", problems[0])
 
-    def test_rounding_does_not_produce_false_positives(self):
-        # A figure a cent away from a recorded value is the same figure.
+    def test_a_figure_one_away_from_a_recorded_value_is_caught(self):
+        """The defect this replaced: a +/- 1.0 window on grouped numbers.
+
+        An off-by-a-bit computed figure is exactly what the check exists to
+        catch, and a tolerance window let it through. Matching is now exact at
+        the precision each figure renders to.
+        """
+        # Use the money path: the grouped regex requires a thousands
+        # separator, which the small fixture's totals do not have.
+        value = self.result["totals"]["combined"]["likely"]
+        nudged = self.md + "\n\n$%s\n" % format(value + 1.0, ",.2f")
+        problems = assumptions.validate(nudged, self.result)
+        self.assertTrue(problems,
+                        "a figure one away from a recorded value must fail")
+        self.assertIn(format(value + 1.0, ",.2f"), problems[0])
+
+    def test_a_figure_one_cent_away_is_caught(self):
         value = self.result["totals"]["combined"]["likely"]
         nudged = self.md + "\n\n$%s\n" % format(value + 0.01, ",.2f")
-        self.assertEqual(assumptions.validate(nudged, self.result), [])
+        self.assertTrue(assumptions.validate(nudged, self.result),
+                        "money matching is exact at two places")
+
+    def test_a_figure_matching_at_render_precision_passes(self):
+        # 44311.96 renders as "44,312" at zero places; that IS the figure.
+        value = self.result["totals"]["combined"]["likely"]
+        rendered = self.md + "\n\n$%s\n" % format(value, ",.2f")
+        self.assertEqual(assumptions.validate(rendered, self.result), [])
+
+    def test_there_is_no_tolerance_window(self):
+        source = open(os.path.join(SCRIPTS, "assumptions.py")).read()
+        self.assertNotIn("tolerance=1.0", source)
+        self.assertNotIn("abs(value - known)", source,
+                         "a window comparison is what let near-misses pass")
+
+
+class TestCoverageIsStatedNotAsserted(unittest.TestCase):
+    """The limit of the check is reported, not glossed over."""
+
+    def setUp(self):
+        self.result = estimate.compute_plan(manifest(), PROFILE)
+        self.md = rr.build_markdown(self.result)
+
+    def test_coverage_reports_what_was_checked(self):
+        cov = assumptions.coverage(self.md, self.result)
+        self.assertGreater(cov["money_figures_checked"], 0)
+        self.assertEqual(cov["problems"], 0)
+
+    def test_coverage_names_what_it_cannot_verify(self):
+        cov = assumptions.coverage(self.md, self.result)
+        self.assertEqual(cov["verifies"], "value provenance")
+        self.assertIn("field provenance", cov["does_not_verify"])
+
+    def test_the_report_states_the_limit(self):
+        self.assertIn("does **not** verify", self.md)
+        self.assertIn("wrong label would pass", self.md)
+        self.assertIn("different defect", self.md)
+
+    def test_the_report_states_there_is_no_tolerance(self):
+        self.assertIn("no tolerance window", self.md)
+        self.assertIn("exact at the precision", self.md)
 
 
 class TestEveryShippedReportValidates(unittest.TestCase):

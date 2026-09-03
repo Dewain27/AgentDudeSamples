@@ -291,6 +291,14 @@ declared in the manifest, or arithmetic on those.
 mechanical and runs on every build; a figure the estimator cannot account for
 fails validation rather than being printed.
 
+Matching is exact at the precision each figure is rendered to.
+There is **no tolerance window**, so a value one away from a recorded one fails.
+
+What it does **not** verify: that a recorded value appears in the right place. A
+renderer showing a real figure under the wrong label would pass. That is a
+different defect needing a different check, and claiming otherwise would be the
+overstatement this section exists to avoid.
+
 ## Known limits
 
 1. **Build only.** Nothing here is the cost of running the agent once it is live.

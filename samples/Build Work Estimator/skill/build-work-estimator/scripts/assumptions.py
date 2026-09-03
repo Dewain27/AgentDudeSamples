@@ -212,11 +212,19 @@ def ledger(result):
     return found
 
 
-def _cited(value, book, tolerance=0.02):
-    """A figure is cited if the ledger holds it, allowing for rounding."""
-    if round(value, 2) in book:
-        return True
-    return any(abs(value - known) <= tolerance for known in book)
+def _cited(value, book, places):
+    """Is this rendered figure exactly some recorded value, at its precision?
+
+    The report formats to a fixed number of decimal places, so a recorded
+    44311.96 renders as "44,312" at zero places. Matching therefore compares
+    the ROUNDED forms rather than opening a tolerance window.
+
+    An earlier version allowed +/- 1.0 on grouped numbers, which let a figure
+    one away from a recorded value pass -- exactly the off-by-a-bit computed
+    value the check exists to catch. There is no window now.
+    """
+    target = round(value, places)
+    return any(round(known, places) == target for known in book)
 
 
 def validate(markdown, result):
@@ -230,19 +238,45 @@ def validate(markdown, result):
 
     for raw in set(_MONEY.findall(markdown)):
         value = float(raw.replace(",", ""))
-        if not _cited(value, book):
+        if not _cited(value, book, places=2):
             problems.append(
                 "$%s appears in the report but the estimator cannot say where "
                 "it came from" % raw)
 
     for raw in set(_GROUPED.findall(markdown)):
         value = float(raw.replace(",", ""))
-        if not _cited(value, book, tolerance=1.0):
+        if not _cited(value, book, places=0):
             problems.append(
                 "%s appears in the report but the estimator cannot say where "
                 "it came from" % raw)
 
     return sorted(problems)
+
+
+def coverage(markdown, result):
+    """What the check actually verifies, measured rather than asserted.
+
+    Honesty about the limit matters as much as the check: this validates
+    VALUE provenance -- every figure equals something the estimator recorded
+    -- not FIELD provenance. It cannot detect a renderer that displays a real
+    value from the wrong field. That is a different defect needing a different
+    check, and claiming otherwise would be the kind of overstatement this
+    module exists to prevent.
+    """
+    book = ledger(result)
+    money = set(_MONEY.findall(markdown))
+    grouped = set(_GROUPED.findall(markdown))
+    shared = sum(1 for paths in book.values() if len(paths) > 1)
+    return {
+        "recorded_values": len(book),
+        "values_with_multiple_origins": shared,
+        "money_figures_checked": len(money),
+        "grouped_figures_checked": len(grouped),
+        "problems": len(validate(markdown, result)),
+        "verifies": "value provenance",
+        "does_not_verify": "field provenance -- a real value shown in the "
+                           "wrong place still passes",
+    }
 
 
 def render_provenance(result, problems):
@@ -269,5 +303,15 @@ def render_provenance(result, problems):
                "The check is\nmechanical and runs on every build; a figure "
                "the estimator cannot account for\nfails validation rather "
                "than being printed.")
+    out.append("")
+    out.append("Matching is exact at the precision each figure is rendered "
+               "to.\nThere is **no tolerance window**, so a value one away "
+               "from a recorded one fails.")
+    out.append("")
+    out.append("What it does **not** verify: that a recorded value appears in "
+               "the right place. A\nrenderer showing a real figure under the "
+               "wrong label would pass. That is a\ndifferent defect needing a "
+               "different check, and claiming otherwise would be the\n"
+               "overstatement this section exists to avoid.")
     out.append("")
     return "\n".join(out)
