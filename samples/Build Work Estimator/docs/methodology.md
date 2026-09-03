@@ -144,6 +144,21 @@ to prevent.
 - **Quality.** A cheaper build is not a better one, and this says nothing about
   whether the output is any good.
 
+## The weakest input, and what would fix it
+
+Everything above is arithmetic on measured values except one thing: the work
+breakdown itself. The turn medians are measured; what they get **applied to**
+is a judgment someone made when they wrote `size: medium, files: 11`.
+
+Nothing in the estimator checks whether that breakdown is complete, whether an
+item is plausibly sized, or whether the specification is detailed enough to
+size from at all.
+
+[`2026-09-03-build-work-researcher-design.md`](2026-09-03-build-work-researcher-design.md)
+specifies a companion skill that attacks exactly that gap — and, critically,
+produces **structure and questions, never numbers**, so nothing it finds
+enters the arithmetic without a human sizing it first.
+
 ## The honest limits
 
 1. **Turn counts per bucket are the weakest input.** Everything else is
