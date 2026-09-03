@@ -35,6 +35,41 @@ generated: 2026-09-03T00:00:00Z
 > Rates verified 2026-06-24 and change without notice.
 > Calibration source: `measured` · Generated 2026-09-03T00:00:00Z
 
+## Estimate summary
+
+### What was estimated
+
+| Input | Value |
+| --- | --- |
+| **Built with** (development tool) | Claude Code — metered in USD (tokens) |
+| **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
+| Target harness | `github-copilot` — bills for build, test and evaluation |
+| Licensing | Seat — Claude Max, $200.00/month x 1 seat = $200.00/month |
+| Evaluation cycles planned | 4 |
+| Contingency reserve | 25% |
+| Calibration | Measured, 24 local sessions |
+
+### Totals
+
+| | Build — USD | Target — Copilot Credits | **Combined (USD)** |
+| --- | ---: | ---: | ---: |
+| Low | $230.67 | 28,418 | $514.85 |
+| **Likely** | **$890.21** | **32,290** | **$1,213.11** |
+| High | $5,230.98 | 40,035 | $5,631.33 |
+| **Likely + 25% reserve** | **$1,112.76** | **40,362** | **$1,516.38** |
+
+> **Plan for $1,213.11. Hold $1,516.38 including the 25% reserve.**
+
+**Two meters, not two options.** The build and target figures are spent on the same
+project over the same period and add together; they are not alternatives to choose
+between.
+
+- Copilot Credits are converted at $0.01 each so the two meters can be shown in one column. They are separate budgets drawn on different accounts.
+- The build figure is **notional** — on seat licensing no additional money is invoiced. See Licensing below for the share of the seat this build actually consumes.
+- The build range comes from observed spread in comparable work; the target range from running 3 to 6 evaluation cycles instead of 4.
+
+Everything below explains how each of these figures was reached.
+
 ## Platforms
 
 | | Platform | Metered in |
@@ -66,16 +101,6 @@ cover operating it afterwards.
 | Infrastructure, hosting, storage, egress | Your cloud cost tooling |
 | Human labour — PM, design, QA time | Your delivery estimation process |
 | Ongoing maintenance and support after delivery | A run cost, not a build cost |
-
-## Summary
-
-| Component | Meter | Total | With 25% reserve |
-| --- | --- | ---: | ---: |
-| Build — authoring and remediation | USD (tokens) | $890.21 | $1,112.76 |
-| Target — preview, test and evaluation | Copilot Credits | 32,290 | 40,362 |
-
-**Two meters, not two options.** The figures above are spent on the same project
-over the same period and add together; they are not alternatives to choose between.
 
 ## The build loop
 

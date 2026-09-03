@@ -175,6 +175,36 @@ than a comparison:
 
 ## What good output looks like
 
+Every report opens with an executive summary — the inputs that were given, then
+four numbers — before any of the detail:
+
+```
+### What was estimated
+  Built with (development tool)    Claude Code — metered in USD (tokens)
+  Built on  (target environment)   Microsoft Copilot Studio — Copilot Credits
+  Target harness                   github-copilot — bills for build, test, eval
+  Licensing                        Seat — Claude Max, $200.00/month x 1 seat
+  Evaluation cycles planned        4
+  Contingency reserve              25%
+  Calibration                      Measured, 24 local sessions
+
+### Totals
+                          Build (USD)   Target (Credits)   Combined (USD)
+  Low                         $230.67             28,418         $514.85
+  Likely                      $890.21             32,290       $1,213.11
+  High                      $5,230.98             40,035       $5,631.33
+  Likely + 25% reserve      $1,112.76             40,362       $1,516.38
+
+  Plan for $1,213.11. Hold $1,516.38 including the 25% reserve.
+```
+
+The build range comes from observed spread in comparable work; the target range
+from running 3 to 6 evaluation cycles instead of 4. Credits are converted at
+$0.01 purely so both meters fit one column — they remain separate budgets on
+different accounts, and the report says so.
+
+Everything after the summary explains how each figure was reached.
+
 ### Reserve adequacy — the section that earns its keep
 
 ```

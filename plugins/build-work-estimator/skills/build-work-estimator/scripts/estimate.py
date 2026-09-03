@@ -502,7 +502,7 @@ def compute_plan(manifest, profile):
     for key in (["copilot-studio", "azure"] if target_key == "both"
                 else [target_key]):
         try:
-            targets.append(target_platform.compute(
+            targets.append(target_platform.compute_range(
                 target_cfg, reserve_pct, target=key))
         except target_platform.TargetPlatformError as exc:
             raise EstimateError(str(exc))

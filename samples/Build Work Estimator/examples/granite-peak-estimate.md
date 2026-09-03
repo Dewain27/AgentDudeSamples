@@ -35,6 +35,41 @@ generated: 2026-09-03T00:00:00Z
 > Rates verified 2026-06-24 and change without notice.
 > Calibration source: `not applicable` · Generated 2026-09-03T00:00:00Z
 
+## Estimate summary
+
+### What was estimated
+
+| Input | Value |
+| --- | --- |
+| **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
+| **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
+| Target harness | `standard` — does not bill for build or test |
+| Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats = $57.00/month |
+| Evaluation cycles planned | 3 |
+| Contingency reserve | 30% |
+| Calibration | Not applicable — the build platform is not metered from local session history |
+
+### Totals
+
+| | Build — GitHub AI Credits | Target — Copilot Credits | **Combined (USD)** |
+| --- | ---: | ---: | ---: |
+| Low | 900 | 104 | $10.04 |
+| **Likely** | **900** | **156** | **$10.56** |
+| High | 900 | 260 | $11.60 |
+| **Likely + 30% reserve** | **1,170** | **203** | **$13.73** |
+
+> **Plan for $10.56. Hold $13.73 including the 30% reserve.**
+
+**Two meters, not two options.** The build and target figures are spent on the same
+project over the same period and add together; they are not alternatives to choose
+between.
+
+- Copilot Credits are converted at $0.01 each so the two meters can be shown in one column. They are separate budgets drawn on different accounts.
+- The build figure is **notional** — on seat licensing no additional money is invoiced. See Licensing below for the share of the seat this build actually consumes.
+- The build side has no measured spread of its own: the declared interaction volume is the estimate. Only the target side varies here.
+
+Everything below explains how each of these figures was reached.
+
 ## Platforms
 
 | | Platform | Metered in |
@@ -66,16 +101,6 @@ cover operating it afterwards.
 | Infrastructure, hosting, storage, egress | Your cloud cost tooling |
 | Human labour — PM, design, QA time | Your delivery estimation process |
 | Ongoing maintenance and support after delivery | A run cost, not a build cost |
-
-## Summary
-
-| Component | Meter | Total | With 30% reserve |
-| --- | --- | ---: | ---: |
-| Build — authoring and remediation | GitHub AI Credits | 900 | 1,170 |
-| Target — billable side-effects only — preview, test and evaluation are unbilled on the standard harness | Copilot Credits | 156 | 203 |
-
-**Two meters, not two options.** The figures above are spent on the same project
-over the same period and add together; they are not alternatives to choose between.
 
 ## The build loop
 
