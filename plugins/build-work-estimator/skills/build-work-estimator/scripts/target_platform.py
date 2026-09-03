@@ -61,6 +61,9 @@ DEFAULTS = {
     # Azure targets: the user supplies their own figure; nothing is bundled.
     "azure_build_usd": 0.0,
     "azure_note": "",
+    # A real Azure target is many services. One opaque number hides which of
+    # them the estimate is actually about.
+    "azure_components": None,
 }
 
 
@@ -130,7 +133,20 @@ def compute(config, reserve_percent, target="copilot-studio"):
     }
 
     if target == "azure":
-        usd = float(cfg["azure_build_usd"] or 0.0)
+        components = cfg.get("azure_components") or []
+        itemised = 0.0
+        for entry in components:
+            if not isinstance(entry, dict):
+                raise TargetPlatformError(
+                    "azure_components entries must be mappings with `name` "
+                    "and `usd`.")
+            try:
+                itemised += float(entry.get("usd") or 0.0)
+            except (TypeError, ValueError):
+                raise TargetPlatformError(
+                    "azure_components[%r].usd must be a number"
+                    % entry.get("name"))
+        usd = itemised if components else float(cfg["azure_build_usd"] or 0.0)
         result.update({
             "harness": None,
             "currency": "USD",
@@ -142,13 +158,24 @@ def compute(config, reserve_percent, target="copilot-studio"):
         })
         result["budget_dollars"] = round(
             result["total_dollars"] + result["reserve_dollars"], 2)
-        result["lines"].append({
-            "label": "Azure consumption during build and test",
-            "credits": 0.0, "dollars": round(usd, 2), "billed": True,
-            "unbilled_credits": 0.0,
-            "detail": cfg["azure_note"] or "user-supplied figure; Azure rates "
-                                           "are not bundled here",
-        })
+        result["azure_components"] = components
+        if components:
+            for entry in components:
+                result["lines"].append({
+                    "label": entry.get("name", "Azure component"),
+                    "credits": 0.0,
+                    "dollars": round(float(entry.get("usd") or 0.0), 2),
+                    "billed": True, "unbilled_credits": 0.0,
+                    "detail": entry.get("note", ""),
+                })
+        else:
+            result["lines"].append({
+                "label": "Azure consumption during build and test",
+                "credits": 0.0, "dollars": round(usd, 2), "billed": True,
+                "unbilled_credits": 0.0,
+                "detail": cfg["azure_note"] or "user-supplied figure; Azure "
+                                               "rates are not bundled here",
+            })
         return result
 
     harness = validate_harness(cfg["harness"])

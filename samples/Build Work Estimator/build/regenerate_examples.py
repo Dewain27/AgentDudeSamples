@@ -33,6 +33,7 @@ import tempfile
 SAMPLE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCRIPTS = os.path.join(SAMPLE, "skill", "build-work-estimator", "scripts")
 EXAMPLES = os.path.join(SAMPLE, "examples")
+SCENARIOS_DIR = os.path.join(SAMPLE, "scenarios")
 PROFILE = os.path.join(EXAMPLES, "calibration-profile.json")
 
 #: Pinned so regeneration is deterministic. These are sample identifiers, not
@@ -52,6 +53,25 @@ SCENARIOS = (
     },
 )
 
+#: Full worked scenarios. Same governance as the minimal examples: generated
+#: from committed inputs, byte-reproducible, and checked in CI.
+SCENARIO_RUNS = (
+    {
+        "name": "kestrel-claude-code",
+        "dir": os.path.join(SCENARIOS_DIR, "kestrel-financial"),
+        "manifest": "kestrel-claude-code-manifest.yaml",
+        "estimate_id": "est_20260903T000000_kestrelcc",
+        "generated": "2026-09-03T00:00:00Z",
+    },
+    {
+        "name": "kestrel-github-copilot",
+        "dir": os.path.join(SCENARIOS_DIR, "kestrel-financial"),
+        "manifest": "kestrel-github-copilot-manifest.yaml",
+        "estimate_id": "est_20260903T000000_kestrelgh",
+        "generated": "2026-09-03T00:00:00Z",
+    },
+)
+
 #: Figures pulled out of the Markdown and required to appear in the PDF.
 MONEY = re.compile(r"\$[\d,]+\.\d{2}")
 BIG_NUMBER = re.compile(r"\b\d{1,3}(?:,\d{3})+\b")
@@ -63,6 +83,10 @@ def run(argv):
         raise SystemExit("command failed: %s\n%s%s"
                          % (" ".join(argv), proc.stdout, proc.stderr))
     return proc.stdout
+
+
+def _home(scenario):
+    return scenario.get("dir", EXAMPLES)
 
 
 def generate(scenario, out_dir, formats="both", payload_dir=None):
@@ -77,7 +101,7 @@ def generate(scenario, out_dir, formats="both", payload_dir=None):
         os.makedirs(payload_dir)
     payload = os.path.join(payload_dir, scenario["name"] + ".json")
     run([sys.executable, os.path.join(SCRIPTS, "estimate.py"),
-         "--manifest", os.path.join(EXAMPLES, scenario["manifest"]),
+         "--manifest", os.path.join(_home(scenario), scenario["manifest"]),
          "--profile", PROFILE,
          "--estimate-id", scenario["estimate_id"],
          "--generated", scenario["generated"],
@@ -148,16 +172,20 @@ def main(argv=None):
         for scenario in SCENARIOS:
             generate(scenario, EXAMPLES, "both", payload_dir=scratch)
             print("Regenerated examples/%s-estimate.{md,pdf}" % scenario["name"])
+        for scenario in SCENARIO_RUNS:
+            generate(scenario, scenario["dir"], "both", payload_dir=scratch)
+            print("Regenerated scenarios/%s/%s-estimate.{md,pdf}"
+                  % (os.path.basename(scenario["dir"]), scenario["name"]))
         print("\nCommit the result. `--check` in CI will fail if these drift "
               "from the code.")
         return 0
 
     problems = []
     staging = tempfile.mkdtemp()
-    for scenario in SCENARIOS:
+    for scenario in SCENARIOS + SCENARIO_RUNS:
         fresh = generate(scenario, staging, "md")
         committed = os.path.join(
-            EXAMPLES, scenario["name"] + "-estimate.md")
+            _home(scenario), scenario["name"] + "-estimate.md")
         if not os.path.exists(committed):
             problems.append("%s: committed Markdown is missing"
                             % scenario["name"])
@@ -170,7 +198,8 @@ def main(argv=None):
                     "code" % scenario["name"])
         problems.extend(check_pdf(
             scenario["name"], committed,
-            os.path.join(EXAMPLES, scenario["name"] + "-estimate.pdf")))
+            os.path.join(_home(scenario),
+                         scenario["name"] + "-estimate.pdf")))
 
     if problems:
         print("Worked examples are OUT OF DATE:\n", file=sys.stderr)
@@ -180,8 +209,9 @@ def main(argv=None):
               "  python build/regenerate_examples.py", file=sys.stderr)
         return 1
 
-    print("Worked examples are current (%d scenario%s checked)."
-          % (len(SCENARIOS), "" if len(SCENARIOS) == 1 else "s"))
+    total = len(SCENARIOS) + len(SCENARIO_RUNS)
+    print("Worked examples and scenarios are current (%d run%s checked)."
+          % (total, "" if total == 1 else "s"))
     return 0
 
 

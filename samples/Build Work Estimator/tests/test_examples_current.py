@@ -133,6 +133,75 @@ class TestExamplesDirectoryIsClean(unittest.TestCase):
                     "%s changed while the suite ran" % name)
 
 
+class TestScenariosAreGoverned(unittest.TestCase):
+    """Full scenarios live under the same rules as the minimal examples."""
+
+    def test_scenario_runs_are_registered(self):
+        self.assertTrue(regen.SCENARIO_RUNS,
+                        "scenarios must be registered for regeneration")
+
+    def test_every_scenario_input_is_committed(self):
+        for run in regen.SCENARIO_RUNS:
+            self.assertTrue(
+                os.path.exists(os.path.join(run["dir"], run["manifest"])),
+                "missing scenario manifest: %s" % run["manifest"])
+
+    def test_every_scenario_has_a_specification(self):
+        seen = set(run["dir"] for run in regen.SCENARIO_RUNS)
+        for directory in seen:
+            self.assertTrue(
+                os.path.exists(os.path.join(directory, "specification.md")),
+                "a scenario without a specification is just a fixture")
+
+    def test_both_developer_ais_are_exercised(self):
+        import miniyaml
+        platforms = set()
+        for run in regen.SCENARIO_RUNS:
+            data = miniyaml.load_path(
+                os.path.join(run["dir"], run["manifest"]))
+            platforms.add(data["build_platform"])
+        self.assertEqual(platforms, {"claude-code", "github-copilot"})
+
+    def test_the_two_runs_share_one_work_breakdown(self):
+        """Two runs of one scenario must estimate the same scope."""
+        import miniyaml
+        breakdowns = []
+        for run in regen.SCENARIO_RUNS:
+            data = miniyaml.load_path(
+                os.path.join(run["dir"], run["manifest"]))
+            breakdowns.append([
+                (i["name"], i["size"], i.get("files"), i.get("unknowns"))
+                for i in data["items"]])
+        self.assertEqual(
+            breakdowns[0], breakdowns[1],
+            "the runs differ in scope, so they are not estimating the same "
+            "programme")
+
+    def test_the_two_runs_share_one_target(self):
+        import miniyaml
+        targets = []
+        for run in regen.SCENARIO_RUNS:
+            data = miniyaml.load_path(
+                os.path.join(run["dir"], run["manifest"]))
+            targets.append((data["target_platform"], data["target"]))
+        self.assertEqual(targets[0], targets[1],
+                         "the target does not change with the build tool")
+
+    def test_reports_are_standalone_not_a_comparison(self):
+        for run in regen.SCENARIO_RUNS:
+            path = os.path.join(run["dir"], run["name"] + "-estimate.md")
+            with open(path) as fh:
+                body = fh.read()
+            self.assertIn("not a platform comparison tool", body)
+            for other in regen.SCENARIO_RUNS:
+                if other["name"] == run["name"]:
+                    continue
+                self.assertNotIn(
+                    other["name"], body,
+                    "%s references the other run; each report must stand "
+                    "alone" % run["name"])
+
+
 class TestExamplesAreCurrent(unittest.TestCase):
     def test_committed_examples_match_a_fresh_regeneration(self):
         proc = subprocess.run(

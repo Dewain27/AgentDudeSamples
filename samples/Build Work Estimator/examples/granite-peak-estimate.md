@@ -44,7 +44,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
 | Target harness | `standard` — does not bill for build or test |
-| Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats = $57.00/month |
+| Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats x 1 month = **$57.00** over the build |
 | Evaluation cycles planned | 3 |
 | Contingency reserve | 30% |
 | Calibration | Not applicable — the build platform is not metered from local session history |

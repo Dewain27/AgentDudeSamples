@@ -440,6 +440,11 @@ def compute(manifest, profile):
         "generated": calibrate._now(),
         "author": manifest.get("author", "Dewain Robinson"),
         "project": manifest.get("project", "Unnamed build"),
+        # Turn count is a property of the WORK, not of the tool doing it, so
+        # it sizes a GitHub Copilot build too -- only the price per turn
+        # differs. The report states that this comes from Claude Code
+        # calibration when it is used that way.
+        "total_turns": int(sum(r["turns"] for r in rows)),
         "items": rows,
         "base": round(base, 2),
         "low": round(low, 2),
@@ -483,11 +488,38 @@ def compute_plan(manifest, profile):
         build_currency_total = base["base"]
     else:
         import github_copilot
+        gh_cfg = dict(manifest.get("github_copilot") or {})
+        sized_from_items = None
+        if manifest.get("items") and not gh_cfg.get("interactions"):
+            # Size the GitHub Copilot build from the SAME work breakdown the
+            # Claude Code path uses, so two estimates of one scenario are
+            # actually estimating the same scenario.
+            sizing = compute(manifest, profile)
+            gh_cfg["interactions"] = sizing["total_turns"]
+            sized_from_items = {
+                "total_turns": sizing["total_turns"],
+                "items": sizing["items"],
+                "thin_buckets": sizing.get("thin_buckets", []),
+                "profile": sizing["profile"],
+            }
         try:
-            build_detail = github_copilot.compute(
-                manifest.get("github_copilot"), reserve_pct)
+            build_detail = github_copilot.compute(gh_cfg, reserve_pct)
         except github_copilot.GitHubCopilotError as exc:
             raise EstimateError(str(exc))
+        if sized_from_items:
+            build_detail["sized_from_items"] = sized_from_items
+            # Same spread that gives the Claude Code build its range: similar
+            # work varies in how many turns it actually takes.
+            sizing_base = sizing["base"] or 1.0
+            for label, key in (("low", "low"), ("high", "high")):
+                ratio = sizing[key] / sizing_base
+                variant = dict(gh_cfg)
+                variant["interactions"] = max(
+                    1, int(round(sizing["total_turns"] * ratio)))
+                priced = github_copilot.compute(variant, reserve_pct)
+                build_detail["%s_units" % label] = priced["total_units"]
+                build_detail["%s_dollars" % label] = priced.get(
+                    "total_dollars", 0)
         base = None
         build_currency_total = build_detail.get("total_units", 0)
 
@@ -554,7 +586,16 @@ def compute_plan(manifest, profile):
         result["profile"] = base["profile"]
     else:
         result["build"] = None
-        result["profile"] = {"source": "not applicable"}
+        sized = (build_detail or {}).get("sized_from_items")
+        if sized:
+            # The work was sized from the same calibrated turn medians. Turn
+            # count is a property of the work, not the tool -- but that is an
+            # assumption, and the report must state it rather than imply the
+            # figure came from GitHub Copilot history.
+            result["profile"] = dict(sized["profile"])
+            result["profile"]["sized_from_claude_calibration"] = True
+        else:
+            result["profile"] = {"source": "not applicable"}
 
     return result
 

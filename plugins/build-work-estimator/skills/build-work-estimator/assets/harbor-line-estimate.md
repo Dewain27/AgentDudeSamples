@@ -44,7 +44,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
-| Licensing | Seat — Claude Max, $200.00/month x 1 seat = $200.00/month |
+| Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
 | Evaluation cycles planned | 4 |
 | Contingency reserve | 25% |
 | Calibration | Measured, 24 local sessions |
@@ -157,8 +157,9 @@ so no additional money changes hands for this build -- but the seat is not free.
 
 | | |
 | --- | ---: |
-| Share of a typical month's allowance | **188%** |
-| Seat cost per month | $200.00 |
+| Developer-months of allowance available | 1 (1 seat x 1 month) |
+| Share of that allowance | **188%** |
+| Seat spend over the build | $200.00 |
 | **Attributable cost of this build** | **$376.15** |
 | Already committed to other work | 45% |
 | **Total committed** | **233%** |

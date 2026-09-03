@@ -142,20 +142,23 @@ def _build_totals(result):
             "usd_high": build["high"], "usd_with_reserve": build["budget_ask"],
             "notional": (build.get("licensing") or {}).get("model") == "seat",
         }
-    units = (detail or {}).get("total_units", 0) or 0
+    detail = detail or {}
+    units = detail.get("total_units", 0) or 0
     rate = rates.DOLLARS_PER_GITHUB_AI_CREDIT
-    with_reserve = (detail or {}).get("budget_units", units)
-    # A GitHub Copilot build has no measured spread of its own; the declared
-    # interaction volume is the estimate. Say so rather than invent a range.
+    with_reserve = detail.get("budget_units", units)
+    sized = detail.get("sized_from_items")
+    low = detail.get("low_units", units)
+    high = detail.get("high_units", units)
     return {
         "currency": "GitHub AI Credits",
-        "low": units, "likely": units, "high": units,
+        "low": low, "likely": units, "high": high,
         "with_reserve": with_reserve,
-        "usd_low": round(units * rate, 2), "usd_likely": round(units * rate, 2),
-        "usd_high": round(units * rate, 2),
+        "usd_low": round(low * rate, 2), "usd_likely": round(units * rate, 2),
+        "usd_high": round(high * rate, 2),
         "usd_with_reserve": round(with_reserve * rate, 2),
         "notional": (result.get("licensing") or {}).get("model") == "seat",
-        "no_range": True,
+        "no_range": not sized,
+        "sized_from_items": bool(sized),
     }
 
 
@@ -216,19 +219,31 @@ def build_summary(result):
         # seats; licensing.normalise() stores the PER-SEAT figure. Dividing
         # both misreports one of them, so discriminate explicitly.
         seats = max(1, licence.get("seats", 1))
-        is_attribution = "billed" in licence
-        total = licence.get("seat_monthly_cost", 0)
-        per_seat = (total / seats) if is_attribution else total
-        out.append("| Licensing | Seat — %s, $%s/month x %d seat%s = $%s/month |"
+        months = licence.get("duration_months", 1) or 1
+        # licensing.attribute() stores the TOTAL over the build and the true
+        # monthly rate separately; licensing.normalise() stores only the rate.
+        # Labelling the total as "per month" overstated it by the duration.
+        rate = licence.get("seat_rate_monthly")
+        if rate is None:
+            rate = licence.get("seat_monthly_cost", 0)
+        total = rate * seats * months
+        out.append("| Licensing | Seat — %s, $%s/month x %d seat%s x %s month%s "
+                   "= **$%s** over the build |"
                    % (licence.get("plan") or "unspecified",
-                      format(per_seat, ",.2f"), seats,
-                      "" if seats == 1 else "s",
-                      format(per_seat * seats, ",.2f")))
+                      format(rate, ",.2f"), seats, "" if seats == 1 else "s",
+                      format(months, ",g"), "" if months == 1 else "s",
+                      format(total, ",.2f")))
     elif licence.get("model"):
         out.append("| Licensing | Consumption — every unit bills |")
     out.append("| Evaluation cycles planned | %d |" % result["eval_cycles"])
     out.append("| Contingency reserve | %.0f%% |" % result["reserve_percent"])
-    if profile.get("source") == "measured":
+    if profile.get("source") == "measured" and \
+            profile.get("sized_from_claude_calibration"):
+        out.append("| Work sizing | Turn counts from measured Claude Code "
+                   "calibration (%d session%s), used as a work-size proxy |"
+                   % (profile.get("sessions", 0),
+                      "" if profile.get("sessions") == 1 else "s"))
+    elif profile.get("source") == "measured":
         out.append("| Calibration | Measured, %d local session%s |"
                    % (profile.get("sessions", 0),
                       "" if profile.get("sessions") == 1 else "s"))
@@ -296,7 +311,13 @@ def build_summary(result):
         notes.append("The build figure is **notional** — on seat licensing no "
                      "additional money is invoiced. See Licensing below for "
                      "the share of the seat this build actually consumes.")
-    if build.get("no_range"):
+    if build.get("sized_from_items"):
+        notes.append("The build side is sized from the same work breakdown "
+                     "using turn medians measured on Claude Code. Turn count "
+                     "is treated as a property of the work rather than of the "
+                     "tool; the price per turn is not. That is an assumption, "
+                     "not a measurement of GitHub Copilot.")
+    elif build.get("no_range"):
         notes.append("The build side has no measured spread of its own: the "
                      "declared interaction volume is the estimate. Only the "
                      "target side varies here.")

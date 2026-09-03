@@ -66,10 +66,10 @@ jobs:
             sys.exit(0 if d['build']['base'] > 0 else 1)"
           pip install pyyaml
 
-      - name: Worked examples are current
+      - name: Worked examples and scenarios are current
         run: |
-          # Fails if the committed examples drift from the code that makes
-          # them, or if a PDF is left behind at old numbers.
+          # Fails if committed examples or scenario runs drift from the code
+          # that makes them, or if a PDF is left behind at old numbers.
           python build/regenerate_examples.py --check
 
       - name: Generated plugin is current
