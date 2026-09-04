@@ -29,6 +29,8 @@ asserts parity between the two on every shipped manifest.
 
 __author__ = "Dewain Robinson"
 
+import re as _re
+
 TRUE = ("true", "yes", "on")
 FALSE = ("false", "no", "off")
 NULL = ("null", "~", "")
@@ -84,6 +86,103 @@ def _strip_comment(line):
             break
         out.append(char)
     return "".join(out).rstrip()
+
+
+_BLOCK_TOKEN = "__miniyaml_block_%d__"
+_BLOCK_HEADER = _re.compile(
+    r"^(\s*)(-\s+)?([A-Za-z0-9_.\-]+)\s*:\s*([>|])([-+]?)\s*$")
+
+
+def _extract_block_scalars(text):
+    """Fold `key: >` and `key: |` blocks out of the text before tokenising.
+
+    Block scalars carry prose, and prose is why they exist: a finding's
+    rationale is a paragraph, not a phrase. The tokeniser below strips
+    comments and blank lines, both of which are literal content inside a
+    block, so the block has to come out first.
+
+    Each block is replaced by a bare placeholder token and restored after the
+    structure is parsed. Going via a placeholder rather than a quoted string
+    keeps prose containing quotes and backslashes intact -- `_scalar` strips
+    quotes but does not decode escapes, so round-tripping through one would
+    corrupt exactly the text this exists to carry.
+    """
+    lines = text.splitlines()
+    out, blocks, index = [], {}, 0
+
+    while index < len(lines):
+        match = _BLOCK_HEADER.match(lines[index])
+        if not match:
+            out.append(lines[index])
+            index += 1
+            continue
+
+        prefix, dash, key, style, chomp = match.groups()
+        dash = dash or ""
+        # A block under a sequence entry is indented relative to the dash.
+        base = len(prefix) + len(dash)
+        index += 1
+
+        body = []
+        while index < len(lines):
+            line = lines[index]
+            if not line.strip():
+                body.append("")
+                index += 1
+                continue
+            if len(line) - len(line.lstrip(" ")) <= base:
+                break
+            body.append(line)
+            index += 1
+
+        while body and not body[-1].strip():
+            body.pop()
+
+        content = _fold(body, style)
+        if chomp != "-" and content:
+            content += "\n"
+        elif chomp == "+":
+            content += "\n"
+
+        token = _BLOCK_TOKEN % len(blocks)
+        blocks[token] = content
+        out.append("%s%s%s: %s" % (prefix, dash, key, token))
+
+    return "\n".join(out), blocks
+
+
+def _fold(body, style):
+    """Apply YAML block-scalar semantics to the collected lines."""
+    if not body:
+        return ""
+    indents = [len(l) - len(l.lstrip(" ")) for l in body if l.strip()]
+    strip = min(indents) if indents else 0
+    rows = [l[strip:] if l.strip() else "" for l in body]
+
+    if style == "|":
+        return "\n".join(rows)
+
+    # Folded: blank lines become newlines, other lines join with a space.
+    parts, current = [], []
+    for row in rows:
+        if row:
+            current.append(row)
+        else:
+            parts.append(" ".join(current))
+            current = []
+    parts.append(" ".join(current))
+    return "\n".join(parts)
+
+
+def _restore_blocks(value, blocks):
+    """Put the folded prose back where its placeholder sits."""
+    if isinstance(value, dict):
+        return {k: _restore_blocks(v, blocks) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_restore_blocks(v, blocks) for v in value]
+    if isinstance(value, str) and value in blocks:
+        return blocks[value]
+    return value
 
 
 def _lines(text):
@@ -206,6 +305,7 @@ def _parse_sequence(rows, index, indent):
 
 def parse(text):
     """Parse the manifest subset. Returns a dict (or None for empty input)."""
+    text, blocks = _extract_block_scalars(text)
     rows = list(_lines(text))
     if not rows:
         return None
@@ -215,7 +315,7 @@ def parse(text):
     if index != len(rows):
         raise ManifestParseError(
             "line %d could not be parsed." % rows[index][2])
-    return value
+    return _restore_blocks(value, blocks) if blocks else value
 
 
 def load(text):

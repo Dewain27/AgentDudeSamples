@@ -1,0 +1,126 @@
+# Research review of the Kestrel Financial specification
+# Author: Dewain Robinson
+#
+# This is the worked example of a Build Work Researcher review. It is the
+# review that was performed against the Kestrel specification BEFORE the four
+# resilience items were added to the breakdown, which is why those four appear
+# here as findings and are marked `addressed`.
+#
+# Every finding is structure or a question. There is no size, no turn count,
+# no hour figure and no cost anywhere in this file, and the schema has nowhere
+# to put one. `scripts/findings.py` rejects the document if that stops being
+# true -- in the fields AND in the prose.
+
+schema: 1
+reviewed: "2026-09-04"
+specification: scenarios/kestrel-financial/specification.md
+manifest: scenarios/kestrel-financial/kestrel-claude-code-manifest.yaml
+mode: offline
+
+findings:
+  - id: F-001
+    type: missing-component
+    severity: high
+    title: No work item covers backup, restore, or disaster recovery
+    rationale: >
+      N5 states recovery point and recovery time objectives for the platform.
+      The breakdown provisions Cosmos, Storage and the landing zone, but no
+      item owns backup configuration, restore rehearsal, failover runbooks, or
+      the drill that would demonstrate the objectives are met. Provisioning a
+      data store is not the same as being able to recover it.
+    spec_reference: "N5, and the Azure platform items in the breakdown"
+    breakdown_impact: >
+      A new item is needed, or the landing-zone item's scope must state that
+      recovery is inside it.
+    status: addressed
+
+  - id: F-002
+    type: missing-component
+    severity: high
+    title: Nothing covers load or performance testing
+    rationale: >
+      N1 sets a first-token latency target and N6 sets a concurrency target
+      for advisor sessions. No item covers building a load model, scripting
+      the scenarios, running them, or tuning against the result. Evaluation
+      cases test whether the agent answers correctly, which is a different
+      question from whether it answers under load.
+    spec_reference: "N1, N6, and section 11 on the evaluation strategy"
+    breakdown_impact: >
+      A new item, distinct from the evaluation cases already declared.
+    status: addressed
+
+  - id: F-003
+    type: missing-component
+    severity: high
+    title: Customer-managed key setup is unowned
+    rationale: >
+      N9 requires encryption at rest under customer-managed keys. Key Vault
+      appears in the Azure consumption list, but provisioning a vault is not
+      the same as wiring CMK into Cosmos and Storage, defining rotation, and
+      verifying enforcement. The item that would own that work does not exist.
+    spec_reference: "N9, and the Cosmos and Storage platform items"
+    breakdown_impact: >
+      A new item, applied per environment rather than authored once.
+    status: addressed
+
+  - id: F-004
+    type: missing-component
+    severity: medium
+    title: Region-pinned inference is required but nothing configures it
+    rationale: >
+      S10 and N8 require inference to stay within a named region for data
+      residency. No item covers configuring the pinning, preventing
+      cross-region egress, or producing the evidence a compliance reviewer
+      would ask for.
+    spec_reference: "S10, N8"
+    breakdown_impact: >
+      A new item, or an explicit statement that the landing-zone item includes
+      residency enforcement and its evidence.
+    status: addressed
+
+  - id: F-005
+    type: scope-question
+    severity: medium
+    title: Segregation of duties may or may not sit inside the CI/CD item
+    rationale: >
+      S9 requires deploy approvals to be separate from authoring. The CI/CD
+      and ALM item plausibly contains that work, but nothing says so. If it
+      does, the item is carrying a control it does not name; if it does not,
+      the control is unowned. Either way a reader cannot tell which.
+    spec_reference: "S9, and the CI/CD and ALM item"
+    breakdown_impact: >
+      Either the CI/CD item's scope statement names the control, or a separate
+      item does.
+    status: open
+
+  - id: F-006
+    type: unstated-unknown
+    severity: medium
+    title: KYC screening latency interacts with the agent latency target
+    rationale: >
+      The integration section notes that KYC screening latency degrades under
+      load, while N1 sets a first-token latency target for the agent. No item
+      declares an unknown for how a slow downstream screening call is handled
+      inside a latency-bound conversation. Whether the agent waits, streams
+      around it, or degrades is undecided.
+    spec_reference: "the KYC integration entry, N1"
+    breakdown_impact: >
+      The integration item should carry an additional declared unknown, which
+      widens its range.
+    status: open
+
+  - id: F-007
+    type: thin-specification
+    severity: medium
+    title: The client portal covers five modules as a single item
+    rationale: >
+      P1 through P5 describe authentication with step-up, account views,
+      documents, secure messaging and notifications. The breakdown carries one
+      item for the whole portal. P4's routing model is not defined in the
+      specification, so that part cannot be sized with confidence even by
+      someone who knows the rest well.
+    spec_reference: "P1-P5, and the client self-service portal item"
+    breakdown_impact: >
+      Either split the item along the module boundaries, or record that P4 is
+      undefined so the range widens to reflect it.
+    status: open

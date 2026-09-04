@@ -136,6 +136,104 @@ def interview(prompt=input, echo=print):
             "status": status}
 
 
+def normalise_review(config):
+    """Validate the manifest's optional `research_review:` block.
+
+    A review is DECLARED, never inferred. The estimator cannot tell whether a
+    breakdown was challenged, and it does not pretend to -- it records that
+    someone says it was, because "reviewed, three findings knowingly accepted"
+    is a materially different confidence signal from "never reviewed".
+
+    Absent is allowed and reported, exactly as a missing specification is.
+    """
+    if config is None:
+        return {"declared": False}
+
+    if not isinstance(config, dict):
+        raise SpecificationError(
+            "research_review must be a mapping:\n\n"
+            "  research_review:\n"
+            "    reviewed: 2026-09-04\n"
+            "    findings_total: 14\n"
+            "    findings_addressed: 11\n"
+            "    findings_accepted_as_is: 3\n")
+
+    def _count(key):
+        raw = config.get(key, 0) or 0
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            raise SpecificationError(
+                "research_review.%s must be a whole number, got %r"
+                % (key, raw))
+        if value < 0:
+            raise SpecificationError(
+                "research_review.%s cannot be negative." % key)
+        return value
+
+    total = _count("findings_total")
+    addressed = _count("findings_addressed")
+    accepted = _count("findings_accepted_as_is")
+
+    if addressed + accepted > total:
+        raise SpecificationError(
+            "research_review: %d addressed + %d accepted exceeds %d total. "
+            "Every finding is one or the other, or still open."
+            % (addressed, accepted, total))
+
+    return {
+        "declared": True,
+        "reviewed": str(config.get("reviewed") or "").strip() or None,
+        "findings_total": total,
+        "findings_addressed": addressed,
+        "findings_accepted_as_is": accepted,
+        "findings_open": total - addressed - accepted,
+    }
+
+
+def render_review_markdown(review):
+    """Report section: was the breakdown challenged, and what came of it."""
+    out = ["### Was the breakdown challenged?", ""]
+
+    if not review or not review.get("declared"):
+        out.append("> **No research review is recorded.** This estimate prices "
+                   "the breakdown as\n> written. Nothing has checked whether "
+                   "it is complete, whether an item is\n> plausibly sized, or "
+                   "whether the specification is detailed enough to size\n> "
+                   "from at all.")
+        out.append("")
+        out.append("Reviewing it is an available improvement, and the "
+                   "breakdown is the weakest\ninput in the whole estimate.")
+        out.append("")
+        return "\n".join(out)
+
+    out.append("A review is **declared**, not verified. The estimator records "
+               "that someone\nchallenged the breakdown; it cannot judge how "
+               "well.")
+    out.append("")
+    out.append("| | Findings |")
+    out.append("| --- | ---: |")
+    out.append("| Raised | %d |" % review["findings_total"])
+    out.append("| Addressed in the breakdown | %d |"
+               % review["findings_addressed"])
+    out.append("| Knowingly accepted as-is | %d |"
+               % review["findings_accepted_as_is"])
+    if review["findings_open"]:
+        out.append("| **Still open** | **%d** |" % review["findings_open"])
+    out.append("")
+    if review.get("reviewed"):
+        out.append("Reviewed %s." % review["reviewed"])
+        out.append("")
+    if review["findings_open"]:
+        out.append("> **%d finding%s neither addressed nor accepted.** The "
+                   "breakdown this estimate\n> prices is known to be "
+                   "incomplete."
+                   % (review["findings_open"],
+                      "" if review["findings_open"] == 1 else "s"))
+        out.append("")
+    return "\n".join(out)
+
+
 def render_markdown(spec):
     """Report section recording what the estimate was sized from."""
     out = ["## What this was sized from", ""]

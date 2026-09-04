@@ -204,9 +204,12 @@ item is plausibly sized, or whether the specification is detailed enough to
 size from at all.
 
 [The Build Work Researcher design spec](https://github.com/Dewain27/AgentDudeSamples/blob/main/samples/Build%20Work%20Estimator/docs/2026-09-03-build-work-researcher-design.md)
-specifies a companion skill that attacks exactly that gap — and, critically,
-produces **structure and questions, never numbers**, so nothing it finds
-enters the arithmetic without a human sizing it first.
+specifies the **Build Work Researcher**, which is built and ships in this same
+plugin. It attacks exactly that gap and, critically, produces **structure and
+questions, never numbers**, so nothing it finds enters the arithmetic without a
+human sizing it first. Its `research_review` block is then recorded here as a
+declared input, because "reviewed, three findings knowingly accepted" is a
+materially different confidence signal from "never reviewed".
 
 ## The honest limits
 

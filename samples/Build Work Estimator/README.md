@@ -34,6 +34,34 @@ actually cost.
 Asked for any of those, the skill declines and redirects rather than
 improvising a number.
 
+## Two skills: review the breakdown, then estimate it
+
+This plugin installs **two** skills, because they are different disciplines
+with different failure modes.
+
+| Skill | What it does |
+| --- | --- |
+| **Build Work Researcher** | Reviews a work breakdown against the specification it was sized from, *before* estimating. Surfaces components the specification requires but the breakdown does not own. |
+| **Build Work Estimator** | Turns a reviewed breakdown into an estimate. |
+
+The researcher exists because the breakdown is the estimator's weakest input.
+Turn medians are measured; what they get *applied to* is a judgment someone
+made when they wrote `size: medium, files: 11`, and nothing else checks whether
+that list is complete.
+
+Critically, **the researcher produces structure and questions, never numbers.**
+It can say a component is missing or that a size is unsupported; it cannot say
+what the size should be. That boundary is enforced mechanically — the findings
+schema has no field a size could occupy, and the prose is scanned for effort
+and cost assertions — so a review can never inject a guess into arithmetic
+built from measured values.
+
+Reviewing the Kestrel specification found four components the 39-item breakdown
+did not own: disaster recovery, load testing, customer-managed keys, and
+region-pinned inference. All four are now items, and the review ships as a
+worked example in [`examples/kestrel-research-findings.yaml`](examples/kestrel-research-findings.yaml)
+([rendered](examples/kestrel-research-review.md)).
+
 ## It always asks what the estimate was sized from
 
 Before anything else, the estimator asks for a **functional** and a **technical**
@@ -421,7 +449,7 @@ numbers.
 cd "samples/Build Work Estimator/tests" && python3 -m unittest discover -p 'test_*.py'
 ```
 
-340 tests. Fixtures are synthetic and committed; no test reads real history and
+379 tests. Fixtures are synthetic and committed; no test reads real history and
 no test makes a network call.
 
 The most important suite is `test_contribute.py`. It seeds a ledger entry with
