@@ -36,8 +36,9 @@ not wait to be told to proceed a second time.
 
 You are done when **all four** of these are true:
 
-1. `scripts/estimate.py` ran and wrote its JSON
-2. `scripts/render_report.py` ran and wrote the Markdown (and the PDF if asked)
+1. `scripts/estimate.py --report <name>` ran — one command that computes and
+   writes the report, so there is no half-finished sequence to forget
+2. The `.md` exists on disk (and the `.pdf` if asked for)
 3. You told the user where the files are
 4. You gave them the headline: likely, and likely-plus-reserve
 
@@ -47,6 +48,27 @@ collects every input and produces no file has failed, however agreeable it was.
 
 If a command fails, show the error and what you are doing about it. Silence
 after "ready to run" is the worst outcome available.
+
+### Never say you ran something you did not run
+
+**A status claim must be backed by output you can point at.** Do not say "I'm
+running it now", "yes, it's running", or "that's in progress" unless a command
+has actually executed and you can show what it printed. There is no background
+execution here — nothing runs between your messages, so anything you have not
+already done is not underway.
+
+This happened, verbatim, in a real session:
+
+> **User:** OK, so it is running now?
+> **Assistant:** Yes.
+> **User:** What is the status of it?
+> **Assistant:** It is not running yet — I have not executed the estimate
+> commands.
+
+That is worse than being slow. The user waited on a claim that was never true.
+
+If you are asked whether it is running and it is not: say so in one sentence,
+then **run it in that same reply** rather than promising again.
 
 ## Say that you have started, and keep saying where you are
 
@@ -149,10 +171,21 @@ Offer a sensible default for everything that has one, so the user can say
 | `other_workload_share` | Propose 0.0 if they say nothing is allocated |
 | `tier`, `reasoning_model` | Infer from the specification, and say what you inferred |
 
-`reserve_percent`, `specification`, `build_platform`, `target_platform`, the
-harness when the target includes Copilot Studio, and `seat_monthly_cost` for
-seat licensing genuinely cannot be defaulted. Everything else can start from a
-proposal.
+These genuinely cannot be defaulted, and **the work breakdown is the first of
+them**:
+
+1. **`items:` — the work breakdown.** Draft it from the specification (step
+   1a) or get it from the user. Without it there is nothing to estimate. Two
+   real sessions listed "required inputs" as six config fields and never
+   mentioned the breakdown at all, then could not run.
+2. `reserve_percent`
+3. `specification`
+4. `build_platform`
+5. `target_platform` — recommend it rather than asking cold
+6. `target.harness`, when the target includes Copilot Studio
+7. `seat_monthly_cost`, for seat licensing
+
+Everything else can start from a proposal.
 
 **Never ask for something the specification already answers.** If it names the
 platform, the integrations, or the environments, read them out and confirm
@@ -420,6 +453,18 @@ Code completions and next edit suggestions consume nothing and are unlimited on
 paid plans — they never enter the estimate.
 
 ### 4. Report — actually produce it
+
+**Prefer the single command.** Estimating and rendering in one invocation
+means "run it" is one action with a file at the end, not a sequence whose
+second half keeps not happening:
+
+```bash
+python scripts/estimate.py --manifest estimate.yaml \
+    --report build-estimate --format both
+```
+
+It prints the paths written and the headline figure. The separate form still
+exists when you already have the JSON:
 
 ```bash
 python scripts/render_report.py estimate.json -o build-estimate --format both

@@ -299,3 +299,85 @@ class TestItReportsProgress(unittest.TestCase):
     def test_it_says_to_surface_a_slow_or_failing_step(self):
         t = skill_text()
         self.assertIn("If something is slow, say it is slow", t)
+
+
+class TestOneCommandProducesTheDeliverable(unittest.TestCase):
+    """Estimating and rendering were two commands, so "run it" was a sequence
+    whose second half kept not happening while the assistant narrated as
+    though it had."""
+
+    def test_estimate_can_render_in_one_invocation(self):
+        import subprocess
+        import tempfile
+        out = os.path.join(tempfile.mkdtemp(), "e")
+        scripts = os.path.join(SAMPLE, "skill", "build-work-estimator",
+                               "scripts")
+        proc = subprocess.run(
+            [__import__("sys").executable,
+             os.path.join(scripts, "estimate.py"),
+             "--manifest", os.path.join(SAMPLE, "examples",
+                                        "harbor-line-manifest.yaml"),
+             "--profile", os.path.join(SAMPLE, "examples",
+                                       "calibration-profile.json"),
+             "--no-ledger", "--report", out],
+            capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertTrue(os.path.exists(out + ".md"),
+                        "one command must leave a report behind")
+
+    def test_it_prints_the_headline_so_the_run_is_visible(self):
+        import subprocess
+        import tempfile
+        out = os.path.join(tempfile.mkdtemp(), "e")
+        scripts = os.path.join(SAMPLE, "skill", "build-work-estimator",
+                               "scripts")
+        proc = subprocess.run(
+            [__import__("sys").executable,
+             os.path.join(scripts, "estimate.py"),
+             "--manifest", os.path.join(SAMPLE, "examples",
+                                        "harbor-line-manifest.yaml"),
+             "--profile", os.path.join(SAMPLE, "examples",
+                                       "calibration-profile.json"),
+             "--no-ledger", "--report", out],
+            capture_output=True, text=True)
+        self.assertIn("Likely $", proc.stdout)
+        self.assertIn("with reserve $", proc.stdout)
+
+    def test_render_write_is_shared_not_duplicated(self):
+        import render_report
+        self.assertTrue(callable(getattr(render_report, "write", None)),
+                        "estimate --report and the CLI must share one writer")
+
+    def test_the_skill_prefers_the_single_command(self):
+        t = skill_text()
+        self.assertIn("Prefer the single command", t)
+
+
+class TestItDoesNotClaimToBeRunning(unittest.TestCase):
+    """The worst failure yet: asserting it was running when it was not."""
+
+    def test_the_rule_exists(self):
+        t = skill_text()
+        self.assertIn("Never say you ran something you did not run", t)
+
+    def test_a_status_claim_must_be_backed_by_output(self):
+        t = skill_text()
+        self.assertIn("must be backed by output you can point at", t)
+
+    def test_it_says_nothing_runs_between_messages(self):
+        t = skill_text()
+        self.assertIn("nothing runs between your messages", t)
+
+    def test_it_says_to_run_in_the_same_reply_when_caught(self):
+        t = skill_text()
+        self.assertIn("run it in that same reply", t)
+
+
+class TestTheBreakdownIsFirstInTheReadinessList(unittest.TestCase):
+    def test_items_is_named_as_a_required_input(self):
+        t = skill_text()
+        self.assertIn("**`items:` — the work breakdown.**", t)
+
+    def test_the_omission_that_caused_it_is_recorded(self):
+        t = skill_text()
+        self.assertIn("mentioned the breakdown at all", t)

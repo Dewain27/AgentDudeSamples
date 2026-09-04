@@ -82,6 +82,16 @@ REFERENCE_GROUPS = {
 # example manifest as well is redundant against a hard file budget.
 PACKAGED_ASSETS = ("harbor-line-estimate.md",)
 
+#: The single-command form also asks for a PDF, and this host cannot make one.
+#: Rewritten to Markdown for the same reason as the block below -- and asserted
+#: rather than best-effort, so a reworded SKILL.md fails the build instead of
+#: silently shipping an instruction the sandbox cannot follow.
+OLD_ONE_COMMAND = """python scripts/estimate.py --manifest estimate.yaml \\
+    --report build-estimate --format both"""
+
+NEW_ONE_COMMAND = """python scripts/estimate.py --manifest estimate.yaml \\
+    --report build-estimate --format md"""
+
 OLD_PDF_BLOCK = """```bash
 python scripts/render_report.py estimate.json -o build-estimate --format both
 ```
@@ -200,6 +210,10 @@ def stage_skill(dest):
         raise SystemExit(
             "SKILL.md no longer contains the expected PDF block; the packaged "
             "PDF instructions would be wrong. Update OLD_PDF_BLOCK.")
+    assert OLD_ONE_COMMAND in skill, (
+        "the single-command example changed; update OLD_ONE_COMMAND or this "
+        "package ships a PDF instruction the sandbox cannot follow")
+    skill = skill.replace(OLD_ONE_COMMAND, NEW_ONE_COMMAND)
     skill = skill.replace(OLD_PDF_BLOCK, NEW_PDF_BLOCK)
 
     # Repoint the consolidated reference names.

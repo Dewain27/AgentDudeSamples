@@ -910,6 +910,40 @@ def write_pdf(md_text, pdf_path, title):
     return None
 
 
+def write(result, basename, fmt="md", credits=None, strict=False):
+    """Render a computed result to BASENAME.md / .pdf. Returns paths written.
+
+    Shared by the render_report CLI and by `estimate.py --report`, so the two
+    cannot drift. The Markdown is always written even when a PDF is asked for:
+    an estimate must survive a PDF toolchain failure.
+    """
+    md_text = build_markdown(result, credits)
+
+    problems = assumptions_mod.validate(md_text, result)
+    if problems and strict:
+        raise ValueError(
+            "provenance validation failed: %d figure(s) cannot be traced"
+            % len(problems))
+
+    written = []
+    md_path = basename + ".md"
+    with open(md_path, "w") as fh:
+        fh.write(md_text)
+    written.append(md_path)
+
+    if fmt in ("pdf", "both"):
+        pdf_path = basename + ".pdf"
+        reason = write_pdf(md_text, pdf_path,
+                           "Build Work Estimate - %s" % result["project"])
+        if reason:
+            print("WARNING  PDF not generated: %s" % reason)
+            print("         The Markdown estimate at %s is complete."
+                  % md_path)
+        else:
+            written.append(pdf_path)
+    return written
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("estimate_json")

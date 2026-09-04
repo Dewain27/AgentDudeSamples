@@ -898,6 +898,12 @@ def main(argv=None):
                          "regeneration)")
     ap.add_argument("--no-ledger", action="store_true",
                     help="do not append to the ledger (regeneration/CI)")
+    ap.add_argument("--report", metavar="BASENAME",
+                    help="also render the report to BASENAME.md/.pdf, so one "
+                         "command goes manifest -> finished deliverable")
+    ap.add_argument("--format", default="md",
+                    choices=["md", "pdf", "both"],
+                    help="report format when --report is used (default: md)")
     args = ap.parse_args(argv)
 
     try:
@@ -930,9 +936,28 @@ def main(argv=None):
             fh.write(payload)
         print("Wrote %s" % args.out)
         print("Estimate id: %s" % result["estimate_id"])
-    else:
+    elif not args.report:
         print(payload)
+
+    # Rendering in the same command matters more than it looks. Estimating and
+    # reporting used to be two invocations, so "run it" was a SEQUENCE -- and
+    # in real sessions the second half kept not happening while the assistant
+    # narrated as though it had. One command, one deliverable.
+    if args.report:
+        import render_report
+        written = render_report.write(result, args.report, args.format)
+        for path in written:
+            print("Wrote %s" % path)
+        totals = result.get("totals", {}).get("combined", {})
+        if totals:
+            print("Likely %s | with reserve %s"
+                  % (_money(totals.get("likely")),
+                     _money(totals.get("with_reserve"))))
     return 0
+
+
+def _money(value):
+    return "n/a" if value is None else "$%s" % format(float(value), ",.2f")
 
 
 if __name__ == "__main__":
