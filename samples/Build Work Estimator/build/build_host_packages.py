@@ -205,12 +205,8 @@ def stage_skill(dest):
                           "references/rates.md")
     skill = skill.replace("references/licensing-and-stacks.md",
                           "references/methodology.md")
-    skill = skill.replace(
-        "| `assets/granite-peak-estimate.md` | Worked example: Copilot Studio "
-        "stack, consumption |\n", "")
-    skill = skill.replace(
-        "| `assets/copper-basin-estimate.md` | Worked example: GitHub Copilot "
-        "on a blend of GPT models |\n", "")
+    # No asset rows to strip: the plugin bundles only the harbor-line example,
+    # which the package carries too, so the table is already accurate here.
     skill = skill.rstrip() + "\n" + HOST_NOTE
     _write(os.path.join(dest, "SKILL.md"), skill)
 
