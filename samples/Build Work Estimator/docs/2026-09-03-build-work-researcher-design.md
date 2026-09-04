@@ -240,6 +240,41 @@ Three reasons:
 3. **They install together.** One plugin, so a user gets both without a second
    registration.
 
+### Why a skill and not an agent
+
+This was asked twice, and the spec's original silence on it is why. The
+request that started this work said *"an agent structure in the plugin"*, and
+that phrasing translated into "skill" here without the change being flagged --
+so the question kept coming back.
+
+The answer is portability, and it is settled by what the manifest actually
+declares. The `agent-plugins.org` schema is **metadata only**: name, version,
+author, keywords, and an `extensions` escape hatch. It defines no `agents`,
+`skills`, `commands` or `hooks` property, so components are discovered **by
+convention** rather than declared. The conventions differ by host:
+
+| Surface | Where it works |
+| --- | --- |
+| `skills/` | All four target hosts — Agent Skills is an open standard, which is why the Copilot Studio and Cowork upload packages exist at all |
+| `agents/` | Claude Code only — subagents are a Claude Code concept, and the other three hosts would ignore the directory |
+
+This sample promises to run in Microsoft Copilot Cowork, GitHub Copilot, Claude
+Code and Claude Cowork. A skill keeps that promise; an agent would keep it in
+one host out of four.
+
+An agent would buy one real thing: **context isolation.** Reading a full
+specification in a subagent keeps it out of the dispatching conversation. That
+is a genuine benefit and the reason the question is worth asking — but it is a
+Claude Code convenience layered over the portable surface, not the
+architecture.
+
+The tempting middle path, an agent that restates the boundary so it is
+self-sufficient, was drafted and rejected. **The boundary is not enforced by
+prose.** `findings.py` has a closed schema and scans the text; `render_review.py`
+refuses to render anything that fails. Whether the model read the rule changes
+nothing about what can ship. So a second copy of those rules buys no safety and
+creates drift that nothing checks for.
+
 ---
 
 ## 8. Testing
