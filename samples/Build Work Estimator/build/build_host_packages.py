@@ -49,7 +49,10 @@ SKILL_SRC = os.path.join(REPO, "plugins", "build-work-estimator", "skills",
 
 NAME = "build-work-estimator"
 SHORT_NAME = "Build Work Estimator"
-VERSION = "1.0.0"
+#: Imported, not duplicated. This was its own constant, so bumping the plugin
+#: left the Cowork package manifest behind at the old version with nothing
+#: checking the two agreed. One source, one bump.
+from build_plugin import VERSION  # noqa: E402
 AUTHOR = "Dewain Robinson"
 ACCENT = "#1F3A5F"
 
