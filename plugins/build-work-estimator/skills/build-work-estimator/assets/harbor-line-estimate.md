@@ -43,6 +43,7 @@ generated: 2026-09-03T00:00:00Z
 | --- | --- |
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
+| **Built by** (model) | not declared |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
 | Specification | `draft` — confidence in sizing: **low** |
@@ -185,6 +186,19 @@ Measured from 24 local sessions spanning 2026-06-01 to 2026-08-30.
 
 Cost per agent turn: **$0.32**, at **list price** — an organization on contracted
 rates must substitute its own.
+
+## Which model builds it
+
+| | Model |
+| --- | --- |
+| Declared for this build | **not declared** |
+| Measured in the calibration profile | claude-opus-5 55% / claude-sonnet-5 45% |
+
+> **Not repriced.** No build model was declared, so the estimate carries the calibration mix's blended per-turn cost unchanged.
+
+The per-turn cost used here is the measured **$0.32**, which carries whatever
+model mix produced it. If you will build on a materially different model, this
+estimate does not adjust for that.
 
 ## Licensing
 

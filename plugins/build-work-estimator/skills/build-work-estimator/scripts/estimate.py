@@ -24,6 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_model as build_model_mod  # noqa: E402
 import calibrate  # noqa: E402
 import environments as env_mod  # noqa: E402
 import licensing  # noqa: E402
@@ -196,6 +197,31 @@ def interview(prompt=input, echo=print):
             echo("    Expected one of: %s"
                  % ", ".join(sorted(rates.BUILD_PLATFORMS)))
 
+    # Which model does the building. The catalogue is platform-specific:
+    # Claude Code runs Anthropic models, GitHub Copilot runs its own. Offering
+    # a model the platform cannot run would price a build that cannot happen.
+    echo("")
+    echo("=" * 68)
+    echo("Q1b. Which MODEL will do the building?")
+    echo("")
+    echo("Model choice changes the price of every token in every turn. Blank")
+    echo("means the calibration profile's own mix, which the report discloses.")
+    echo("")
+    catalogue = sorted(rates.models_for_platform(build_platform))
+    for key in catalogue:
+        echo("  %s" % key)
+    build_model_choice = ""
+    while True:
+        build_model_choice = prompt("\n  Build model [blank = calibration mix]: ").strip().lower()
+        if not build_model_choice:
+            build_model_choice = None
+            break
+        try:
+            rates.validate_model_for_platform(build_platform, build_model_choice)
+            break
+        except ValueError as exc:
+            echo("    %s" % str(exc).splitlines()[0])
+
     echo("")
     echo("=" * 68)
     echo("Q2. What are you BUILDING ON?")
@@ -291,6 +317,7 @@ def interview(prompt=input, echo=print):
         "reserve_percent": reserve,
         "specification": specification,
         "build_platform": build_platform,
+        "build_model": build_model_choice,
         "target_platform": target_platform,
         "target": target,
         "licensing": licence,
@@ -398,7 +425,18 @@ def compute(manifest, profile, env_multiplier=1.0):
     reserve_pct = validate_reserve(manifest.get("reserve_percent"))
     items = normalise_items(manifest.get("items"))
     index = bucket_index(profile)
-    per_turn = profile["cost_per_main_turn"] * profile.get("subagent_multiplier", 1.0)
+
+    # Which model builds it changes the price of every token in every turn.
+    # Only the Claude Code path reprices: compute() is reused to SIZE the
+    # GitHub run, where the cost fields are not the ones that ship.
+    platform = str(manifest.get("build_platform") or "claude-code").strip().lower()
+    model_info = None
+    if platform == "claude-code":
+        model_info = build_model_mod.resolve(manifest, profile, "claude-code")
+        base_per_turn = model_info["cost_per_turn"]
+    else:
+        base_per_turn = profile["cost_per_main_turn"]
+    per_turn = base_per_turn * profile.get("subagent_multiplier", 1.0)
 
     rows, corrections = [], []
     base = low = high = 0.0
@@ -478,6 +516,7 @@ def compute(manifest, profile, env_multiplier=1.0):
             "date_range": profile.get("date_range"),
             "cost_per_main_turn": profile["cost_per_main_turn"],
         },
+        "build_model": model_info,
         "thin_buckets": thin,
         "warnings": rates.staleness_warnings(),
     }
@@ -636,8 +675,19 @@ def compute_plan(manifest, profile):
         base["licensing"] = licensing.attribute(base["base"], licence, profile)
         result["build"] = base
         result["profile"] = base["profile"]
+        result["build_model"] = base.get("build_model")
     else:
         result["build"] = None
+        result["build_model"] = {
+            "platform": "github-copilot",
+            "declared": {},
+            "declared_label": (build_detail or {}).get("build_model")
+                              or "not declared",
+            "repriced": False,
+            "ratio": 1.0,
+            "reason": (build_detail or {}).get(
+                "model_rate_source", "not declared"),
+        }
         sized = (build_detail or {}).get("sized_from_items")
         if sized:
             # The work was sized from the same calibrated turn medians. Turn

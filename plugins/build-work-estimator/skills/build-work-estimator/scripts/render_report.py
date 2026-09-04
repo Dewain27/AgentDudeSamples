@@ -18,6 +18,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build_model as build_model_mod  # noqa: E402
 import copilot_credits  # noqa: E402
 import github_copilot  # noqa: E402
 import target_platform as tp  # noqa: E402
@@ -227,6 +228,15 @@ def build_summary(result):
                % (result["build_platform_label"], result["build_currency"]))
     out.append("| **Built on** (target environment) | %s — metered in %s |"
                % (result["target_platform_label"], result["target_currency"]))
+    model_info = result.get("build_model") or {}
+    if model_info.get("declared_label"):
+        note = ""
+        if model_info.get("repriced") and model_info.get("ratio", 1.0) != 1.0:
+            note = " — per-turn cost repriced x%.4f" % model_info["ratio"]
+        elif model_info.get("repriced"):
+            note = " — matches the calibration mix, no rescale"
+        out.append("| **Built by** (model) | %s%s |"
+                   % (model_info["declared_label"], note))
     if target.get("harness"):
         out.append("| Target harness | `%s` — %s |"
                    % (target["harness"],
@@ -556,6 +566,8 @@ def build_plan_markdown(result):
                    "organization on contracted\nrates must substitute its own."
                    % money(profile["cost_per_main_turn"]))
         out.append("")
+        if result.get("build_model"):
+            out.append(build_model_mod.render_markdown(result["build_model"]))
         if build.get("licensing"):
             out.append(licensing.render_markdown(build["licensing"]))
     elif detail:

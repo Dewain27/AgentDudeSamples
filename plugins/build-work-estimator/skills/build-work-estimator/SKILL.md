@@ -311,6 +311,7 @@ typed phrase; do not attempt to bypass or pre-answer that prompt.
 | `scripts/calibrate.py` | Measures local history into a profile |
 | `scripts/estimate.py` | The estimate model and reserve enforcement |
 | `scripts/specification.py` | What the estimate was sized from, and its confidence |
+| `scripts/build_model.py` | Which model builds it, and the repricing that follows |
 | `scripts/environments.py` | Dev/QA/test/prod, and how each cost multiplies |
 | `scripts/assumptions.py` | Measured vs judgment, and the provenance validator |
 | `scripts/miniyaml.py` | Manifest parsing with no PyYAML dependency |

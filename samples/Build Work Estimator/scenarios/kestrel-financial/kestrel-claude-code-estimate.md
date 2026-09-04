@@ -43,6 +43,7 @@ generated: 2026-09-03T00:00:00Z
 | --- | --- |
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
 | **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
+| **Built by** (model) | claude-opus-5 55% / claude-sonnet-5 45% — matches the calibration mix, no rescale |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude for Enterprise, $150.00/month x 6 seats x 5 months = **$4,500.00** over the build |
 | Specification | `approved` — confidence in sizing: **high** |
@@ -276,6 +277,35 @@ Measured from 24 local sessions spanning 2026-06-01 to 2026-08-30.
 
 Cost per agent turn: **$0.32**, at **list price** — an organization on contracted
 rates must substitute its own.
+
+## Which model builds it
+
+| | Model |
+| --- | --- |
+| Declared for this build | **claude-opus-5 55% / claude-sonnet-5 45%** |
+| Measured in the calibration profile | claude-opus-5 55% / claude-sonnet-5 45% |
+
+The declared model **matches the calibration mix**, so the measured per-turn cost
+applies unchanged at **$0.32**. No rescale was needed.
+
+### How the ratio was derived
+
+Each row is a **measured dollar share** of the real per-turn cost, times a ratio of
+**published per-model rates**. There is no free parameter.
+
+| Cost component | Measured share | This model $/1M | Calibration $/1M | Contribution |
+| --- | ---: | ---: | ---: | ---: |
+| Cache read | 66% | 0.3650 | 0.3650 | 0.6600 |
+| Cache write | 25% | 4.5625 | 4.5625 | 0.2500 |
+| Output | 9% | 18.2500 | 18.2500 | 0.0900 |
+| **Ratio** | | | | **1.0000** |
+
+> **What this does not capture.** The rescale prices *tokens*, not capability. It
+> does **not** model that a cheaper or weaker model may need **more turns** to do
+> the same work. That effect is real and is not derivable from published rates, so
+> it is named here rather than folded silently into the number. The rescale also
+> holds the measured token profile — context size, output length, cache behaviour —
+> constant.
 
 ## Licensing
 

@@ -1,7 +1,7 @@
 # Build-Model Factor — Design Spec
 
 **Author:** Dewain Robinson
-**Status:** Specified, not implemented
+**Status:** Implemented
 **Date:** 2026-09-04
 
 ---
@@ -119,6 +119,23 @@ Every model named must exist in `ANTHROPIC_RATES`, or the estimator refuses
 the input with the list of known ids — an unknown model is never priced by
 guessing a rate.
 
+### 3.5 A model must be available on the platform that builds it
+
+The build platform constrains which models can build. **Claude Code runs
+Anthropic models only; GitHub Copilot runs its published multi-provider
+catalog.** So `build_model` is validated against the platform's catalog, not a
+global list:
+
+| `build_platform` | Valid `build_model` catalog |
+| --- | --- |
+| `claude-code` | `rates.ANTHROPIC_RATES` — Anthropic models only |
+| `github-copilot` | `rates.GITHUB_MODEL_RATES` — the sourced GitHub catalog |
+
+Naming a GPT or Gemini model as the Claude Code build model is refused with the
+Anthropic list; naming an Anthropic-only id GitHub does not carry is refused
+with the GitHub list. The check is one function, `models_for_platform`, so the
+two catalogs cannot drift apart from the validation.
+
 ## 4. Fallback — when repricing is refused
 
 The rescale needs the profile to carry `component_shares` and `model_mix`. A
@@ -140,19 +157,25 @@ the `github_copilot:` block. These are per-model rates already; the change is
 to make the model explicit and disclosed rather than to invent a second rate
 mechanism.
 
-- Add `build_model` to the `github_copilot:` block. It is a disclosed label
-  naming which model the supplied `dollars_per_1m_*` rates describe.
-- If a **sourced** GitHub per-model rate table can be established from GitHub's
-  published pricing during implementation (verified via the docs tools, with a
-  SOURCE url and VERIFIED date exactly like every other table in `rates.py`),
-  a known `build_model` populates the rates from it and the report cites them.
-- If such a table **cannot** be sourced reliably, GitHub Copilot keeps the
-  user-supplied `dollars_per_1m_*` (still per-model, still illustrative), and
-  the report discloses the model those rates are asserted to describe and warns
-  the reader to check them against GitHub's published rate for that model.
+A real per-model table **was** sourced from GitHub's published pricing and is
+added to `rates.py` as `GITHUB_MODEL_RATES`, carrying its own SOURCE url and
+VERIFIED date and wired into the same 90-day staleness machinery as every other
+table. Each rate was confirmed twice against the source page, and the Anthropic
+rows independently cross-check against `ANTHROPIC_RATES` — Sonnet 5 at
+\$2/\$10, Opus 5 at \$5/\$25, Haiku 4.5 at \$1/\$5 — which is the corroboration
+that made the table safe to ship.
 
-Under no circumstance is a GitHub per-model rate fabricated to fill the table.
-Sourced or user-declared, never invented.
+The two GitHub billing modes take the model differently, because they meter
+differently:
+
+| Mode | How `build_model` is used |
+| --- | --- |
+| `ai-credits` | The model **populates** `dollars_per_1m_input/output` from `GITHUB_MODEL_RATES`. An explicitly supplied rate still overrides, and the report says which applied. |
+| `premium-requests` (legacy) | The model is a **disclosed label only**. GitHub's current pricing page no longer publishes request multipliers, so `model_multiplier` stays user-supplied and the report says so rather than implying a sourced value. |
+
+Only the token table is sourced. No premium-request multiplier is invented to
+fill the legacy mode, and no GitHub rate is fabricated anywhere: sourced or
+user-declared, never guessed.
 
 ## 6. Report
 

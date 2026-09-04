@@ -32,6 +32,10 @@ licensing:
 
 github_copilot:
   billing_mode: premium-requests   # ai-credits | premium-requests
+  # Disclosed label only. GitHub's current pricing page publishes per-model
+  # TOKEN rates, not request multipliers, so there is no sourced multiplier to
+  # apply here and model_multiplier stays the declaration below.
+  build_model: gpt-5.4
   interactions: 900
   model_multiplier: 1.0
   monthly_allowance: 1500

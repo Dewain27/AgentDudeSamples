@@ -43,6 +43,7 @@ generated: 2026-09-03T00:00:00Z
 | --- | --- |
 | **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
+| **Built by** (model) | gpt-5.4 |
 | Target harness | `standard` — does not bill for build or test |
 | Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats x 1 month = **$57.00** over the build |
 | Specification | `draft` — confidence in sizing: **low** |
@@ -147,6 +148,8 @@ Declaring them is the single largest correction available to this estimate.
 > Credits, even though both are $0.01 per credit.
 
 **Billing model:** Legacy premium requests — Each interaction costs one premium request multiplied by the model's multiplier, drawn from a monthly plan allowance. Eligible Copilot Pro and Pro+ subscribers on existing annual plans remain on this model until their plan expires.
+
+**Build model:** `gpt-5.4` — rates user-declared multiplier (legacy mode).
 
 | Build activity | Premium Requests | Basis |
 | --- | ---: | --- |

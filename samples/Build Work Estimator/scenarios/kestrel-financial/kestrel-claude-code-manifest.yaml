@@ -20,6 +20,13 @@ specification:
 reserve_percent: 30
 
 build_platform: claude-code
+
+# Which model does the building. Declared as the same mix the calibration
+# profile measured, so the ratio is exactly 1.0 and the measured per-turn cost
+# applies unchanged -- the model is now stated rather than assumed.
+build_model:
+  claude-opus-5: 0.55
+  claude-sonnet-5: 0.45
 target_platform: both          # Copilot Studio agent, Azure application
 
 licensing:

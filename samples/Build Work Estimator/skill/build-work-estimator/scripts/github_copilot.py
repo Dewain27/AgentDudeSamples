@@ -33,6 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import rates  # noqa: E402
 
 DEFAULTS = {
+    "build_model": None,
     "billing_mode": "ai-credits",
     "interactions": 0,
     "tokens_per_interaction": 6000,
@@ -65,12 +66,27 @@ def compute(config, reserve_percent):
     interactions = int(cfg["interactions"] or 0)
     mode_info = rates.GITHUB_BILLING_MODES[mode]
 
+    # Which model builds it. GitHub runs a multi-provider catalogue, so the
+    # model is validated against what GitHub Copilot can actually run -- not
+    # against a global list, and never against Claude Code's Anthropic-only
+    # catalogue.
+    build_model = cfg.get("build_model")
+    model_rates = None
+    if build_model:
+        try:
+            build_model = rates.validate_model_for_platform(
+                "github-copilot", build_model)
+        except ValueError as exc:
+            raise GitHubCopilotError(str(exc))
+        model_rates = rates.GITHUB_MODEL_RATES[build_model]
+
     result = {
         "stack": "github-copilot",
         "billing_mode": mode,
         "billing_mode_label": mode_info["label"],
         "billing_mode_note": mode_info["note"],
         "interactions": interactions,
+        "build_model": build_model or None,
         "unmetered": list(rates.GITHUB_UNMETERED),
         "reserve_percent": float(reserve_percent),
         "verified": rates.GITHUB_VERIFIED,
@@ -83,6 +99,12 @@ def compute(config, reserve_percent):
     }
 
     if mode == "premium-requests":
+        # Legacy. GitHub's current pricing page publishes per-model TOKEN
+        # rates, not request multipliers, so there is no sourced multiplier to
+        # look up. The model is disclosed as a label and the multiplier stays
+        # the user's declaration -- inventing one to fill the gap would be a
+        # fabricated rate wearing a source's clothes.
+        result["model_rate_source"] = "user-declared multiplier (legacy mode)"
         multiplier = float(cfg["model_multiplier"] or 1.0)
         used = interactions * multiplier
         result.update({
@@ -111,6 +133,22 @@ def compute(config, reserve_percent):
     # ai-credits
     rin = cfg["dollars_per_1m_input"]
     rout = cfg["dollars_per_1m_output"]
+
+    # A declared model supplies its published rates, so the common case needs
+    # no hand-copied numbers. An explicit rate still wins -- GitHub's
+    # catalogue moves, and someone with a current figure should not be
+    # overridden by this table -- and the report says which applied.
+    if model_rates is not None and (rin is None or rout is None):
+        rin, rout = model_rates
+        result["model_rate_source"] = "published GitHub rate for %s" % build_model
+        result["model_rates_verified"] = rates.GITHUB_MODEL_RATES_VERIFIED
+    elif model_rates is not None:
+        result["model_rate_source"] = (
+            "explicitly supplied, overriding the published rate for %s"
+            % build_model)
+    else:
+        result["model_rate_source"] = "explicitly supplied"
+
     if rin is None or rout is None:
         raise GitHubCopilotError(
             "dollars_per_1m_input and dollars_per_1m_output are required for "
@@ -119,8 +157,14 @@ def compute(config, reserve_percent):
             "rates, then\nconverts to AI Credits at $%.2f each. Those rates "
             "are not hardcoded here --\nthey change, and a stale table would "
             "misprice every estimate.\n\n"
-            "Look up the model you use at:\n  %s"
-            % (rates.DOLLARS_PER_GITHUB_AI_CREDIT, rates.GITHUB_SOURCE))
+            "Either declare the model and let its published rate apply:\n"
+            "  build_model: %s\n\n"
+            "or supply the rates directly. Known models:\n  %s\n\n"
+            "Full catalogue: %s"
+            % (rates.DOLLARS_PER_GITHUB_AI_CREDIT,
+               sorted(rates.GITHUB_MODEL_RATES)[0],
+               ", ".join(sorted(rates.GITHUB_MODEL_RATES)),
+               rates.GITHUB_SOURCE))
 
     rin, rout = float(rin), float(rout)
     total_tokens = interactions * int(cfg["tokens_per_interaction"] or 0)
@@ -174,6 +218,24 @@ def render_markdown(result):
     out.append("")
     out.append("**Billing model:** %s — %s"
                % (result["billing_mode_label"], result["billing_mode_note"]))
+    out.append("")
+    if result.get("build_model"):
+        out.append("**Build model:** `%s` — rates %s."
+                   % (result["build_model"],
+                      result.get("model_rate_source", "as supplied")))
+        if result.get("model_rates_verified"):
+            out.append("")
+            out.append("GitHub prices AI Credits from token consumption at the "
+                       "selected model's published\nrate, so which model builds "
+                       "is a cost input rather than a preference. Rate "
+                       "verified\n%s against [models and pricing](%s)."
+                       % (result["model_rates_verified"],
+                          result["sources"]["models_and_pricing"]))
+    else:
+        out.append("> **No build model declared.** GitHub prices AI Credits "
+                   "from the selected model's\n> published token rate, so the "
+                   "model is a cost input. Declaring it lets the "
+                   "published\n> rate apply instead of a hand-copied one.")
     out.append("")
 
     if not result["interactions"]:
