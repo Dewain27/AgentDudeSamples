@@ -1,9 +1,9 @@
 # Build Work Researcher — Design Spec
 
 **Author:** Dewain Robinson
-**Status:** Specified, not implemented
+**Status:** Implemented
 **Date:** 2026-09-03
-**Skill:** `plugins/build-work-estimator/skills/build-work-researcher/`
+**Skill:** `plugins/build-work-estimator/skills/build-work-researcher/` — built
 
 ---
 
@@ -234,7 +234,7 @@ Three reasons:
 1. **Different discipline, different failure modes.** The estimator is
    deterministic arithmetic; the researcher is a model reading prose. Keeping
    them separate keeps each one's contract legible.
-2. **Companion-file budget is per skill.** The estimator sits at 18/20 against
+2. **Companion-file budget is per skill.** The estimator sits at 19/20 against
    the documented ceiling. A second skill gets its own budget rather than
    competing for that headroom.
 3. **They install together.** One plugin, so a user gets both without a second
@@ -363,3 +363,50 @@ cheaper AI-credits meter. None of the four adds behavioural eval cases, so the
 management and residency are infrastructure and NFR work verified by other
 means, which is the §2 boundary holding in practice: the researcher named
 missing components, a human sized them, and nothing it produced was a number.
+
+
+---
+
+## 12. Built
+
+Implemented on 2026-09-04, following the sequence in section 10. What shipped:
+
+| Piece | Where |
+| --- | --- |
+| Schema and boundary validator | `skill/build-work-researcher/scripts/findings.py` |
+| Candidate extraction | `skill/build-work-researcher/scripts/extract.py` |
+| Review renderer | `skill/build-work-researcher/scripts/render_review.py` |
+| Skill instructions | `skill/build-work-researcher/SKILL.md` |
+| `research_review` declared block | `specification.py`, rendered by the estimator |
+| Worked review | `examples/kestrel-research-findings.yaml` and `-review.md` |
+
+The boundary suite was written and passing **before** any of it was wired to a
+model, and it immediately earned that ordering by catching a hole: `\b` cannot
+precede `~`, so the tilde branch of the hedged-quantity pattern could never
+fire and `~15 files` passed clean. A test that only confirmed the happy path
+would have shipped it.
+
+Two other defects surfaced during the build, both from existing governance:
+
+- **`miniyaml` could not read the format.** Findings carry prose, prose needs
+  folded block scalars, and the bundled reader raised on them — so in any host
+  without PyYAML the researcher's own output would have been unreadable. Block
+  scalars are now supported, verified by the existing PyYAML parity test.
+- **Dates diverged.** PyYAML reads a bare `2026-09-04` as a date object and the
+  bundled reader as a string. Dates in shipped YAML are now quoted.
+
+### The extractor, measured
+
+Run against the Kestrel specification and the ORIGINAL 39-item breakdown, the
+mechanical pass produced seven candidates: four real, one arguable, one false
+positive, one since matched. Against the current 43-item breakdown it produces
+four, and N5 no longer appears — the DR item now covers it.
+
+Building it also found a false positive the design predicted but the first
+implementation caused: `MIN_TOKEN` discarded three-letter acronyms, so RPO and
+RTO were dropped and N5 looked unmatched even after the DR item existed. The
+tokeniser was manufacturing the finding rather than reading it from the
+breakdown. Short all-caps acronyms now survive.
+
+That is the case for the design in one line: **the mechanical pass produces
+leads, and judgment is the product.**

@@ -79,7 +79,11 @@ class TestInputsAreCommitted(unittest.TestCase):
 class TestExamplesDirectoryIsClean(unittest.TestCase):
     """examples/ holds inputs and outputs only -- no build intermediates."""
 
-    ALLOWED_SUFFIXES = ("-manifest.yaml", "-estimate.md", "-estimate.pdf")
+    # A research review is an INPUT to a breakdown, not a build intermediate:
+    # the findings file is hand-authored and the review is rendered from it,
+    # so both belong here alongside the manifests they were written against.
+    ALLOWED_SUFFIXES = ("-manifest.yaml", "-estimate.md", "-estimate.pdf",
+                        "-research-findings.yaml", "-research-review.md")
     ALLOWED_EXACT = ("calibration-profile.json",)
 
     def test_no_stray_files(self):

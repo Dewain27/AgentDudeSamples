@@ -535,6 +535,8 @@ def compute_plan(manifest, profile):
     licence = licensing.normalise(manifest.get("licensing"))
     try:
         specification = spec_mod.normalise(manifest.get("specification"))
+        research_review = spec_mod.normalise_review(
+            manifest.get("research_review"))
     except spec_mod.SpecificationError as exc:
         raise EstimateError(str(exc))
 
@@ -645,6 +647,7 @@ def compute_plan(manifest, profile):
         "remediation_share": REMEDIATION_SHARE,
         "licensing": licence,
         "specification": specification,
+        "research_review": research_review,
         "environments": envs,
         "build_detail": build_detail,
         "targets": targets,

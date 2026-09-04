@@ -469,6 +469,8 @@ def build_plan_markdown(result):
     out.extend(build_summary(result))
     if result.get("specification"):
         out.append(spec_mod.render_markdown(result["specification"]))
+        out.append(spec_mod.render_review_markdown(
+            result.get("research_review")))
     out.extend(build_context(result))
 
     build = result.get("build")

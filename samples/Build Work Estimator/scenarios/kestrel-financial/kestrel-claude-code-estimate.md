@@ -81,6 +81,23 @@ Everything below explains how each of these figures was reached.
 | Status | `approved` — Signed off. Sizes rest on agreed scope. |
 | Confidence in sizing | **high** |
 
+### Was the breakdown challenged?
+
+A review is **declared**, not verified. The estimator records that someone
+challenged the breakdown; it cannot judge how well.
+
+| | Findings |
+| --- | ---: |
+| Raised | 7 |
+| Addressed in the breakdown | 4 |
+| Knowingly accepted as-is | 0 |
+| **Still open** | **3** |
+
+Reviewed 2026-09-04.
+
+> **3 findings neither addressed nor accepted.** The breakdown this estimate
+> prices is known to be incomplete.
+
 ## Platforms
 
 | | Platform | Metered in |

@@ -19,6 +19,16 @@ specification:
 
 reserve_percent: 30
 
+# The breakdown was reviewed against the specification before estimating.
+# See examples/kestrel-research-findings.yaml for the findings themselves.
+# Declared, not verified: the estimator records that a review happened, never
+# how good it was.
+research_review:
+  reviewed: "2026-09-04"
+  findings_total: 7
+  findings_addressed: 4
+  findings_accepted_as_is: 0
+
 build_platform: claude-code
 
 # Which model does the building. Declared as the same mix the calibration
@@ -364,9 +374,10 @@ items:
     brownfield: false
 
   # --- Resilience, security and residency ------------------------------
-  # These four items close gaps found by running the Build Work Researcher's
-  # acceptance gate against this specification (see the researcher design
-  # spec, section 11). Each is a component the specification requires but the
+  # These four items close gaps found by reviewing this specification against
+  # the breakdown. The review was performed by hand before the Build Work
+  # Researcher existed; its findings are recorded in
+  # examples/kestrel-research-findings.yaml as F-001 to F-004. Each is a component the specification requires but the
   # breakdown above did not own. None adds behavioural eval cases: the 568
   # cases in specification s11 evaluate the agent's responses, whereas DR
   # failover, load, key management and residency are infrastructure and NFR

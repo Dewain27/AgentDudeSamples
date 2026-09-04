@@ -55,6 +55,33 @@ def skill_root():
     return os.path.join(plugin_root(), "skills", PLUGIN)
 
 
+#: The second skill in this plugin. The estimator is deterministic arithmetic;
+#: the researcher is a model reading prose. Different disciplines with
+#: different failure modes, so they stay separate skills that install together.
+RESEARCHER = "build-work-researcher"
+
+
+def researcher_root():
+    return os.path.join(plugin_root(), "skills", RESEARCHER)
+
+
+def copy_researcher():
+    src = os.path.join(SAMPLE, "skill", RESEARCHER)
+    if not os.path.isdir(src):
+        return False
+    dst = researcher_root()
+    shutil.copytree(src, dst)
+    for root, _dirs, files in os.walk(dst):
+        for name in files:
+            if name.endswith(".pyc") or name == ".DS_Store":
+                os.remove(os.path.join(root, name))
+        for name in list(_dirs):
+            if name == "__pycache__":
+                shutil.rmtree(os.path.join(root, name))
+                _dirs.remove(name)
+    return True
+
+
 def clean():
     if os.path.isdir(plugin_root()):
         shutil.rmtree(plugin_root())
@@ -255,7 +282,10 @@ def update_marketplace():
         "source": "plugins/%s" % PLUGIN,
         "description": DESCRIPTION,
         "version": VERSION,
-        "author": AUTHOR,
+        # An object, matching the other plugin in this marketplace and the
+        # plugin.json this same script writes. It was a bare string, which
+        # was the odd one out in both directions.
+        "author": {"name": AUTHOR, "url": AUTHOR_URL},
     }
     plugins = data.setdefault("plugins", [])
     changed = True
@@ -321,11 +351,14 @@ def main(argv=None):
     copy_skill()
     copy_references()
     copy_assets()
+    built_researcher = copy_researcher()
     write_plugin_json()
     write_plugin_readme()
     assert_authorship()
 
     print("Built plugins/%s" % PLUGIN)
+    if built_researcher:
+        print("  + skills/%s" % RESEARCHER)
     if not args.no_marketplace:
         version, changed = update_marketplace()
         print("Registered in .github/plugin/marketplace.json "

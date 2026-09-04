@@ -81,6 +81,16 @@ Everything below explains how each of these figures was reached.
 | Status | `in-review` — Under review; scope may still move. |
 | Confidence in sizing | **medium** |
 
+### Was the breakdown challenged?
+
+> **No research review is recorded.** This estimate prices the breakdown as
+> written. Nothing has checked whether it is complete, whether an item is
+> plausibly sized, or whether the specification is detailed enough to size
+> from at all.
+
+Reviewing it is an available improvement, and the breakdown is the weakest
+input in the whole estimate.
+
 ## Platforms
 
 | | Platform | Metered in |
