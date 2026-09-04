@@ -158,8 +158,13 @@ def main(argv=None):
     sys.path.insert(0, F._estimator_scripts())
     import miniyaml
 
-    with open(args.findings) as fh:
-        doc = miniyaml.load(fh.read())
+    try:
+        doc = miniyaml.load(F.read_text(
+            args.findings, "The findings file",
+            "\nRun scripts/findings.py to validate it first."))
+    except F.InputError as exc:
+        print("%s" % exc, file=sys.stderr)
+        return 2
 
     # Rendering a document that breaches the boundary would put the very
     # numbers the validator exists to stop onto a page someone then trusts.

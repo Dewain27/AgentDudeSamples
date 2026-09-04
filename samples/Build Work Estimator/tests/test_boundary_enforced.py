@@ -206,6 +206,65 @@ class TestCitations(unittest.TestCase):
         self.assertEqual(problems, [])
 
 
+class TestBadInputExplainsItself(unittest.TestCase):
+    """A stack trace says the interpreter was surprised, not what to fix.
+
+    The researcher's own rule is to say so and stop when an input is missing.
+    A raw FileNotFoundError is not saying so -- it is crashing, and it was
+    what these scripts actually did until this suite existed.
+    """
+
+    SCRIPTS = os.path.join(SAMPLE, "skill", "build-work-researcher", "scripts")
+
+    def _run(self, script, *args):
+        import subprocess
+        return subprocess.run(
+            [sys.executable, os.path.join(self.SCRIPTS, script)] + list(args),
+            capture_output=True, text=True, cwd=SAMPLE)
+
+    def test_a_missing_specification_is_explained_not_traced(self):
+        out = self._run("extract.py",
+                        "--specification", "does/not/exist.md",
+                        "--manifest", "examples/harbor-line-manifest.yaml")
+        self.assertEqual(out.returncode, 2)
+        self.assertNotIn("Traceback", out.stderr)
+        self.assertIn("was not found", out.stderr)
+
+    def test_a_missing_specification_says_the_absence_is_the_finding(self):
+        """The useful thing to tell someone with no specification."""
+        out = self._run("extract.py",
+                        "--specification", "does/not/exist.md",
+                        "--manifest", "examples/harbor-line-manifest.yaml")
+        self.assertIn("thin-specification", out.stderr)
+
+    def test_a_missing_breakdown_is_explained(self):
+        out = self._run("extract.py",
+                        "--specification",
+                        "scenarios/kestrel-financial/specification.md",
+                        "--manifest", "does/not/exist.yaml")
+        self.assertEqual(out.returncode, 2)
+        self.assertNotIn("Traceback", out.stderr)
+
+    def test_a_missing_findings_file_is_explained(self):
+        out = self._run("findings.py", "does/not/exist.yaml")
+        self.assertEqual(out.returncode, 2)
+        self.assertNotIn("Traceback", out.stderr)
+        self.assertIn("was not found", out.stderr)
+
+    def test_render_explains_a_missing_findings_file(self):
+        out = self._run("render_review.py", "does/not/exist.yaml")
+        self.assertEqual(out.returncode, 2)
+        self.assertNotIn("Traceback", out.stderr)
+
+    def test_an_empty_input_is_not_treated_as_valid(self):
+        import tempfile
+        empty = os.path.join(tempfile.mkdtemp(), "empty.yaml")
+        open(empty, "w").close()
+        out = self._run("findings.py", empty)
+        self.assertEqual(out.returncode, 2)
+        self.assertIn("empty", out.stderr)
+
+
 class TestNoManifestWrites(unittest.TestCase):
     """A human decides what a finding means for the breakdown."""
 
