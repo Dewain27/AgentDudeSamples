@@ -169,7 +169,24 @@ Offer a sensible default for everything that has one, so the user can say
 | `interactive_test_hours` | Propose a figure and label it an assumption |
 | `licensing.seats` | Propose 1 unless they mention a team |
 | `other_workload_share` | Propose 0.0 if they say nothing is allocated |
-| `tier`, `reasoning_model` | Infer from the specification, and say what you inferred |
+| `tier`, `reasoning_model` | Infer from the specification, and say what you inferred. **Copilot Studio fields** — they do nothing unless the target includes Copilot Studio |
+
+**Never propose a `target.harness`.** It is in the required list below for a
+reason: it swings the target figure between near-zero and the largest line in
+the estimate, so a proposed default is a guess at the most consequential input.
+Ask it, and if the build platform is GitHub Copilot say which pairing is
+likely:
+
+> You're building with GitHub Copilot. Authoring Copilot Studio agents that way
+> usually means the `github-copilot` harness rather than `standard` — but they
+> bill very differently, so I don't want to assume. Which is it?
+
+**Never propose a value copied from the manifest example.** `Claude Max`, `200`
+and `0.45` are placeholders in the shape reference below, not defaults. A real
+session proposed all three as "drafted from your specification" on a build that
+had nothing to do with Claude — they were drafted from an example. Licence
+plan, seat cost and workload share come from the user or they are asked for;
+they are never filled in from the sample.
 
 These genuinely cannot be defaulted, and **the work breakdown is the first of
 them**:

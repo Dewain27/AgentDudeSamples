@@ -362,6 +362,78 @@ def correction_for(profile, bucket):
 REMEDIATION_SHARE = 0.25   # each extra eval cycle costs ~25% of the build
 
 
+def check_coherence(manifest):
+    """Do these inputs make sense together? Returns a list of warnings.
+
+    The two axes are independent, which means a manifest can be internally
+    contradictory while every individual field is valid. Nothing caught that
+    until now, and real sessions produced exactly this: a Claude Max licence
+    on a GitHub Copilot build, and Copilot Studio tier settings on a target
+    that has no Copilot Studio in it.
+
+    These are WARNINGS, not errors, with one exception. A wrong-but-plausible
+    combination is usually a mistake and occasionally deliberate, so the run
+    continues and the report says what looked wrong. Refusing outright would
+    block legitimate configurations nobody anticipated.
+    """
+    out = []
+    build = str(manifest.get("build_platform") or "").strip().lower()
+    target = str(manifest.get("target_platform") or "").strip().lower()
+    licence = manifest.get("licensing") or {}
+    target_cfg = manifest.get("target") or {}
+    plan = str(licence.get("plan") or "")
+    covers_studio = target in ("copilot-studio", "both")
+    covers_azure = target in ("azure", "both")
+
+    # The licence should name the platform actually doing the building.
+    if build == "github-copilot" and "claude" in plan.lower():
+        out.append(
+            "licensing.plan is %r but build_platform is github-copilot. A "
+            "Claude plan does not pay for GitHub Copilot usage -- check the "
+            "plan and seat cost describe the tool actually doing the "
+            "building." % plan)
+    if build == "claude-code" and "copilot" in plan.lower():
+        out.append(
+            "licensing.plan is %r but build_platform is claude-code. A "
+            "Copilot plan does not pay for Claude Code usage." % plan)
+
+    # Copilot Studio settings on a target with no Copilot Studio in it.
+    if not covers_studio:
+        for field in ("harness", "tier", "reasoning_model",
+                      "eval_test_cases", "interactive_test_hours",
+                      "agent_flow_actions"):
+            if target_cfg.get(field) not in (None, "", 0, False):
+                out.append(
+                    "target.%s is set but target_platform is %r, which has no "
+                    "Copilot Studio in it. That setting has no effect on this "
+                    "estimate." % (field, target or "unset"))
+
+    # Azure spend declared against a target with no Azure in it.
+    if not covers_azure and target_cfg.get("azure_build_usd"):
+        out.append(
+            "target.azure_build_usd is set but target_platform is %r, which "
+            "has no Azure in it. That spend is not counted." % target)
+
+    # NOT checked: build_platform github-copilot paired with the STANDARD
+    # harness. That was drafted as a warning and removed after it fired on two
+    # deliberate shipped examples. build_platform is which coding agent writes
+    # the code; target.harness is which Copilot Studio experience bills, and a
+    # team can genuinely use GitHub Copilot for application code while makers
+    # author the agent in the standard experience. There is no sourced basis
+    # for calling that unusual, and a check that fires on valid input teaches
+    # people to ignore checks. Not defaulting the harness is handled where it
+    # belongs -- in the instructions, which forbid proposing one at all.
+
+    # A github_copilot block that will never be read.
+    if manifest.get("github_copilot") and build != "github-copilot":
+        out.append(
+            "a `github_copilot:` block is present but build_platform is %r, "
+            "so none of it is used. Nothing here is priced from it."
+            % (build or "unset"))
+
+    return out
+
+
 def validate_platforms(manifest):
     """Two axes, both required, and they are not the same question.
 
@@ -519,6 +591,7 @@ def compute(manifest, profile, env_multiplier=1.0):
         "build_model": model_info,
         "thin_buckets": thin,
         "warnings": rates.staleness_warnings(),
+        "coherence": check_coherence(manifest),
     }
 
 
@@ -655,6 +728,7 @@ def compute_plan(manifest, profile):
         "build_detail": build_detail,
         "targets": targets,
         "warnings": rates.staleness_warnings(),
+        "coherence": check_coherence(manifest),
     }
 
     if base is not None:
@@ -943,6 +1017,9 @@ def main(argv=None):
     # reporting used to be two invocations, so "run it" was a SEQUENCE -- and
     # in real sessions the second half kept not happening while the assistant
     # narrated as though it had. One command, one deliverable.
+    for warning in result.get("coherence") or []:
+        print("CHECK INPUTS  %s" % warning, file=sys.stderr)
+
     if args.report:
         import render_report
         written = render_report.write(result, args.report, args.format)
