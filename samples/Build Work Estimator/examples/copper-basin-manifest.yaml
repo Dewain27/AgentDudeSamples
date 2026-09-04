@@ -1,0 +1,95 @@
+# Copper Basin Utilities -- outage triage agent
+# Author: Dewain Robinson
+#
+# Copper Basin Utilities is FICTIONAL, like every company in these samples.
+#
+# What this example exists to show: a build on GitHub Copilot using a BLEND of
+# GPT models rather than a single one. Real teams route work by difficulty --
+# the cheap model handles routine edits, the strong one handles the hard
+# reasoning -- and the blended rate prices that instead of pretending one model
+# did everything.
+#
+# Every rate below comes from GitHub's published per-model token table
+# (rates.GITHUB_MODEL_RATES); nothing here is hand-copied.
+
+project: Copper Basin Utilities -- outage triage agent
+
+specification:
+  functional: Outage intake and triage requirements (illustrative)
+  technical: Copilot Studio agent design note (illustrative)
+  status: in-review
+
+reserve_percent: 30
+
+build_platform: github-copilot     # what does the building
+target_platform: copilot-studio    # where it is deployed and evaluated
+
+github_copilot:
+  # `interactions` is deliberately omitted: it is derived from the `items:`
+  # breakdown below, so the work is sized from the same calibrated medians.
+  billing_mode: ai-credits
+
+  # The blend. Weights are shares of interactions, and the estimator blends
+  # each model's published input/output rate by these weights.
+  #
+  #   gpt-5.5      the hard reasoning -- agent orchestration, tricky topics
+  #   gpt-5.4      the everyday driver for most authoring work
+  #   gpt-5-mini   routine edits, renames, boilerplate
+  build_model:
+    gpt-5.5: 0.25
+    gpt-5.4: 0.50
+    gpt-5-mini: 0.25
+
+  tokens_per_interaction: 6000
+  output_share: 0.15
+  auto_discount: 0.10
+
+licensing:
+  model: seat
+  plan: GitHub Copilot Business
+  seat_monthly_cost: 19
+  seats: 4
+  duration_months: 3
+  other_workload_share: 0.35
+  concentrated: false
+
+target:
+  harness: standard              # does not bill for build or test
+  tier: standard
+
+  interactive_test_hours: 12
+  interactions_per_hour: 25
+
+  eval_test_cases: 40
+  eval_repeats: 3
+  eval_cycles: 2
+  eval_tokens_per_case: 3000
+
+items:
+  - name: Outage intake topic and entity extraction
+    eval_cases: 14
+    size: medium
+    files: 6
+    unknowns: 2
+    brownfield: false
+
+  - name: Crew dispatch lookup integration
+    eval_cases: 10
+    size: medium
+    files: 7
+    unknowns: 3
+    brownfield: true
+
+  - name: Customer notification templates and throttling
+    eval_cases: 8
+    size: small
+    files: 4
+    unknowns: 1
+    brownfield: false
+
+  - name: Escalation rules for safety-critical reports
+    eval_cases: 8
+    size: medium
+    files: 5
+    unknowns: 3
+    brownfield: false

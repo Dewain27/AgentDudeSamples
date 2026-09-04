@@ -43,7 +43,7 @@ generated: 2026-09-03T00:00:00Z
 | --- | --- |
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
-| **Built by** (model) | not declared |
+| **Built by** (model) | claude-sonnet-5 80% / claude-opus-5 20% — per-turn cost repriced x0.7123 |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
 | Specification | `draft` — confidence in sizing: **low** |
@@ -55,12 +55,12 @@ generated: 2026-09-03T00:00:00Z
 
 | | Build — USD | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | $230.67 | 28,418 | $514.85 |
-| **Likely** | **$890.21** | **32,290** | **$1,213.11** |
-| High | $5,230.98 | 40,035 | $5,631.33 |
-| **Likely + 25% reserve** | **$1,112.76** | **40,362** | **$1,516.38** |
+| Low | $164.31 | 28,418 | $448.49 |
+| **Likely** | **$634.11** | **32,290** | **$957.01** |
+| High | $3,726.17 | 40,035 | $4,126.52 |
+| **Likely + 25% reserve** | **$792.64** | **40,362** | **$1,196.26** |
 
-> **Plan for $1,213.11. Hold $1,516.38 including the 25% reserve.**
+> **Plan for $957.01. Hold $1,196.26 including the 25% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
@@ -141,11 +141,11 @@ Each component's share of **both** meters. The build column is the work of autho
 
 | Component | Size | Turns | Build |
 | --- | --- | ---: | ---: |
-| Agent instructions, topics and tool definitions | medium | 1,218 | $448.35 |
-| Dataverse schema and rate-card importer | small | 289 | $106.26 |
-| Legacy AS400 field mapping research | exploration | 100 | $36.72 |
-| Driver mobile handoff screens | medium | 812 | $298.90 |
-| **Total** | | 2,419 | **$890.23** |
+| Agent instructions, topics and tool definitions | medium | 1,218 | $319.38 |
+| Dataverse schema and rate-card importer | small | 289 | $75.69 |
+| Legacy AS400 field mapping research | exploration | 100 | $26.14 |
+| Driver mobile handoff screens | medium | 812 | $212.91 |
+| **Total** | | 2,419 | **$634.12** |
 
 ## Environments
 
@@ -160,25 +160,25 @@ Declaring them is the single largest correction available to this estimate.
 
 | | Amount |
 | --- | ---: |
-| Base estimate (incl. remediation) | $890.21 |
-| Reserve (25%) | $222.55 |
-| **Budget ask** | **$1,112.76** |
-| Observed low | $230.67 |
-| Observed high | $5,230.98 |
+| Base estimate (incl. remediation) | $634.11 |
+| Reserve (25%) | $158.53 |
+| **Budget ask** | **$792.64** |
+| Observed low | $164.31 |
+| Observed high | $3,726.17 |
 
 ### Reserve adequacy
 
 **The reserve does not cover observed variance.**
 
-A **25%** reserve reaches $1,112.76. Comparable work has reached $5,230.98. Full coverage
+A **25%** reserve reaches $792.64. Comparable work has reached $3,726.17. Full coverage
 would require **488%**.
 
 | Item | Size | Files | Turns | Estimate | Range | n |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
-| Agent instructions, topics and tool definitions | medium (brownfield) | 11 | 1,218 | $448.35 | $98.79 – $2,291.12 | 5 |
-| Dataverse schema and rate-card importer | small | 4 | 289 | $106.26 | $57.96 – $417.44 | 6 |
-| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 100 | $36.72 | $8.05 – $1,504.12 | 7 |
-| Driver mobile handoff screens | medium | 8 | 812 | $298.90 | $65.85 – $1,018.27 | 5 |
+| Agent instructions, topics and tool definitions | medium (brownfield) | 11 | 1,218 | $319.38 | $70.37 – $1,632.03 | 5 |
+| Dataverse schema and rate-card importer | small | 4 | 289 | $75.69 | $41.28 – $297.36 | 6 |
+| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 100 | $26.14 | $5.74 – $1,071.44 | 7 |
+| Driver mobile handoff screens | medium | 8 | 812 | $212.91 | $46.92 – $725.34 | 5 |
 
 ### Calibration basis
 
@@ -191,14 +191,30 @@ rates must substitute its own.
 
 | | Model |
 | --- | --- |
-| Declared for this build | **not declared** |
+| Declared for this build | **claude-sonnet-5 80% / claude-opus-5 20%** |
 | Measured in the calibration profile | claude-opus-5 55% / claude-sonnet-5 45% |
 
-> **Not repriced.** No build model was declared, so the estimate carries the calibration mix's blended per-turn cost unchanged.
+Repricing the measured **$0.32** per turn by **x0.7123** gives **$0.23** — this model
+costs less per token than the mix the measurement was taken on.
 
-The per-turn cost used here is the measured **$0.32**, which carries whatever
-model mix produced it. If you will build on a materially different model, this
-estimate does not adjust for that.
+### How the ratio was derived
+
+Each row is a **measured dollar share** of the real per-turn cost, times a ratio of
+**published per-model rates**. There is no free parameter.
+
+| Cost component | Measured share | This model $/1M | Calibration $/1M | Contribution |
+| --- | ---: | ---: | ---: | ---: |
+| Cache read | 66% | 0.2600 | 0.3650 | 0.4701 |
+| Cache write | 25% | 3.2500 | 4.5625 | 0.1781 |
+| Output | 9% | 13.0000 | 18.2500 | 0.0641 |
+| **Ratio** | | | | **0.7123** |
+
+> **What this does not capture.** The rescale prices *tokens*, not capability. It
+> does **not** model that a cheaper or weaker model may need **more turns** to do
+> the same work. That effect is real and is not derivable from published rates, so
+> it is named here rather than folded silently into the number. The rescale also
+> holds the measured token profile — context size, output length, cache behaviour —
+> constant.
 
 ## Licensing
 
@@ -208,11 +224,11 @@ so no additional money changes hands for this build -- but the seat is not free.
 | | |
 | --- | ---: |
 | Developer-months of allowance available | 1 (1 seat x 1 month) |
-| Share of that allowance | **188%** |
+| Share of that allowance | **134%** |
 | Seat spend over the build | $200.00 |
-| **Attributable cost of this build** | **$376.15** |
+| **Attributable cost of this build** | **$267.93** |
 | Already committed to other work | 45% |
-| **Total committed** | **233%** |
+| **Total committed** | **179%** |
 
 The attributable cost is the seat's monthly price apportioned by the share of
 the allowance this build consumes. Nothing extra is invoiced, but this is the
@@ -220,10 +236,10 @@ real cost of the capacity the build uses up.
 
 ### Allowance overrun
 
-**This build plus existing workload exceeds the allowance by 133%.**
+**This build plus existing workload exceeds the allowance by 79%.**
 
 Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$266.15**.
+bills on top of the seat. Overage exposure at the same rate: **$157.93**.
 
 Options: spread the build across allowance periods, move part of it to
 consumption billing, add seats, or reduce the other committed work.
@@ -237,7 +253,7 @@ comfortably in a month can still exhaust a short window and stall.
 Monthly headroom will not protect it; expect to hit shorter windows and plan
 for pauses.
 
-Notional value at list rates: **$890.21** — what this build would cost on
+Notional value at list rates: **$634.11** — what this build would cost on
 consumption billing. Shown for scale; it is not a charge.
 
 ## Target platform — Microsoft Copilot Studio

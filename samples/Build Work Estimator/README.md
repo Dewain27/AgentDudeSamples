@@ -189,8 +189,9 @@ than a comparison:
 
 | Scenario | Built with → built on | Licensing | Demonstrates |
 | --- | --- | --- | --- |
-| [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | **Claude Code** → Copilot Studio, GitHub Copilot harness | Seat (Claude Max) | Both meters billing at once; 4 eval cycles; the 20-evals-per-day velocity cap forcing 24 days minimum |
+| [Harbor Line Logistics](examples/harbor-line-estimate.md) ([pdf](examples/harbor-line-estimate.pdf)) | **Claude Code** → Copilot Studio, GitHub Copilot harness | Seat (Claude Max) | Both meters billing at once; 4 eval cycles; the 20-evals-per-day velocity cap forcing 24 days minimum; a **model blend that reprices** the measured per-turn cost by x0.71 |
 | [Granite Peak Utilities](examples/granite-peak-estimate.md) ([pdf](examples/granite-peak-estimate.pdf)) | **GitHub Copilot** → Copilot Studio, standard harness | Seat (Copilot Business) | Standard harness billing nothing for build or test, with the counterfactual shown; side-effects still billing |
+| [Copper Basin Utilities](examples/copper-basin-estimate.md) ([pdf](examples/copper-basin-estimate.pdf)) | **GitHub Copilot** → Copilot Studio, standard harness | Seat (Copilot Business) | A **blend of GPT models** — gpt-5.5 for hard reasoning, gpt-5.4 for the everyday work, gpt-5-mini for routine edits — priced from GitHub's published per-model table and weighted by share |
 
 ## A full worked scenario
 
@@ -420,7 +421,7 @@ numbers.
 cd "samples/Build Work Estimator/tests" && python3 -m unittest discover -p 'test_*.py'
 ```
 
-333 tests. Fixtures are synthetic and committed; no test reads real history and
+340 tests. Fixtures are synthetic and committed; no test reads real history and
 no test makes a network call.
 
 The most important suite is `test_contribute.py`. It seeds a ledger entry with

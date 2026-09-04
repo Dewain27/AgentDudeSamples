@@ -204,6 +204,11 @@ def ledger(result):
     for model, (rin, rout) in rates.ANTHROPIC_RATES.items():
         found.setdefault(round(rin, 2), []).append("rates.%s.input" % model)
         found.setdefault(round(rout, 2), []).append("rates.%s.output" % model)
+    for model, (rin, rout) in rates.GITHUB_MODEL_RATES.items():
+        found.setdefault(round(rin, 2), []).append(
+            "rates.GITHUB_MODEL_RATES.%s.input" % model)
+        found.setdefault(round(rout, 2), []).append(
+            "rates.GITHUB_MODEL_RATES.%s.output" % model)
     for entry in registry():
         value = entry["value"]
         if isinstance(value, (int, float)):

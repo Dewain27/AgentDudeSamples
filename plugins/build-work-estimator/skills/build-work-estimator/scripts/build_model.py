@@ -85,14 +85,8 @@ def _normalise_shares(shares):
 
 
 def describe(mix):
-    """Human label for a mix: 'claude-opus-5' or 'opus-5 55% / sonnet-5 45%'."""
-    if not mix:
-        return "not declared"
-    if len(mix) == 1:
-        return list(mix)[0]
-    return " / ".join(
-        "%s %.0f%%" % (model, weight * 100)
-        for model, weight in sorted(mix.items(), key=lambda kv: -kv[1]))
+    """Human label for a mix. Shared with the GitHub side via rates."""
+    return rates.describe_mix(mix)
 
 
 def resolve(manifest, profile, build_platform):

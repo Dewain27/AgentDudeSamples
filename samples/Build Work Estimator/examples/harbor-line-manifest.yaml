@@ -19,6 +19,14 @@ specification:
 reserve_percent: 25
 
 build_platform: claude-code        # what does the building
+
+# Which model does the building. This team leans on Sonnet for routine work and
+# keeps Opus for the hard reasoning, which is a different blend from the one the
+# calibration profile measured -- so the measured per-turn cost is repriced and
+# the report shows the derivation.
+build_model:
+  claude-sonnet-5: 0.8
+  claude-opus-5: 0.2
 target_platform: copilot-studio    # where it is deployed and evaluated
 
 licensing:

@@ -153,7 +153,8 @@ def copy_assets():
     if not os.path.isdir(assets):
         os.makedirs(assets)
     for name in ("harbor-line-estimate.md", "harbor-line-manifest.yaml",
-                 "granite-peak-estimate.md", "granite-peak-manifest.yaml"):
+                 "granite-peak-estimate.md", "granite-peak-manifest.yaml",
+                 "copper-basin-estimate.md", "copper-basin-manifest.yaml"):
         src = os.path.join(SAMPLE, "examples", name)
         if os.path.exists(src):
             shutil.copyfile(src, os.path.join(assets, name))

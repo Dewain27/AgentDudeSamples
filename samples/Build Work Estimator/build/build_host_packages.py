@@ -208,6 +208,9 @@ def stage_skill(dest):
     skill = skill.replace(
         "| `assets/granite-peak-estimate.md` | Worked example: Copilot Studio "
         "stack, consumption |\n", "")
+    skill = skill.replace(
+        "| `assets/copper-basin-estimate.md` | Worked example: GitHub Copilot "
+        "on a blend of GPT models |\n", "")
     skill = skill.rstrip() + "\n" + HOST_NOTE
     _write(os.path.join(dest, "SKILL.md"), skill)
 

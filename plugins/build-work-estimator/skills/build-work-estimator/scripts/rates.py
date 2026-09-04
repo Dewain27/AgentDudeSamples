@@ -269,6 +269,10 @@ GITHUB_MODEL_RATES_SOURCE = GITHUB_SOURCE
 
 #: model id -> (input $/1M, output $/1M) at the default (non-long-context) tier
 GITHUB_MODEL_RATES = {
+    "gpt-5-mini": (0.25, 2.00),
+    "gpt-5.3-codex": (1.75, 14.00),
+    "gpt-5.4-nano": (0.20, 1.25),
+    "gpt-5.4-mini": (0.75, 4.50),
     "gpt-5.4": (2.50, 15.00),
     "gpt-5.5": (5.00, 30.00),
     "claude-sonnet-5": (2.00, 10.00),
@@ -542,6 +546,41 @@ def normalise_model_mix(mix, build_platform):
     if total <= 0:
         raise ValueError("build_model weights must sum to more than zero.")
     return {model: weight / total for model, weight in out.items()}
+
+
+def describe_mix(mix):
+    """Human label for a mix: 'gpt-5.5' or 'gpt-5.5 50% / gpt-5.4 30%'."""
+    if not mix:
+        return "not declared"
+    if len(mix) == 1:
+        return list(mix)[0]
+    return " / ".join(
+        "%s %.0f%%" % (model, weight * 100)
+        for model, weight in sorted(mix.items(), key=lambda kv: -kv[1]))
+
+
+def blended_github_rates(mix):
+    """Weight-blend GitHub per-model token rates across a mix.
+
+    A team rarely builds on one model: the cheap one handles routine edits and
+    the expensive one handles the hard reasoning. Blending the published rates
+    by the declared share prices that reality instead of forcing a single
+    model to stand in for all of it.
+    """
+    if not mix:
+        raise ValueError("cannot blend an empty model mix.")
+    total = float(sum(mix.values()))
+    rin = rout = 0.0
+    for model, weight in mix.items():
+        if model not in GITHUB_MODEL_RATES:
+            raise ValueError(
+                "no published GitHub rate for %r; known models: %s"
+                % (model, ", ".join(sorted(GITHUB_MODEL_RATES))))
+        share = float(weight) / total
+        model_in, model_out = GITHUB_MODEL_RATES[model]
+        rin += share * model_in
+        rout += share * model_out
+    return rin, rout
 
 
 def component_rates(model):

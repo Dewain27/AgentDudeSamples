@@ -19,9 +19,17 @@ GitHub runs two billing models in parallel:
                     Eligible Pro and Pro+ annual subscribers stay on this
                     until their plan expires.
 
-Per-model rates and multipliers are NOT hardcoded. GitHub publishes them and
-changes them; a stale table here would silently misprice every estimate. The
-user supplies the rate for the model they actually use.
+Which model builds it is a COST INPUT here, not a preference: AI Credits are
+priced from the selected model's published token rate. `build_model` accepts a
+single model id or a blend, and blended rates are weighted by declared share,
+because a team rarely builds on one model.
+
+Per-model TOKEN rates come from `rates.GITHUB_MODEL_RATES`, which carries a
+source and a verification date under the same staleness machinery as every
+other table -- and an explicitly supplied rate always overrides it, because
+GitHub's catalogue moves. Request MULTIPLIERS are not tabled at all: GitHub's
+current pricing page no longer publishes them, so legacy premium-requests mode
+keeps the user's declared multiplier rather than a fabricated one.
 """
 
 __author__ = "Dewain Robinson"
@@ -66,19 +74,22 @@ def compute(config, reserve_percent):
     interactions = int(cfg["interactions"] or 0)
     mode_info = rates.GITHUB_BILLING_MODES[mode]
 
-    # Which model builds it. GitHub runs a multi-provider catalogue, so the
-    # model is validated against what GitHub Copilot can actually run -- not
-    # against a global list, and never against Claude Code's Anthropic-only
-    # catalogue.
+    # Which model builds it, as a single id or a blend. Validated against what
+    # GitHub Copilot can actually run -- never Claude Code's Anthropic-only
+    # catalogue. Teams rarely build on one model -- a cheap
+    # one for routine edits, a stronger one for the hard reasoning -- so the
+    # rates blend by declared share rather than forcing one model to stand in
+    # for all of it.
     build_model = cfg.get("build_model")
     model_rates = None
+    model_mix = {}
     if build_model:
         try:
-            build_model = rates.validate_model_for_platform(
-                "github-copilot", build_model)
+            model_mix = rates.normalise_model_mix(build_model, "github-copilot")
+            model_rates = rates.blended_github_rates(model_mix)
         except ValueError as exc:
             raise GitHubCopilotError(str(exc))
-        model_rates = rates.GITHUB_MODEL_RATES[build_model]
+        build_model = rates.describe_mix(model_mix)
 
     result = {
         "stack": "github-copilot",
@@ -87,6 +98,7 @@ def compute(config, reserve_percent):
         "billing_mode_note": mode_info["note"],
         "interactions": interactions,
         "build_model": build_model or None,
+        "build_model_mix": model_mix or {},
         "unmetered": list(rates.GITHUB_UNMETERED),
         "reserve_percent": float(reserve_percent),
         "verified": rates.GITHUB_VERIFIED,
@@ -140,7 +152,10 @@ def compute(config, reserve_percent):
     # overridden by this table -- and the report says which applied.
     if model_rates is not None and (rin is None or rout is None):
         rin, rout = model_rates
-        result["model_rate_source"] = "published GitHub rate for %s" % build_model
+        result["model_rate_source"] = (
+            "published GitHub rates, blended across %d models" % len(model_mix)
+            if len(model_mix) > 1
+            else "published GitHub rate for %s" % build_model)
         result["model_rates_verified"] = rates.GITHUB_MODEL_RATES_VERIFIED
     elif model_rates is not None:
         result["model_rate_source"] = (
@@ -183,6 +198,11 @@ def compute(config, reserve_percent):
     credits = discounted / rates.DOLLARS_PER_GITHUB_AI_CREDIT
 
     result.update({
+        # Recorded because the report renders them. A blended rate is derived,
+        # so leaving it uncorded would put a figure on the page that the
+        # provenance ledger could not account for.
+        "dollars_per_1m_input": round(rin, 4),
+        "dollars_per_1m_output": round(rout, 4),
         "total_tokens": int(total_tokens),
         "unit": "GitHub AI Credit",
         "dollars_per_credit": rates.DOLLARS_PER_GITHUB_AI_CREDIT,
