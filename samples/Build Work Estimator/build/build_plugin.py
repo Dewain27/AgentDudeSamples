@@ -148,19 +148,35 @@ def write_anthropic_reference(path):
         fh.write("\n".join(lines))
 
 
+#: The ONE worked example the installed skill carries, so it has a concrete
+#: target for what good output looks like. The other runs are repository
+#: examples for people to read -- they are not plugin payload, and bundling
+#: every one of them just inflates what users install.
+BUNDLED_EXAMPLE = ("harbor-line-estimate.md", "harbor-line-manifest.yaml")
+
+
 def copy_assets():
     assets = os.path.join(skill_root(), "assets")
     if not os.path.isdir(assets):
         os.makedirs(assets)
-    for name in ("harbor-line-estimate.md", "harbor-line-manifest.yaml",
-                 "granite-peak-estimate.md", "granite-peak-manifest.yaml",
-                 "copper-basin-estimate.md", "copper-basin-manifest.yaml"):
+
+    expected = set(BUNDLED_EXAMPLE)
+    for name in BUNDLED_EXAMPLE:
         src = os.path.join(SAMPLE, "examples", name)
         if os.path.exists(src):
             shutil.copyfile(src, os.path.join(assets, name))
     baseline = os.path.join(SAMPLE, "calibration", "baseline.json")
     if os.path.exists(baseline):
         shutil.copyfile(baseline, os.path.join(assets, "baseline.json"))
+        expected.add("baseline.json")
+
+    # Prune anything no longer bundled. Without this the directory only ever
+    # grows: an asset dropped from the list above would stay behind forever,
+    # shipping to users as an orphan nothing regenerates.
+    for name in sorted(os.listdir(assets)):
+        if name not in expected:
+            os.remove(os.path.join(assets, name))
+            print("  pruned stale asset: %s" % name)
 
 
 def write_plugin_json():

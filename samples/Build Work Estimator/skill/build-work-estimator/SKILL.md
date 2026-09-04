@@ -326,8 +326,6 @@ typed phrase; do not attempt to bypass or pre-answer that prompt.
 | `references/methodology.md` | Why turns and context, not lines of code |
 | `references/rates-copilot-credits.md` | The Microsoft rate detail |
 | `assets/harbor-line-estimate.md` | Worked example: Claude Code stack, seat licensing |
-| `assets/granite-peak-estimate.md` | Worked example: Copilot Studio stack, consumption |
-| `assets/copper-basin-estimate.md` | Worked example: GitHub Copilot on a blend of GPT models |
 | `references/platforms-and-licensing.md` | Why the two axes are different questions |
 
 ## Known limits
