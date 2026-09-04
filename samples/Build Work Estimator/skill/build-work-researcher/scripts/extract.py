@@ -186,13 +186,37 @@ def main(argv=None):
 
     sys.path.insert(0, _estimator_scripts())
     import miniyaml
+    from findings import InputError, read_text
 
-    with open(args.specification) as fh:
-        spec_text = fh.read()
-    with open(args.manifest) as fh:
-        manifest = miniyaml.load(fh.read())
+    try:
+        spec_text = read_text(
+            args.specification, "The specification",
+            "\nA review needs something to review AGAINST. If the project "
+            "genuinely has no\nwritten specification, that is not a blocker "
+            "to work around -- it IS the finding,\nand the honest one: a "
+            "breakdown sized from nothing cannot be checked for\n"
+            "completeness. Record it as a `thin-specification` finding and "
+            "say so plainly.")
+        manifest = miniyaml.load(read_text(
+            args.manifest, "The breakdown",
+            "\nThis is the manifest whose `items:` are being checked for "
+            "completeness."))
+    except InputError as exc:
+        print("%s" % exc, file=sys.stderr)
+        return 2
+    except Exception as exc:                      # miniyaml parse failures
+        print("The breakdown could not be parsed:\n  %s\n  %s"
+              % (args.manifest, exc), file=sys.stderr)
+        return 2
 
-    cands = candidates(spec_text, manifest.get("items"), args.min_overlap)
+    items = (manifest or {}).get("items")
+    if not items:
+        print("The breakdown declares no `items:`, so there is nothing to "
+              "check the\nspecification against:\n  %s" % args.manifest,
+              file=sys.stderr)
+        return 2
+
+    cands = candidates(spec_text, items, args.min_overlap)
     text = render(cands, args.specification, args.manifest)
 
     if args.out:

@@ -44,6 +44,7 @@ specification rather than paraphrasing numbers out of it.
 __author__ = "Dewain Robinson"
 
 import argparse
+import os
 import re
 import sys
 
@@ -111,6 +112,34 @@ BANNED_PATTERNS = (
     (re.compile(r"\b(?:files?|unknowns?|eval_cases)\b\s*[:=]\s*\d", re.I),
      "assigns an estimator input directly"),
 )
+
+
+class InputError(Exception):
+    """Raised for a missing or unusable input the user must fix.
+
+    A stack trace tells someone the interpreter was surprised. It does not
+    tell them what to do. Every other module in this codebase answers a bad
+    input with an explanation, and these scripts are no exception.
+    """
+
+
+def read_text(path, what, guidance=""):
+    """Read a required input, or explain precisely what is wrong with it."""
+    if not os.path.exists(path):
+        raise InputError(
+            "%s was not found:\n  %s\n%s" % (what, path, guidance))
+    if os.path.isdir(path):
+        raise InputError(
+            "%s is a directory, not a file:\n  %s" % (what, path))
+    try:
+        with open(path) as fh:
+            text = fh.read()
+    except OSError as exc:
+        raise InputError("%s could not be read:\n  %s\n  %s"
+                         % (what, path, exc))
+    if not text.strip():
+        raise InputError("%s is empty:\n  %s" % (what, path))
+    return text
 
 
 class FindingsError(Exception):
@@ -251,8 +280,14 @@ def main(argv=None):
     sys.path.insert(0, _estimator_scripts())
     import miniyaml
 
-    with open(args.findings) as fh:
-        doc = miniyaml.load(fh.read())
+    try:
+        doc = miniyaml.load(read_text(
+            args.findings, "The findings file",
+            "\nWrite findings first, or see references/findings-schema.md "
+            "for the shape."))
+    except InputError as exc:
+        print("%s" % exc, file=sys.stderr)
+        return 2
 
     problems = validate_findings(doc)
     if problems:
@@ -271,7 +306,6 @@ def main(argv=None):
 
 def _estimator_scripts():
     """The estimator's scripts, for the shared YAML reader."""
-    import os
     here = os.path.dirname(os.path.abspath(__file__))
     return os.path.normpath(os.path.join(
         here, "..", "..", "build-work-estimator", "scripts"))
