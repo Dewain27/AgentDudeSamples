@@ -537,6 +537,8 @@ def compute_plan(manifest, profile):
         specification = spec_mod.normalise(manifest.get("specification"))
         research_review = spec_mod.normalise_review(
             manifest.get("research_review"))
+        breakdown_source = spec_mod.normalise_breakdown_source(
+            manifest.get("breakdown_source"))
     except spec_mod.SpecificationError as exc:
         raise EstimateError(str(exc))
 
@@ -648,6 +650,7 @@ def compute_plan(manifest, profile):
         "licensing": licence,
         "specification": specification,
         "research_review": research_review,
+        "breakdown_source": breakdown_source,
         "environments": envs,
         "build_detail": build_detail,
         "targets": targets,
