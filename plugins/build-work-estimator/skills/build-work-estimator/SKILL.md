@@ -98,10 +98,32 @@ rule, they were right.
 
 ## Run order
 
-### 0. Version gate — always first
+### 0. Find a Python interpreter — before anything else
+
+Every script here is Python. **`python` and `python3` are frequently absent
+from a chat host's PATH while a perfectly good interpreter exists**, so a
+`command not found` is the start of the problem, not the end of it. In a real
+session the assistant declared itself blocked for four turns; the interpreter
+was at `/usr/bin/python3` the whole time.
+
+Work through this before concluding anything:
 
 ```bash
-python scripts/version_check.py
+command -v python3 || command -v python \
+  || ls /usr/bin/python3 /usr/local/bin/python3 /opt/homebrew/bin/python3 \
+       /usr/bin/python 2>/dev/null
+```
+
+Use whatever that finds — an absolute path is fine, and preferable to
+reporting failure. Only if every one of them comes back empty is the
+environment genuinely without Python; say so then, and say what the user would
+need to install. Never present "python: command not found" as the final answer
+without having looked in the standard locations.
+
+### 0b. Version gate
+
+```bash
+<python> scripts/version_check.py
 ```
 
 **Exit code 2 means stop.** A newer version is published; tell the user not to
@@ -168,7 +190,20 @@ Offer a sensible default for everything that has one, so the user can say
 | `eval_test_cases` | Propose a count scaled to the breakdown |
 | `interactive_test_hours` | Propose a figure and label it an assumption |
 | `licensing.seats` | Propose 1 unless they mention a team |
-| `other_workload_share` | Propose 0.0 if they say nothing is allocated |
+
+**Never assume a seat's whole allowance is free for this build.** A seat
+carries a monthly credit allowance, and most of them are already doing other
+work — that is what `other_workload_share` records. Defaulting it to `0.0`
+claims the entire seat is available to this project, which is the most
+optimistic possible reading and quietly understates what the build draws.
+
+Ask it directly:
+
+> How much of that seat's monthly allowance is already going to other work?
+> `0.0` means this build gets the whole seat; `0.45` means 45% is already
+> committed elsewhere. If you're not sure, a rough share is far better than
+> assuming the seat is idle.
+| `other_workload_share` | **No default. Always ask.** See below |
 | `tier`, `reasoning_model` | Infer from the specification, and say what you inferred. **Copilot Studio fields** — they do nothing unless the target includes Copilot Studio |
 
 **Never propose a `target.harness`.** It is in the required list below for a
@@ -342,6 +377,22 @@ recommendation, as information, not as the reason.
 For `seat`, `seat_monthly_cost` and `other_workload_share` are **required**. A
 seat is not free — reporting $0 for seat-based work is the same class of error
 this tool exists to prevent. If the user does not know their seat cost, ask.
+
+**Name the plan and the estimator checks it.** `rates.py` carries published
+seat SKUs for both platforms, so a plan name is worth more than a remembered
+number:
+
+| Platform | What is published | What gets checked |
+| --- | --- | --- |
+| GitHub Copilot | Price **and** monthly AI-credit allowance per SKU | Seat cost against the published price, and any declared `monthly_allowance` against what the SKU actually includes |
+| Claude | Price only | Seat cost against the published price |
+
+**Never state an allowance for a Claude plan.** Anthropic publishes usage as a
+relative multiplier over a rolling five-hour window — "5x or 20x more than
+Pro" — not a credit count. There is no number to quote, and inventing one to
+fill the gap is precisely the failure this estimator exists to prevent. On a
+Claude seat, `other_workload_share` is the user's judgement and nothing can
+cross-check it; say so rather than implying a check happened.
 
 ### 2. Estimate
 

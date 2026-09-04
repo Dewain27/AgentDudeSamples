@@ -328,6 +328,30 @@ def interview(prompt=input, echo=print):
 # Model
 # --------------------------------------------------------------------------
 
+#: Ordered smallest to largest, so a missing bucket can fall back to its
+#: nearest measured neighbour rather than failing the run.
+BUCKET_ORDER = ("exploration", "trivial", "small", "medium", "large",
+                "subsystem")
+
+
+def _nearest_bucket(wanted, index):
+    """Closest covered bucket to `wanted`, preferring the larger on a tie.
+
+    Preferring larger is deliberate: where the profile cannot say, erring
+    toward the bigger measured bucket overstates rather than understates, and
+    an estimate that is quietly too small is the more expensive mistake.
+    """
+    if wanted not in BUCKET_ORDER:
+        return None
+    covered = [b for b in BUCKET_ORDER if b in index]
+    if not covered:
+        return None
+    target = BUCKET_ORDER.index(wanted)
+    return min(covered,
+               key=lambda b: (abs(BUCKET_ORDER.index(b) - target),
+                              -BUCKET_ORDER.index(b)))
+
+
 def bucket_index(profile):
     return dict((row["label"], row) for row in profile.get("buckets", []))
 
@@ -424,6 +448,86 @@ def check_coherence(manifest):
     # people to ignore checks. Not defaulting the harness is handled where it
     # belongs -- in the instructions, which forbid proposing one at all.
 
+    # A seat is not an empty licence: each SKU includes a credit allowance,
+    # and the build draws against it before anything bills on top. Checking
+    # the declared plan against published SKUs is what stops an invented
+    # allowance -- a real session wrote `monthly_allowance: 1500` for a plan
+    # that has no published allowance at all.
+    if build == "github-copilot" and str(
+            licence.get("model") or "").lower() == "seat":
+        resolved = rates.github_seat_plan(plan)
+        if plan and resolved is None:
+            out.append(
+                "licensing.plan %r is not a published GitHub Copilot seat "
+                "SKU. Known plans are %s. Without a recognised plan the "
+                "included credit allowance is unknown, and it must not be "
+                "guessed -- state the plan or declare the allowance you "
+                "actually have."
+                % (plan, ", ".join(sorted(rates.GITHUB_SEAT_PLANS))))
+        elif resolved:
+            _key, published, included = resolved
+            declared = licence.get("seat_monthly_cost")
+            try:
+                declared = float(declared) if declared is not None else None
+            except (TypeError, ValueError):
+                declared = None
+            if declared is not None and abs(declared - published) > 0.01:
+                out.append(
+                    "licensing.seat_monthly_cost is $%.2f but %s publishes "
+                    "$%.2f per seat per month. Seat cost drives the "
+                    "attributed total directly, so check which is right "
+                    "before relying on this."
+                    % (declared, plan, published))
+            gh_declared = (manifest.get("github_copilot") or {}).get(
+                "monthly_allowance")
+            if gh_declared and abs(float(gh_declared) - included) > 0.01:
+                out.append(
+                    "github_copilot.monthly_allowance is %s but %s includes "
+                    "%s AI credits per seat per month. An allowance that does "
+                    "not match the plan understates or overstates what the "
+                    "build draws before anything bills on top."
+                    % (format(float(gh_declared), ",.0f"), plan,
+                       format(included, ",")))
+
+    # The same question on the Claude side, with an honest difference: prices
+    # are published, allowances are not. Anthropic describes usage as "5x or
+    # 20x more than Pro" over a rolling window, which is not a number, so
+    # nothing here can cross-check what share of a seat is still free.
+    if build == "claude-code" and str(
+            licence.get("model") or "").lower() == "seat":
+        resolved = rates.anthropic_seat_plan(plan)
+        if plan and resolved is None:
+            out.append(
+                "licensing.plan %r is not a published Claude plan. Known "
+                "plans are %s. The seat cost cannot be checked against a "
+                "published price."
+                % (plan, ", ".join(sorted(rates.ANTHROPIC_SEAT_PLANS))))
+        elif resolved:
+            _key, published, is_floor = resolved
+            declared = licence.get("seat_monthly_cost")
+            try:
+                declared = float(declared) if declared is not None else None
+            except (TypeError, ValueError):
+                declared = None
+            if declared is not None:
+                mismatch = (declared < published - 0.01 if is_floor
+                            else abs(declared - published) > 0.01)
+                if mismatch:
+                    out.append(
+                        "licensing.seat_monthly_cost is $%.2f but %s publishes "
+                        "%s$%.2f per month. Seat cost drives the attributed "
+                        "total directly."
+                        % (declared, plan, "from " if is_floor else "",
+                           published))
+        if licence.get("other_workload_share") in (None, 0, 0.0, "0"):
+            out.append(
+                "other_workload_share is 0, claiming this build has a Claude "
+                "seat entirely to itself. Anthropic publishes usage as a "
+                "relative multiplier over a rolling window rather than a "
+                "credit count, so nothing here can check that -- it is your "
+                "judgement, and assuming an idle seat understates what the "
+                "build draws.")
+
     # A github_copilot block that will never be read.
     if manifest.get("github_copilot") and build != "github-copilot":
         out.append(
@@ -512,15 +616,32 @@ def compute(manifest, profile, env_multiplier=1.0):
 
     rows, corrections = [], []
     base = low = high = 0.0
+    substitutions = []
     for item in items:
         bucket = calibrate.SIZE_TO_BUCKET[item["size"]]
         row = index.get(bucket)
         if row is None:
-            raise EstimateError(
-                "The calibration profile has no data for size %r. Run "
-                "calibrate.py, or choose a size the profile covers: %s"
-                % (item["size"], ", ".join(sorted(index)))
-            )
+            # The size list is the code's; what is USABLE is whatever the
+            # user's own history covered. Refusing outright meant a size the
+            # documentation advertises could be unusable on a real profile --
+            # and in one session the assistant worked around it by silently
+            # rewriting the breakdown, changing the estimate without saying so.
+            #
+            # Substitute the nearest covered bucket and DISCLOSE it. A
+            # disclosed substitution is honest; a silent rewrite is not.
+            substitute = _nearest_bucket(bucket, index)
+            if substitute is None:
+                raise EstimateError(
+                    "The calibration profile has no usable buckets at all. "
+                    "Run calibrate.py to measure your history, or supply a "
+                    "profile that has some.")
+            substitutions.append(
+                "no measured data for size %r, so the nearest covered bucket "
+                "%r was used for %r. Its turn median is not this size's, and "
+                "the figure is weaker for it."
+                % (item["size"], substitute, item["name"]))
+            bucket = substitute
+            row = index[bucket]
         factor, info = correction_for(profile, bucket)
         if info and info not in corrections:
             corrections.append(info)
@@ -590,6 +711,7 @@ def compute(manifest, profile, env_multiplier=1.0):
         },
         "build_model": model_info,
         "thin_buckets": thin,
+        "bucket_substitutions": substitutions,
         "warnings": rates.staleness_warnings(),
         "coherence": check_coherence(manifest),
     }
@@ -648,8 +770,10 @@ def compute_plan(manifest, profile):
             for c in components]
 
     # --- build side -------------------------------------------------------
+    bucket_substitutions = []
     if build_key == "claude-code":
         base = compute(manifest, profile, envs["work_multiplier"])
+        bucket_substitutions = base.get("bucket_substitutions") or []
         build_detail = None
         build_currency_total = base["base"]
     else:
@@ -661,6 +785,7 @@ def compute_plan(manifest, profile):
             # Claude Code path uses, so two estimates of one scenario are
             # actually estimating the same scenario.
             sizing = compute(manifest, profile, envs["work_multiplier"])
+            bucket_substitutions = sizing.get("bucket_substitutions") or []
             gh_cfg["interactions"] = sizing["total_turns"]
             sized_from_items = {
                 "total_turns": sizing["total_turns"],
@@ -728,7 +853,7 @@ def compute_plan(manifest, profile):
         "build_detail": build_detail,
         "targets": targets,
         "warnings": rates.staleness_warnings(),
-        "coherence": check_coherence(manifest),
+        "coherence": check_coherence(manifest) + bucket_substitutions,
     }
 
     if base is not None:

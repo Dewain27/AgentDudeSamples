@@ -44,6 +44,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
 | **Built by** (model) | gpt-5.4 |
+| **Check inputs** | github_copilot.monthly_allowance is 1,500 but GitHub Copilot Business includes 1,900 AI credits per seat per month. An allowance that does not match the plan understates or overstates what the build draws before anything bills on top. |
 | Target harness | `standard` — does not bill for build or test |
 | Licensing | Seat — GitHub Copilot Business, $19.00/month x 3 seats x 1 month = **$57.00** over the build |
 | Specification | `draft` — confidence in sizing: **low** |

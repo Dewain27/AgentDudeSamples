@@ -204,6 +204,16 @@ def ledger(result):
     for model, (rin, rout) in rates.ANTHROPIC_RATES.items():
         found.setdefault(round(rin, 2), []).append("rates.%s.input" % model)
         found.setdefault(round(rout, 2), []).append("rates.%s.output" % model)
+    # Published seat prices and allowances appear in coherence warnings, so
+    # they are legitimate origins exactly like the per-token rates.
+    for planname, (price, credits) in rates.GITHUB_SEAT_PLANS.items():
+        found.setdefault(round(price, 2), []).append(
+            "rates.GITHUB_SEAT_PLANS.%s.price" % planname)
+        found.setdefault(round(float(credits), 2), []).append(
+            "rates.GITHUB_SEAT_PLANS.%s.credits" % planname)
+    for planname, (price, _floor) in rates.ANTHROPIC_SEAT_PLANS.items():
+        found.setdefault(round(price, 2), []).append(
+            "rates.ANTHROPIC_SEAT_PLANS.%s.price" % planname)
     for model, (rin, rout) in rates.GITHUB_MODEL_RATES.items():
         found.setdefault(round(rin, 2), []).append(
             "rates.GITHUB_MODEL_RATES.%s.input" % model)
