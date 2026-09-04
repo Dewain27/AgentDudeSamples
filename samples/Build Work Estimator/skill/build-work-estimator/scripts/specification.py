@@ -136,6 +136,42 @@ def interview(prompt=input, echo=print):
             "status": status}
 
 
+#: How the work breakdown came to exist. A size someone declared because they
+#: know the work, and a size a model drafted from a specification, are
+#: different claims -- and the reader cannot tell them apart from the number.
+BREAKDOWN_SOURCES = {
+    "authored": ("Authored by someone who knows the work",
+                 "Sizes were declared by a person, which is the strongest "
+                 "input this estimator takes."),
+    "drafted": ("Drafted from the specification, then confirmed",
+                "Sizes were proposed from the specification and corrected by "
+                "a human. That is weaker than an authored breakdown: a "
+                "starting point someone agreed with is not the same as a "
+                "judgement someone formed."),
+}
+
+
+def normalise_breakdown_source(value):
+    """Validate `breakdown_source`. Absent means authored, the default claim."""
+    if value is None:
+        return "authored"
+    key = str(value).strip().lower()
+    if key not in BREAKDOWN_SOURCES:
+        raise SpecificationError(
+            "breakdown_source must be one of: %s (got %r)"
+            % (", ".join(sorted(BREAKDOWN_SOURCES)), value))
+    return key
+
+
+def render_breakdown_source_markdown(source):
+    """One line the reader needs: who decided the sizes."""
+    label, note = BREAKDOWN_SOURCES[source]
+    out = ["| Work breakdown | **%s** |" % label, ""]
+    if source == "drafted":
+        out = ["| Work breakdown | **%s** |" % label, "", "> %s" % note, ""]
+    return "\n".join(out)
+
+
 def normalise_review(config):
     """Validate the manifest's optional `research_review:` block.
 

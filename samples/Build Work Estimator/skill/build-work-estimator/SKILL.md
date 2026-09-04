@@ -25,6 +25,29 @@ at Microsoft's [agent usage estimator](https://microsoft.github.io/copilot-studi
 for runtime agent consumption. Do not improvise a runtime figure. Answering the
 wrong question with a confident number is worse than declining.
 
+## Done means the report exists
+
+**Announcing that you are ready to run the estimate is not running it.**
+
+"Ready to execute", "settings locked", "I can run it next" — these are not
+outcomes. The user asked for an estimate; an estimate is a file. If you have
+the inputs, run the commands in the same turn you finish collecting them. Do
+not wait to be told to proceed a second time.
+
+You are done when **all four** of these are true:
+
+1. `scripts/estimate.py` ran and wrote its JSON
+2. `scripts/render_report.py` ran and wrote the Markdown (and the PDF if asked)
+3. You told the user where the files are
+4. You gave them the headline: likely, and likely-plus-reserve
+
+If a required input is genuinely missing, ask for it and stop — that is a
+legitimate halt. But once nothing is missing, run. A conversation that
+collects every input and produces no file has failed, however agreeable it was.
+
+If a command fails, show the error and what you are doing about it. Silence
+after "ready to run" is the worst outcome available.
+
 ## Run order
 
 ### 0. Version gate — always first
@@ -50,11 +73,73 @@ medians. With no history it falls back to published baselines and says so.
 
 Aggregates only — no paths, project names, or content leave the machine.
 
+### 1a. If you were given a specification, READ IT
+
+When the user points at a specification — a path, a URL, a pasted document —
+**open it before asking them anything.** "Estimate this specification" is the
+most common way this skill is invoked, and answering it with a list of
+questions about fields they cannot see is the wrong response.
+
+From the specification, draft the **work breakdown**. That is the estimator's
+most important input and the one users are least able to produce cold:
+
+1. List the components the specification implies — capabilities, integrations,
+   surfaces, platform work, CI/CD, environments.
+2. Give each a `size`, `files` and `unknowns`.
+3. Include the work of *operating* what is built, not just its features:
+   recovery, load testing, key management, residency. Specifications describe
+   features; breakdowns forget properties.
+4. **Show the draft and ask the user to correct it.** Present it as a table
+   they can argue with, not a fait accompli.
+
+Then set `breakdown_source: drafted` in the manifest. The report says the
+sizes were drafted from the specification and confirmed by the user, rather
+than authored by someone who knew the work. That distinction is real and the
+reader is entitled to it.
+
+**A drafted size is a starting point, not a measurement.** Say so when you
+present it. The user changing your numbers is the process working.
+
+If no specification is available, say what that costs — the breakdown cannot
+be checked for completeness — and ask them to describe the work instead.
+
+### Then ask everything you still need in ONE message
+
+The steps below list what the estimate requires. **Collect them in a
+single round, not one at a time.** Three waves of questions before anything
+runs is the most common way this skill wastes a user's time.
+
+Offer a sensible default for everything that has one, so the user can say
+"those are fine" instead of answering eight questions:
+
+| Input | If they don't say |
+| --- | --- |
+| `reserve_percent` | No default. Required, always ask. |
+| `eval_cycles` | Propose 4, and say why |
+| `eval_repeats` | Propose 3 |
+| `eval_test_cases` | Propose a count scaled to the breakdown |
+| `interactive_test_hours` | Propose a figure and label it an assumption |
+| `licensing.seats` | Propose 1 unless they mention a team |
+| `other_workload_share` | Propose 0.0 if they say nothing is allocated |
+| `tier`, `reasoning_model` | Infer from the specification, and say what you inferred |
+
+`reserve_percent`, `specification`, `build_platform`, `target_platform`, the
+harness when the target includes Copilot Studio, and `seat_monthly_cost` for
+seat licensing genuinely cannot be defaulted. Everything else can start from a
+proposal.
+
+**Never ask for something the specification already answers.** If it names the
+platform, the integrations, or the environments, read them out and confirm
+rather than asking cold.
+
 ### 1b. Ask what this was sized from — ALWAYS
 
-**Before anything else, ask for both specifications.** An estimate without one
-behind it is sizing from vibes: the turn medians are measured, but what they get
-applied to is not.
+**Record what this was sized from.** If step 1a gave you a specification, you
+already have it — note the path and confirm the status rather than asking cold.
+If there is none, this is the question to ask.
+
+An estimate with no specification behind it is sizing from vibes: the turn
+medians are measured, but what they get applied to is not.
 
 | Field | Ask |
 | --- | --- |
@@ -144,6 +229,21 @@ python scripts/estimate.py --manifest estimate.yaml --out estimate.json
 python scripts/estimate.py --interactive          # guided interview
 ```
 
+**Sanity-check a declared rate before you use it.** Seat costs and token
+rates are the inputs most often misremembered, and this estimator's whole
+value is that its numbers are grounded. If a figure looks far from the
+published price, say so and cite the source rather than accepting it:
+
+> You mentioned $100/month for GitHub Copilot Pro. Published Copilot plan
+> pricing is materially lower than that — Pro and Pro+ are different tiers with
+> different prices. Worth checking against
+> https://docs.github.com/en/copilot/get-started/plans before we commit it,
+> because seat cost drives the attributed total directly.
+
+You cannot look up live pricing, and you must not invent a figure to replace
+theirs. Point at the published source, state the concern, and let them decide.
+An estimate built on a 10x-wrong seat price is wrong in a way no reserve covers.
+
 **`reserve_percent` is required.** There is no default and no skip flag. If the
 user has not given one, ask for it — the contingency percentage added on top of
 the estimate for budgeting headroom. A value of 0 is allowed if they genuinely
@@ -158,6 +258,12 @@ specification:                 # REQUIRED -- `none` is an answer, silence is not
   functional: docs/functional-spec.md
   technical: docs/technical-spec.md
   status: approved             # approved | in-review | draft | none
+
+breakdown_source: authored     # authored | drafted -- see 1a
+                               # `drafted` when YOU proposed the sizes from a
+                               # specification and the user confirmed them.
+                               # The report says so; a confirmed proposal is
+                               # not the same claim as an authored judgement.
 
 reserve_percent: 25            # REQUIRED
 build_platform: claude-code       # claude-code | github-copilot
@@ -190,11 +296,13 @@ items:                            # build_platform: claude-code
     unknowns: 2                   # 0-5, widens the upper bound
     brownfield: true
 
-# build_platform: github-copilot uses this instead of items:
+# build_platform: github-copilot ALSO uses items: above. Interactions are
+# DERIVED from the same breakdown, so both platforms size the identical scope.
 # github_copilot:
-#   billing_mode: premium-requests   # ai-credits | premium-requests
-#   interactions: 900
-#   model_multiplier: 1.0
+#   billing_mode: ai-credits         # ai-credits | premium-requests
+#   build_model: gpt-5.4             # or a blend; validated against GitHub's catalogue
+#   # interactions: 900              # omit -- derived from items: unless you override
+#   model_multiplier: 1.0            # premium-requests mode only
 #   monthly_allowance: 1500
 ```
 
@@ -240,7 +348,7 @@ between cycles. Name it; do not estimate its hours as cost.
 Code completions and next edit suggestions consume nothing and are unlimited on
 paid plans — they never enter the estimate.
 
-### 4. Report
+### 4. Report — actually produce it
 
 ```bash
 python scripts/render_report.py estimate.json -o build-estimate --format both

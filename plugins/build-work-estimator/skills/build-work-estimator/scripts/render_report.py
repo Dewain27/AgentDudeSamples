@@ -237,6 +237,12 @@ def build_summary(result):
             note = " — matches the calibration mix, no rescale"
         out.append("| **Built by** (model) | %s%s |"
                    % (model_info["declared_label"], note))
+    # Who decided the sizes belongs beside the dev tool and the target: it is a
+    # key input by exactly the same test, and it is invisible in the figures.
+    source = result.get("breakdown_source", "authored")
+    if source == "drafted":
+        out.append("| **Work breakdown** | drafted from the specification, "
+                   "then confirmed — weaker than an authored breakdown |")
     if target.get("harness"):
         out.append("| Target harness | `%s` — %s |"
                    % (target["harness"],
