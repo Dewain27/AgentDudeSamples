@@ -31,10 +31,10 @@ github_copilot:
   billing_mode: ai-credits
   tokens_per_interaction: 6000
   output_share: 0.15
-  # ILLUSTRATIVE rates. GitHub publishes per-model rates and changes them;
-  # check models-and-pricing before using these for anything real.
-  dollars_per_1m_input: 5.0
-  dollars_per_1m_output: 25.0
+  # Which model does the building. GitHub prices AI Credits from the selected
+  # model's published token rate, so the rates below are no longer hand-copied:
+  # they come from the sourced table in rates.py for this model.
+  build_model: claude-opus-5
   auto_discount: 0.10
 
 licensing:

@@ -247,6 +247,36 @@ GITHUB_PLANS_SOURCE = "https://docs.github.com/en/copilot/get-started/plans"
 #: USD per GitHub AI Credit.
 DOLLARS_PER_GITHUB_AI_CREDIT = 0.01
 
+# --------------------------------------------------------------------------
+# GitHub Copilot -- per-model token rates
+# --------------------------------------------------------------------------
+#
+# GitHub meters AI Credits from token consumption priced at the selected
+# model's published rate, so which model builds is a cost input, not a
+# preference. This table is the published catalogue.
+#
+# Only rates confirmed verbatim against the source page are listed. Every
+# Anthropic row here independently matches ANTHROPIC_RATES above -- Sonnet 5
+# at 2/10, Opus 5 at 5/25, Haiku 4.5 at 1/5 -- which is the corroboration
+# that made shipping this table defensible rather than a transcription.
+#
+# The catalogue is larger than this. Models are added here only once their
+# rate has been read off the source, because a guessed row would misprice
+# every estimate that selected it.
+
+GITHUB_MODEL_RATES_VERIFIED = "2026-09-04"
+GITHUB_MODEL_RATES_SOURCE = GITHUB_SOURCE
+
+#: model id -> (input $/1M, output $/1M) at the default (non-long-context) tier
+GITHUB_MODEL_RATES = {
+    "gpt-5.4": (2.50, 15.00),
+    "gpt-5.5": (5.00, 30.00),
+    "claude-sonnet-5": (2.00, 10.00),
+    "claude-sonnet-4-5": (3.00, 15.00),
+    "claude-opus-5": (5.00, 25.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+}
+
 #: Billing modes GitHub currently runs in parallel.
 GITHUB_BILLING_MODES = {
     "ai-credits": {
@@ -411,6 +441,8 @@ _TABLES = (
     ("Anthropic published baselines", PUBLISHED_BASELINE_VERIFIED,
      PUBLISHED_BASELINE_SOURCE),
     ("Copilot Credits", COPILOT_VERIFIED, COPILOT_SOURCE),
+    ("GitHub per-model token rates", GITHUB_MODEL_RATES_VERIFIED,
+     GITHUB_MODEL_RATES_SOURCE),
 )
 
 
@@ -429,3 +461,118 @@ def staleness_warnings(today=None):
                 "date. Re-verify against %s" % (label, verified, age, source)
             )
     return out
+
+
+# --------------------------------------------------------------------------
+# Which model builds it
+# --------------------------------------------------------------------------
+#
+# The build platform constrains the model catalogue. Claude Code runs
+# Anthropic models; GitHub Copilot runs its published multi-provider
+# catalogue. Selecting a model the platform cannot run is a manifest error,
+# not a rate to look up, so the two catalogues live behind one function and
+# cannot drift apart from the validation that uses them.
+
+#: build_platform -> (catalogue, human label for the error message)
+_PLATFORM_MODELS = {
+    "claude-code": (ANTHROPIC_RATES, "Claude Code runs Anthropic models"),
+    "github-copilot": (GITHUB_MODEL_RATES,
+                       "GitHub Copilot runs its published model catalogue"),
+}
+
+
+def models_for_platform(build_platform):
+    """Model ids the given build platform can actually run."""
+    key = str(build_platform or "").strip().lower()
+    if key not in _PLATFORM_MODELS:
+        raise ValueError(
+            "unknown build_platform %r; expected one of: %s"
+            % (build_platform, ", ".join(sorted(_PLATFORM_MODELS))))
+    return _PLATFORM_MODELS[key][0]
+
+
+def validate_model_for_platform(build_platform, model):
+    """Raise unless `model` is available on `build_platform`.
+
+    Claude Code cannot run a GPT model and GitHub Copilot cannot run a model
+    absent from its catalogue. Pricing such a selection would produce a
+    confident number for a build that cannot happen.
+    """
+    catalogue = models_for_platform(build_platform)
+    key = str(model or "").strip().lower()
+    if key in catalogue:
+        return key
+    _, why = _PLATFORM_MODELS[str(build_platform).strip().lower()]
+    raise ValueError(
+        "%r is not available on %s.\n\n%s. Available models:\n  %s"
+        % (model, build_platform, why,
+           "\n  ".join(sorted(catalogue))))
+
+
+def normalise_model_mix(mix, build_platform):
+    """Accept a single model id or a {model: weight} mix; return a mix.
+
+    Weights are normalised to sum to 1 so a caller may express shares however
+    is natural. Every model is validated against the platform first, because a
+    mix containing one impossible model is an impossible mix.
+    """
+    if not mix:
+        return {}
+    if isinstance(mix, str):
+        return {validate_model_for_platform(build_platform, mix): 1.0}
+    if not isinstance(mix, dict):
+        raise ValueError(
+            "build_model must be a model id or a mapping of model to weight, "
+            "got %r" % type(mix).__name__)
+
+    out = {}
+    for model, weight in mix.items():
+        try:
+            weight = float(weight)
+        except (TypeError, ValueError):
+            raise ValueError(
+                "build_model weight for %r must be a number, got %r"
+                % (model, weight))
+        if weight < 0:
+            raise ValueError(
+                "build_model weight for %r must not be negative." % model)
+        out[validate_model_for_platform(build_platform, model)] = weight
+
+    total = sum(out.values())
+    if total <= 0:
+        raise ValueError("build_model weights must sum to more than zero.")
+    return {model: weight / total for model, weight in out.items()}
+
+
+def component_rates(model):
+    """Per-token cost of each cost component for one Anthropic model.
+
+    Returned in $/1M tokens so the three are directly comparable:
+
+      cache_read   input rate x the model's cache-read multiplier
+      cache_write  input rate x the 5-minute cache-write multiplier
+      output       the model's output rate
+    """
+    if model not in ANTHROPIC_RATES:
+        raise ValueError(
+            "unknown model %r; known models: %s"
+            % (model, ", ".join(sorted(ANTHROPIC_RATES))))
+    rin, rout = ANTHROPIC_RATES[model]
+    return {
+        "cache_read": rin * cache_read_mult(model),
+        "cache_write": rin * CACHE_WRITE_5M_MULT,
+        "output": rout,
+    }
+
+
+def blended_component_rates(mix):
+    """Weight-blend `component_rates` across a {model: weight} mix."""
+    if not mix:
+        raise ValueError("cannot blend an empty model mix.")
+    blended = {"cache_read": 0.0, "cache_write": 0.0, "output": 0.0}
+    total = float(sum(mix.values()))
+    for model, weight in mix.items():
+        share = float(weight) / total
+        for component, rate in component_rates(model).items():
+            blended[component] += share * rate
+    return blended

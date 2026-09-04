@@ -43,6 +43,7 @@ generated: 2026-09-03T00:00:00Z
 | --- | --- |
 | **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
 | **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
+| **Built by** (model) | claude-opus-5 |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — GitHub Copilot Enterprise, $39.00/month x 6 seats x 5 months = **$1,170.00** over the build |
 | Specification | `approved` — confidence in sizing: **high** |
@@ -158,6 +159,12 @@ multiplier. Everything else is authored once.
 > Credits, even though both are $0.01 per credit.
 
 **Billing model:** Usage-based GitHub AI Credits — Interactions consume input, output, and cached tokens. GitHub prices those at the model's published rates and converts the result to AI Credits at $0.01 per credit. On Business and Enterprise plans credits are pooled at the billing-entity level.
+
+**Build model:** `claude-opus-5` — rates published GitHub rate for claude-opus-5.
+
+GitHub prices AI Credits from token consumption at the selected model's published
+rate, so which model builds is a cost input rather than a preference. Rate verified
+2026-09-04 against [models and pricing](https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing).
 
 | Build activity | Github Ai Credits | Basis |
 | --- | ---: | --- |

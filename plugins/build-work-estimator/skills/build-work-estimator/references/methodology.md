@@ -135,6 +135,55 @@ Five move it 63%. Twenty move it 87%. A single surprising build cannot swing
 everything that follows, which is the same over-confidence this estimator exists
 to prevent.
 
+## Which model builds it
+
+`cost_per_main_turn` is one blended number measured from real sessions, and
+that blend was produced by a specific mix of models. Build the same scope on a
+pricier or cheaper model and the price of every token changes, but a measured
+number cannot know that on its own.
+
+So the build model is an explicit input. It is validated against the platform
+that will run it -- **Claude Code runs Anthropic models, GitHub Copilot runs
+its own published catalogue** -- because pricing a model the platform cannot
+run would produce a confident number for a build that cannot happen.
+
+Then one of two things happens, and the report always says which:
+
+**Repriced.** The measured cost is scaled by a share-weighted ratio of
+published per-model rates:
+
+```
+ratio = share_cache_read  x cache_read_rate(target)  / cache_read_rate(calibration)
+      + share_cache_write x cache_write_rate(target) / cache_write_rate(calibration)
+      + share_output      x output_rate(target)      / output_rate(calibration)
+```
+
+Every term is a **measured dollar share** times a ratio of **published rates**.
+The shares already encode volume x rate reality, so nothing is reconstructed
+from token counts and there is no free parameter. At `target == calibration`
+the ratio is exactly 1.0 and the measured cost is returned untouched, so the
+formula cannot drift away from the number it is anchored to.
+
+The decomposition by component is not decoration. Claude Fable 5.1 reads cache
+at 0.025x rather than 0.10x, and cache reads are about two thirds of the bill.
+Scaling by the headline input rate alone would overstate that model by roughly
+**98%**.
+
+**Disclosed.** If no model was declared, or the profile lacks the measured
+shares or the mix that produced it, nothing is rescaled. The calibration mix is
+stated as an assumption and the report says plainly that it was not repriced.
+Disclosure is the floor; repricing is the addition taken only when the data
+supports it.
+
+### What the rescale does not capture
+
+It prices **tokens, not capability**. It does not model that a cheaper or
+weaker model may need **more turns** to finish the same work -- a real effect
+that is not derivable from published rates. The report states that limit every
+time rather than folding it silently into the figure. The rescale also holds
+the measured token profile -- context size, output length, cache behaviour --
+constant.
+
 ## What is deliberately not modelled
 
 - **Runtime cost of what gets built.** Different drivers entirely.
