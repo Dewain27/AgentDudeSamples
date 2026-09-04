@@ -282,6 +282,117 @@ GITHUB_MODEL_RATES = {
 }
 
 #: Billing modes GitHub currently runs in parallel.
+#: What each seat SKU COSTS and what it INCLUDES. A seat is not an empty
+#: licence: it carries a monthly credit allowance, and a build draws against
+#: that before anything is billed on top. Without this table the allowance had
+#: to be supplied by hand, and a real session invented "1500" for a plan whose
+#: actual allowance it had no way to know.
+#:
+#: Verified twice against the source page, the same corroboration the other
+#: rate tables were held to.
+#: Claude seat plans. Prices are published; the ALLOWANCE deliberately is not
+#: recorded, because Anthropic does not publish one as a number. Usage is
+#: described in relative terms -- "5x or 20x more usage than Pro" over a
+#: rolling five-hour window -- which cannot be turned into a credit count
+#: without inventing the conversion.
+#:
+#: That asymmetry with GitHub is the point. GitHub publishes an explicit
+#: monthly credit figure per SKU, so a declared allowance can be checked
+#: against it. Anthropic does not, so `other_workload_share` on a Claude seat
+#: stays the user's own judgement and the report says so rather than implying
+#: a check happened.
+ANTHROPIC_SEAT_PLANS_VERIFIED = "2026-09-04"
+ANTHROPIC_SEAT_PLANS_SOURCE = "https://claude.com/pricing"
+
+#: plan key -> (USD per seat per month, price_is_floor)
+#: `price_is_floor` marks a plan whose published figure is a starting price:
+#: Max is "from $100" with 5x and 20x options, and no figure is printed for
+#: the larger tier, so a higher declared cost is not a discrepancy.
+ANTHROPIC_SEAT_PLANS = {
+    "claude-pro": (20.00, False),
+    "claude-max": (100.00, True),
+    "claude-team-standard": (25.00, False),
+    "claude-team-premium": (125.00, False),
+    "claude-enterprise": (20.00, True),
+}
+
+ANTHROPIC_SEAT_PLAN_ALIASES = {
+    "pro": "claude-pro",
+    "claude pro": "claude-pro",
+    "max": "claude-max",
+    "claude max": "claude-max",
+    "max 5x": "claude-max",
+    "max 20x": "claude-max",
+    "team": "claude-team-standard",
+    "claude team": "claude-team-standard",
+    "team standard": "claude-team-standard",
+    "team premium": "claude-team-premium",
+    "enterprise": "claude-enterprise",
+    "claude enterprise": "claude-enterprise",
+}
+
+
+def anthropic_seat_plan(name):
+    """Resolve a Claude plan name to (key, price, price_is_floor), or None.
+
+    There is no allowance in the tuple on purpose. Adding one would mean
+    inventing a number Anthropic does not publish.
+    """
+    if not name:
+        return None
+    key = str(name).strip().lower()
+    key = ANTHROPIC_SEAT_PLAN_ALIASES.get(key, key.replace(" ", "-"))
+    if key in ANTHROPIC_SEAT_PLANS:
+        price, is_floor = ANTHROPIC_SEAT_PLANS[key]
+        return key, price, is_floor
+    return None
+
+
+GITHUB_SEAT_PLANS_VERIFIED = "2026-09-04"
+
+#: plan key -> (USD per seat per month, included AI credits per month)
+GITHUB_SEAT_PLANS = {
+    "copilot-pro": (10.00, 1500),
+    "copilot-pro-plus": (39.00, 7000),
+    "copilot-business": (19.00, 1900),
+    "copilot-enterprise": (39.00, 3900),
+}
+
+#: Free-text plan names people actually type, mapped to the keys above.
+GITHUB_SEAT_PLAN_ALIASES = {
+    "pro": "copilot-pro",
+    "copilot pro": "copilot-pro",
+    "github copilot pro": "copilot-pro",
+    "pro+": "copilot-pro-plus",
+    "pro plus": "copilot-pro-plus",
+    "copilot pro+": "copilot-pro-plus",
+    "github copilot pro+": "copilot-pro-plus",
+    "business": "copilot-business",
+    "copilot business": "copilot-business",
+    "github copilot business": "copilot-business",
+    "enterprise": "copilot-enterprise",
+    "copilot enterprise": "copilot-enterprise",
+    "github copilot enterprise": "copilot-enterprise",
+}
+
+
+def github_seat_plan(name):
+    """Resolve a typed plan name to (key, price, included_credits), or None.
+
+    Returns None rather than guessing. A plan nobody recognises is reported as
+    unrecognised; it is never mapped to the nearest-looking SKU, because a
+    wrong allowance silently changes what the build is said to cost.
+    """
+    if not name:
+        return None
+    key = str(name).strip().lower()
+    key = GITHUB_SEAT_PLAN_ALIASES.get(key, key.replace(" ", "-"))
+    if key in GITHUB_SEAT_PLANS:
+        price, credits = GITHUB_SEAT_PLANS[key]
+        return key, price, credits
+    return None
+
+
 GITHUB_BILLING_MODES = {
     "ai-credits": {
         "label": "Usage-based GitHub AI Credits",

@@ -28,7 +28,7 @@ PLUGIN = "build-work-estimator"
 #: from this constant -- so raising it here is what tells existing clients to
 #: update. Minor for backwards-compatible additions; major only for a change
 #: that would break an existing manifest.
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 MARKETPLACE = "agentdude-samples"
 REPO_URL = "https://github.com/Dewain27/AgentDudeSamples"
 

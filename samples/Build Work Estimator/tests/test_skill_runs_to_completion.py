@@ -470,3 +470,103 @@ class TestNoGuessedDefaults(unittest.TestCase):
     def test_tier_is_labelled_as_a_copilot_studio_field(self):
         t = skill_text()
         self.assertIn("**Copilot Studio fields**", t)
+
+
+class TestSeatPlansAreChecked(unittest.TestCase):
+    """A seat is not an empty licence. What each SKU costs, and what it
+    includes, are published facts the estimator should not make the user
+    remember -- and must never invent."""
+
+    def setUp(self):
+        import estimate
+        import rates
+        self.check = estimate.check_coherence
+        self.rates = rates
+
+    def test_github_skus_carry_price_and_allowance(self):
+        for plan in ("copilot-pro", "copilot-pro-plus", "copilot-business",
+                     "copilot-enterprise"):
+            price, credits = self.rates.GITHUB_SEAT_PLANS[plan]
+            self.assertGreater(price, 0)
+            self.assertGreater(credits, 0)
+
+    def test_claude_plans_carry_price_but_no_allowance(self):
+        """Anthropic publishes a multiplier, not a credit count."""
+        for plan, value in self.rates.ANTHROPIC_SEAT_PLANS.items():
+            self.assertEqual(len(value), 2,
+                             "an allowance here would be invented: %s" % plan)
+
+    def test_an_unrecognised_github_plan_is_flagged(self):
+        out = self.check({"build_platform": "github-copilot",
+                          "licensing": {"model": "seat", "plan": "Max"}})
+        self.assertTrue(any("not a published GitHub Copilot seat SKU" in w
+                            for w in out))
+
+    def test_a_wrong_github_seat_price_is_flagged(self):
+        out = self.check({"build_platform": "github-copilot",
+                          "licensing": {"model": "seat",
+                                        "plan": "Copilot Business",
+                                        "seat_monthly_cost": 100}})
+        self.assertTrue(any("publishes $19.00" in w for w in out))
+
+    def test_a_wrong_github_allowance_is_flagged(self):
+        """The invented 1500 from a real session."""
+        out = self.check({"build_platform": "github-copilot",
+                          "licensing": {"model": "seat",
+                                        "plan": "Copilot Business",
+                                        "seat_monthly_cost": 19},
+                          "github_copilot": {"monthly_allowance": 1500}})
+        self.assertTrue(any("includes 1,900 AI credits" in w for w in out))
+
+    def test_a_floor_priced_plan_does_not_false_alarm(self):
+        """Max is 'from $100'; the 20x tier costs more and is not an error."""
+        out = self.check({"build_platform": "claude-code",
+                          "licensing": {"model": "seat", "plan": "Max",
+                                        "seat_monthly_cost": 200,
+                                        "other_workload_share": 0.45}})
+        self.assertEqual(out, [])
+
+    def test_assuming_an_idle_claude_seat_is_flagged(self):
+        out = self.check({"build_platform": "claude-code",
+                          "licensing": {"model": "seat", "plan": "Claude Pro",
+                                        "seat_monthly_cost": 20,
+                                        "other_workload_share": 0.0}})
+        self.assertTrue(any("entirely to itself" in w for w in out))
+
+    def test_the_claude_warning_admits_it_cannot_check(self):
+        out = self.check({"build_platform": "claude-code",
+                          "licensing": {"model": "seat", "plan": "Claude Pro",
+                                        "seat_monthly_cost": 20,
+                                        "other_workload_share": 0.0}})
+        self.assertTrue(any("nothing here can check that" in w for w in out))
+
+
+class TestMissingBucketSubstitutes(unittest.TestCase):
+    """A size the docs advertise can be unusable on a real profile."""
+
+    def test_a_missing_bucket_substitutes_and_discloses(self):
+        import copy
+        import estimate
+        from test_estimate import PROFILE, manifest
+        profile = copy.deepcopy(PROFILE)
+        profile["buckets"] = [b for b in profile["buckets"]
+                              if b["label"] != "subsystem"]
+        m = manifest()
+        m["items"] = [{"name": "Big thing", "size": "subsystem",
+                       "files": 20, "unknowns": 2, "brownfield": False}]
+        result = estimate.compute_plan(m, profile)
+        self.assertTrue(any("nearest covered bucket" in w
+                            for w in result["coherence"]),
+                        "a silent rewrite is what this replaces")
+
+    def test_it_prefers_the_larger_bucket_on_a_tie(self):
+        import estimate
+        self.assertEqual(
+            estimate._nearest_bucket("small", {"trivial": 1, "medium": 1}),
+            "medium", "erring larger overstates rather than understates")
+
+    def test_a_covered_profile_substitutes_nothing(self):
+        import estimate
+        from test_estimate import PROFILE, manifest
+        self.assertEqual(estimate.compute_plan(manifest(),
+                                               PROFILE)["coherence"], [])

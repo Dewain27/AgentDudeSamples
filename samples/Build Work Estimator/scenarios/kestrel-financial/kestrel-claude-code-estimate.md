@@ -44,6 +44,7 @@ generated: 2026-09-03T00:00:00Z
 | **Built with** (development tool) | Claude Code — metered in USD (tokens) |
 | **Built on** (target environment) | Copilot Studio and Azure — metered in Copilot Credits + Azure consumption |
 | **Built by** (model) | claude-opus-5 55% / claude-sonnet-5 45% — matches the calibration mix, no rescale |
+| **Check inputs** | licensing.plan 'Claude for Enterprise' is not a published Claude plan. Known plans are claude-enterprise, claude-max, claude-pro, claude-team-premium, claude-team-standard. The seat cost cannot be checked against a published price. |
 | Target harness | `github-copilot` — bills for build, test and evaluation |
 | Licensing | Seat — Claude for Enterprise, $150.00/month x 6 seats x 5 months = **$4,500.00** over the build |
 | Specification | `approved` — confidence in sizing: **high** |
