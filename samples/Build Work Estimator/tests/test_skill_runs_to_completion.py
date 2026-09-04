@@ -194,3 +194,41 @@ class TestDraftedSizesAreDisclosed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestVersionHasOneSource(unittest.TestCase):
+    """Bumping the plugin must bump everything a client compares against.
+
+    build_host_packages.py used to carry its own VERSION constant, so raising
+    the plugin's version left the Cowork package manifest behind at the old
+    number with nothing checking that the two agreed.
+    """
+
+    def _build_dir(self, name):
+        return os.path.join(SAMPLE, "build", name)
+
+    def test_host_packages_does_not_define_its_own_version(self):
+        source = open(self._build_dir("build_host_packages.py")).read()
+        self.assertNotIn('VERSION = "', source,
+                         "a second version constant drifts from the first")
+
+    def test_every_artifact_reports_the_same_version(self):
+        import json
+        import zipfile
+        repo = os.path.abspath(os.path.join(SAMPLE, "..", ".."))
+
+        plugin = json.load(open(os.path.join(
+            repo, "plugins", "build-work-estimator", "plugin.json")))
+        market = json.load(open(os.path.join(
+            repo, ".github", "plugin", "marketplace.json")))
+        entry = [p for p in market["plugins"]
+                 if p["name"] == "build-work-estimator"][0]
+        with zipfile.ZipFile(os.path.join(
+                SAMPLE, "packages",
+                "build-work-estimator-cowork-plugin.zip")) as z:
+            cowork = json.loads(z.read("manifest.json"))["version"]
+
+        self.assertEqual(plugin["version"], entry["version"],
+                         "version_check compares these two directly")
+        self.assertEqual(plugin["version"], cowork,
+                         "the Cowork package must not ship a stale version")

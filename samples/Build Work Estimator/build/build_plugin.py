@@ -23,7 +23,12 @@ import sys
 AUTHOR = "Dewain Robinson"
 AUTHOR_URL = "https://github.com/Dewain27"
 PLUGIN = "build-work-estimator"
-VERSION = "1.0.0"
+#: Bumped whenever shipped behaviour changes. version_check.py compares the
+#: installed plugin.json against the marketplace entry, and both are written
+#: from this constant -- so raising it here is what tells existing clients to
+#: update. Minor for backwards-compatible additions; major only for a change
+#: that would break an existing manifest.
+VERSION = "1.1.0"
 MARKETPLACE = "agentdude-samples"
 REPO_URL = "https://github.com/Dewain27/AgentDudeSamples"
 
