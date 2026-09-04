@@ -51,6 +51,14 @@ SCENARIOS = (
         "estimate_id": "est_20260903T000000_sample2",
         "generated": "2026-09-03T00:00:00Z",
     },
+    {
+        # A GitHub Copilot build on a BLEND of GPT models, priced from the
+        # published per-model table rather than one model standing in for all.
+        "name": "copper-basin",
+        "manifest": "copper-basin-manifest.yaml",
+        "estimate_id": "est_20260904T000000_sample3",
+        "generated": "2026-09-04T00:00:00Z",
+    },
 )
 
 #: Full worked scenarios. Same governance as the minimal examples: generated

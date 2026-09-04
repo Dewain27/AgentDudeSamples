@@ -1,15 +1,15 @@
 ---
-title: Build Work Estimate — Harbor Line Logistics -- dispatch agent
+title: Build Work Estimate — Copper Basin Utilities -- outage triage agent
 author: Dewain Robinson
-build_platform: claude-code
+build_platform: github-copilot
 target_platform: copilot-studio
-estimate_id: est_20260903T000000_sample1
-generated: 2026-09-03T00:00:00Z
+estimate_id: est_20260904T000000_sample3
+generated: 2026-09-04T00:00:00Z
 ---
 
-# Build Work Estimate — Harbor Line Logistics -- dispatch agent
+# Build Work Estimate — Copper Basin Utilities -- outage triage agent
 
-**Author:** Dewain Robinson · **Estimate id:** `est_20260903T000000_sample1` · **Generated:** 2026-09-03T00:00:00Z
+**Author:** Dewain Robinson · **Estimate id:** `est_20260904T000000_sample3` · **Generated:** 2026-09-04T00:00:00Z
 
 > ### SAMPLE — BUILD ESTIMATE ONLY, NOT A QUOTE
 >
@@ -33,7 +33,7 @@ generated: 2026-09-03T00:00:00Z
 > own delivery patterns, model choices, and review overhead.
 >
 > Rates verified 2026-09-03 and change without notice.
-> Calibration source: `measured` · Generated 2026-09-03T00:00:00Z
+> Calibration source: `measured` · Generated 2026-09-04T00:00:00Z
 
 ## Estimate summary
 
@@ -41,34 +41,34 @@ generated: 2026-09-03T00:00:00Z
 
 | Input | Value |
 | --- | --- |
-| **Built with** (development tool) | Claude Code — metered in USD (tokens) |
+| **Built with** (development tool) | GitHub Copilot — metered in GitHub AI Credits |
 | **Built on** (target environment) | Microsoft Copilot Studio — metered in Copilot Credits |
-| **Built by** (model) | claude-sonnet-5 80% / claude-opus-5 20% — per-turn cost repriced x0.7123 |
-| Target harness | `github-copilot` — bills for build, test and evaluation |
-| Licensing | Seat — Claude Max, $200.00/month x 1 seat x 1 month = **$200.00** over the build |
-| Specification | `draft` — confidence in sizing: **low** |
-| Evaluation cycles planned | 4 |
-| Contingency reserve | 25% |
-| Calibration | Measured, 24 local sessions |
+| **Built by** (model) | gpt-5.4 50% / gpt-5.5 25% / gpt-5-mini 25% |
+| Target harness | `standard` — does not bill for build or test |
+| Licensing | Seat — GitHub Copilot Business, $19.00/month x 4 seats x 3 months = **$228.00** over the build |
+| Specification | `in-review` — confidence in sizing: **medium** |
+| Evaluation cycles planned | 2 |
+| Contingency reserve | 30% |
+| Work sizing | Turn counts from measured Claude Code calibration (24 sessions), used as a work-size proxy |
 
 ### Totals
 
-| | Build — USD | Target — Copilot Credits | **Combined (USD)** |
+| | Build — GitHub AI Credits | Target — Copilot Credits | **Combined (USD)** |
 | --- | ---: | ---: | ---: |
-| Low | $164.31 | 28,418 | $448.49 |
-| **Likely** | **$634.11** | **32,290** | **$957.01** |
-| High | $3,726.17 | 40,035 | $4,126.52 |
-| **Likely + 25% reserve** | **$792.64** | **40,362** | **$1,196.26** |
+| Low | 1,089 | 0 | $10.89 |
+| **Likely** | **4,350** | **0** | **$43.50** |
+| High | 24,159 | 0 | $241.59 |
+| **Likely + 30% reserve** | **5,655** | **0** | **$56.55** |
 
-> **Plan for $957.01. Hold $1,196.26 including the 25% reserve.**
+> **Plan for $43.50. Hold $56.55 including the 30% reserve.**
 
 **Two meters, not two options.** The build and target figures are spent on the same
 project over the same period and add together; they are not alternatives to choose
 between.
 
-- Copilot Credits are converted at $0.01 each so the two meters can be shown in one column. They are separate budgets drawn on different accounts.
+- The target column is **zero because of the harness**, not because nothing was estimated. On the standard harness, build, preview, test and evaluation in the interface are not billed, and agent flow test runs are explicitly exempt. See the target section below.
 - The build figure is **notional** — on seat licensing no additional money is invoiced. See Licensing below for the share of the seat this build actually consumes.
-- The build range comes from observed spread in comparable work; the target range from running 3 to 6 evaluation cycles instead of 4.
+- The build side is sized from the same work breakdown using turn medians measured on Claude Code. Turn count is treated as a property of the work rather than of the tool; the price per turn is not. That is an assumption, not a measurement of GitHub Copilot.
 
 Everything below explains how each of these figures was reached.
 
@@ -76,19 +76,16 @@ Everything below explains how each of these figures was reached.
 
 | | Reference |
 | --- | --- |
-| Functional specification | Harbor Line dispatch requirements (illustrative) |
+| Functional specification | Outage intake and triage requirements (illustrative) |
 | Technical specification | Copilot Studio agent design note (illustrative) |
-| Status | `draft` — Draft only. Sizes will move as it settles. |
-| Confidence in sizing | **low** |
-
-> **The specification is a draft.** Sizes will move as it settles, and a draft
-> that grows is the most common reason a build overruns its estimate.
+| Status | `in-review` — Under review; scope may still move. |
+| Confidence in sizing | **medium** |
 
 ## Platforms
 
 | | Platform | Metered in |
 | --- | --- | --- |
-| **Built with** | Claude Code | USD (tokens) |
+| **Built with** | GitHub Copilot | GitHub AI Credits |
 | **Built on** | Microsoft Copilot Studio | Copilot Credits |
 
 > These are different questions and different meters, and the same project spends
@@ -119,7 +116,7 @@ cover operating it afterwards.
 ## The build loop
 
 ```
-  Claude Code                   Microsoft Copilot Studio
+  GitHub Copilot                Microsoft Copilot Studio
   ----------------------        ----------------------
   author definition   -->  deploy
                            preview / interactive test  <- human
@@ -128,24 +125,10 @@ cover operating it afterwards.
   (repeat)
 ```
 
-This estimate plans **4 evaluation cycles**. Each cycle after the first adds
+This estimate plans **2 evaluation cycles**. Each cycle after the first adds
 **25%** of the original build back as remediation, giving a build-side multiplier
-of **1.75x**. An estimate that prices only the first pass is planning for a build
+of **1.25x**. An estimate that prices only the first pass is planning for a build
 where every evaluation passes first time.
-
-## Cost by component
-
-Each component's share of **both** meters. The build column is the work of authoring it; the credits column is the evaluation volume it generates on the target platform.
-
-> **No component declared its evaluation cases**, so target credits are not attributed here — they appear only as a solution-wide total. Adding `eval_cases:` to each item shows which components actually drive the credit burn. They are not distributed by guesswork.
-
-| Component | Size | Turns | Build |
-| --- | --- | ---: | ---: |
-| Agent instructions, topics and tool definitions | medium | 1,218 | $319.38 |
-| Dataverse schema and rate-card importer | small | 289 | $75.69 |
-| Legacy AS400 field mapping research | exploration | 100 | $26.14 |
-| Driver mobile handoff screens | medium | 812 | $212.91 |
-| **Total** | | 2,419 | **$634.12** |
 
 ## Environments
 
@@ -156,122 +139,49 @@ Each component's share of **both** meters. The build column is the work of autho
 
 Declaring them is the single largest correction available to this estimate.
 
-## Build — Claude Code
+## Build cost — GitHub Copilot
 
-| | Amount |
-| --- | ---: |
-| Base estimate (incl. remediation) | $634.11 |
-| Reserve (25%) | $158.53 |
-| **Budget ask** | **$792.64** |
-| Observed low | $164.31 |
-| Observed high | $3,726.17 |
+> Metered in **GitHub AI Credits**. This is a different meter from Copilot Studio Copilot
+> Credits, even though both are $0.01 per credit.
 
-### Reserve adequacy
+**Billing model:** Usage-based GitHub AI Credits — Interactions consume input, output, and cached tokens. GitHub prices those at the model's published rates and converts the result to AI Credits at $0.01 per credit. On Business and Enterprise plans credits are pooled at the billing-entity level.
 
-**The reserve does not cover observed variance.**
+**Build model:** `gpt-5.4 50% / gpt-5.5 25% / gpt-5-mini 25%` — rates published GitHub rates, blended across 3 models.
 
-A **25%** reserve reaches $792.64. Comparable work has reached $3,726.17. Full coverage
-would require **488%**.
+GitHub prices AI Credits from token consumption at the selected model's published
+rate, so which model builds is a cost input rather than a preference. Rate verified
+2026-09-04 against [models and pricing](https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing).
 
-| Item | Size | Files | Turns | Estimate | Range | n |
-| --- | --- | ---: | ---: | ---: | --- | ---: |
-| Agent instructions, topics and tool definitions | medium (brownfield) | 11 | 1,218 | $319.38 | $70.37 – $1,632.03 | 5 |
-| Dataverse schema and rate-card importer | small | 4 | 289 | $75.69 | $41.28 – $297.36 | 6 |
-| Legacy AS400 field mapping research | exploration (brownfield) | 0 | 100 | $26.14 | $5.74 – $1,071.44 | 7 |
-| Driver mobile handoff screens | medium | 8 | 812 | $212.91 | $46.92 – $725.34 | 5 |
+| Build activity | Github Ai Credits | Basis |
+| --- | ---: | --- |
+| Chat and agent interactions | 4,350 | 1,789 interactions, 10,734,000 tokens (15% output) at $2.56/$15.50 per 1M, less 10% Auto discount |
+| **Total** | **4,350** | |
+| Reserve (30%) | 1,305 | required contingency |
+| **Budget ask** | **5,655** | |
 
-### Calibration basis
+At $0.01 per credit that is **$43.50** total, **$56.55** with reserve.
 
-Measured from 24 local sessions spanning 2026-06-01 to 2026-08-30.
+### Not metered
 
-Cost per agent turn: **$0.32**, at **list price** — an organization on contracted
-rates must substitute its own.
+These consume no credits and are unlimited on paid plans, so they contribute
+nothing to this estimate however heavily they are used:
 
-## Which model builds it
+- Code completions
+- Next edit suggestions
 
-| | Model |
-| --- | --- |
-| Declared for this build | **claude-sonnet-5 80% / claude-opus-5 20%** |
-| Measured in the calibration profile | claude-opus-5 55% / claude-sonnet-5 45% |
-
-Repricing the measured **$0.32** per turn by **x0.7123** gives **$0.23** — this model
-costs less per token than the mix the measurement was taken on.
-
-### How the ratio was derived
-
-Each row is a **measured dollar share** of the real per-turn cost, times a ratio of
-**published per-model rates**. There is no free parameter.
-
-| Cost component | Measured share | This model $/1M | Calibration $/1M | Contribution |
-| --- | ---: | ---: | ---: | ---: |
-| Cache read | 66% | 0.2600 | 0.3650 | 0.4701 |
-| Cache write | 25% | 3.2500 | 4.5625 | 0.1781 |
-| Output | 9% | 13.0000 | 18.2500 | 0.0641 |
-| **Ratio** | | | | **0.7123** |
-
-> **What this does not capture.** The rescale prices *tokens*, not capability. It
-> does **not** model that a cheaper or weaker model may need **more turns** to do
-> the same work. That effect is real and is not derivable from published rates, so
-> it is named here rather than folded silently into the number. The rescale also
-> holds the measured token profile — context size, output length, cache behaviour —
-> constant.
-
-## Licensing
-
-**Seat-based licensing (Claude Max).** Usage draws on an allowance already paid for,
-so no additional money changes hands for this build -- but the seat is not free.
-
-| | |
-| --- | ---: |
-| Developer-months of allowance available | 1 (1 seat x 1 month) |
-| Share of that allowance | **134%** |
-| Seat spend over the build | $200.00 |
-| **Attributable cost of this build** | **$267.93** |
-| Already committed to other work | 45% |
-| **Total committed** | **179%** |
-
-The attributable cost is the seat's monthly price apportioned by the share of
-the allowance this build consumes. Nothing extra is invoiced, but this is the
-real cost of the capacity the build uses up.
-
-### Allowance overrun
-
-**This build plus existing workload exceeds the allowance by 79%.**
-
-Work will stall at the limit unless overage is enabled, at which point it
-bills on top of the seat. Overage exposure at the same rate: **$157.93**.
-
-Options: spread the build across allowance periods, move part of it to
-consumption billing, add seats, or reduce the other committed work.
-
-### Window risk
-
-Seat allowances refill on **5-hour rolling and weekly** windows, not only monthly. A build that fits
-comfortably in a month can still exhaust a short window and stall.
-
-**This build is marked as concentrated** — compressed into a short period.
-Monthly headroom will not protect it; expect to hit shorter windows and plan
-for pauses.
-
-Notional value at list rates: **$634.11** — what this build would cost on
-consumption billing. Shown for scale; it is not a charge.
+Rates verified 2026-09-03. Sources: [models and pricing](https://docs.github.com/copilot/reference/copilot-billing/models-and-pricing) · [legacy premium requests](https://docs.github.com/copilot/concepts/billing/copilot-requests) · [plans](https://docs.github.com/en/copilot/get-started/plans)
 
 ## Target platform — Microsoft Copilot Studio
 
-**Target harness:** `github-copilot` — GitHub Copilot harness bills from the moment you start building. Creating a solution with natural language, previewing, testing, and generating evaluations all consume credits. Credits cover LLM tokens, tools (knowledge and MCPs), and the harness itself.
+**Target harness:** `standard` — Standard harness bills after publish, and embedded test chat messages are not billed. Build-time credits are therefore near zero. Non-zero only where the build exercises billable side-effects (agent flow runs, AI Builder or content-processing calls) against a published agent.
 
-| Build-and-test activity | Credits | At $0.01/CC | Basis |
-| --- | ---: | ---: | --- |
-| Interactive validation in the Copilot Studio interface | 16,800 | $168.00 | 16.0 human hours x 25 interactions/hour = 400 interactions |
-| Evaluation runs | 15,360 | $153.60 | 40 cases x 3 repeats x 4 cycles = 480 runs |
-| Agent flow runs during build and test | 130 | $1.30 | 1,000 actions across 4 cycles at 13 CC per 100 -- test runs in the designer and test chat are exempt |
-| **Total** | **32,290** | **$322.90** | |
-| Reserve (25%) | 8,072 | $80.73 | required contingency |
-| **Budget ask** | **40,362** | **$403.62** | |
+> **On the standard harness, build and test in the interface are not billed.**
+> Billing starts after publish and embedded test chat does not count, so the work
+> below consumes no credits. That is a correct result, not a missing one.
 
-**Reasoning-model surcharge: 25,840 credits ($258.40).** Reasoning models bill the feature
-rate *plus* the premium token tier, so the effective tier is `premium` whatever
-the `standard` tier selected.
+Had this been the GitHub Copilot harness, the same volume of preview and
+evaluation work would have cost roughly **3,960 credits ($39.60)** — worth knowing
+before choosing a harness.
 
 ### The evaluation loop
 
@@ -279,16 +189,16 @@ Evaluation is not a one-off gate. Microsoft's guidance is an explicit cycle —
 define tests, run evaluations, analyse results, improve the agent, repeat — with a
 target pass rate of 80–90% and near 100% on core tests.
 
-This estimate plans **4 cycles**: 480 evaluation runs in total, plus the
+This estimate plans **2 cycles**: 240 evaluation runs in total, plus the
 remediation each failed cycle sends back to the build platform.
 
 > **Velocity, not just cost.** Evaluations are capped at **20 per agent node per
-> day**, so this volume needs a minimum of **24 days** of elapsed time however much
+> day**, so this volume needs a minimum of **12 days** of elapsed time however much
 > budget is available.
 
 ### Human validation — a dependency, not a cost line
 
-**16.0 hours** of interactive validation are planned in the Copilot Studio
+**12.0 hours** of interactive validation are planned in the Copilot Studio
 interface. Those hours are collected to size the test volume above — they are
 **not** estimated as labour cost, consistent with this tool metering agent
 consumption rather than people.
@@ -375,7 +285,7 @@ overstatement this section exists to avoid.
 ## Close the loop
 
 ```
-python record_actual.py est_20260903T000000_sample1 --sessions <session-id> [...]
+python record_actual.py est_20260904T000000_sample3 --sessions <session-id> [...]
 ```
 
 ---

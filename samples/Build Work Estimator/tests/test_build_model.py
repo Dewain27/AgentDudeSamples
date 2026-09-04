@@ -235,6 +235,55 @@ class TestGitHubModelRates(unittest.TestCase):
         self.assertIn("GitHub per-model token rates", labels)
 
 
+class TestGitHubModelBlending(unittest.TestCase):
+    """A team rarely builds on one model, so GitHub rates blend by share."""
+
+    MIX = {"gpt-5.5": 0.25, "gpt-5.4": 0.50, "gpt-5-mini": 0.25}
+
+    def test_blended_rates_are_the_weighted_published_rates(self):
+        rin, rout = rates.blended_github_rates(self.MIX)
+        self.assertAlmostEqual(
+            rin, 0.25 * 5.00 + 0.50 * 2.50 + 0.25 * 0.25, places=6)
+        self.assertAlmostEqual(
+            rout, 0.25 * 30.00 + 0.50 * 15.00 + 0.25 * 2.00, places=6)
+
+    def test_a_single_model_blend_is_that_model(self):
+        self.assertEqual(rates.blended_github_rates({"gpt-5.5": 1.0}),
+                         rates.GITHUB_MODEL_RATES["gpt-5.5"])
+
+    def test_weights_need_not_sum_to_one(self):
+        a = rates.blended_github_rates({"gpt-5.5": 1, "gpt-5.4": 1})
+        b = rates.blended_github_rates({"gpt-5.5": 0.5, "gpt-5.4": 0.5})
+        self.assertEqual(a, b)
+
+    def test_a_blend_is_priced_between_its_members(self):
+        rin, _ = rates.blended_github_rates(self.MIX)
+        self.assertLess(rin, rates.GITHUB_MODEL_RATES["gpt-5.5"][0])
+        self.assertGreater(rin, rates.GITHUB_MODEL_RATES["gpt-5-mini"][0])
+
+    def test_the_report_names_every_model_in_the_blend(self):
+        out = gh.compute({"build_model": dict(self.MIX),
+                          "interactions": 1000}, 30)
+        for model in self.MIX:
+            self.assertIn(model, out["build_model"])
+        self.assertIn("blended across 3 models", out["model_rate_source"])
+
+    def test_a_blend_containing_an_unavailable_model_is_refused(self):
+        with self.assertRaises(gh.GitHubCopilotError):
+            gh.compute({"build_model": {"gpt-5.5": 0.5,
+                                        "claude-fable-5-1": 0.5},
+                        "interactions": 10}, 30)
+
+    def test_every_gpt_rate_came_from_the_published_table(self):
+        """No rate is invented to round out the catalogue."""
+        for model in ("gpt-5-mini", "gpt-5.3-codex", "gpt-5.4-nano",
+                      "gpt-5.4-mini", "gpt-5.4", "gpt-5.5"):
+            self.assertIn(model, rates.GITHUB_MODEL_RATES)
+            rin, rout = rates.GITHUB_MODEL_RATES[model]
+            self.assertGreater(rin, 0)
+            self.assertGreater(rout, rin, "output should cost more than input")
+
+
 class TestItReachesTheEstimate(unittest.TestCase):
     def test_a_repriced_model_moves_the_build_total(self):
         cheap = dict(manifest(), build_model="claude-haiku-4-5")
