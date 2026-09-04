@@ -180,12 +180,57 @@ def check_links(problems):
                                 % (os.path.relpath(path, REPO), target))
 
 
+def check_version_bumped(problems):
+    """A change to the plugin must carry a version bump in the same commit.
+
+    Clients learn about an update only by comparing their installed
+    plugin.json against the marketplace entry. A merged change that leaves the
+    version alone is invisible: installed users keep running the old build and
+    the version gate never fires.
+
+    This compares the working tree against origin/main. It is skipped when
+    that ref is unavailable -- a shallow clone or a fresh repo is not a
+    failure, and blocking on it would be worse than the drift it prevents.
+    """
+    import subprocess
+
+    def git(*args):
+        return subprocess.run(["git"] + list(args), cwd=REPO,
+                              capture_output=True, text=True)
+
+    base = "origin/main"
+    if git("rev-parse", "--verify", base).returncode != 0:
+        return
+
+    changed = git("diff", "--name-only", base, "--", "plugins/").stdout.split()
+    if not changed:
+        return
+
+    current = git("show", "%s:samples/Build Work Estimator/build/"
+                  "build_plugin.py" % base)
+    if current.returncode != 0:
+        return
+    match = re.search(r'^VERSION = "([^"]+)"', current.stdout, re.M)
+    if not match:
+        return
+    base_version = match.group(1)
+
+    sys.path.insert(0, os.path.join(SAMPLE, "build"))
+    import build_plugin
+    if build_plugin.VERSION == base_version:
+        problems.append(
+            "plugins/ changed but VERSION is still %s. Raise it in "
+            "build/build_plugin.py and rebuild -- without a bump, installed "
+            "clients are never told to update." % base_version)
+
+
 CHECKS = (
     ("test counts", check_test_counts),
     ("script inventory", check_script_inventory),
     ("companion-file counts", check_companion_counts),
     ("rate verification dates", check_rate_dates),
     ("local links", check_links),
+    ("version bumped with plugin changes", check_version_bumped),
 )
 
 

@@ -232,3 +232,70 @@ class TestVersionHasOneSource(unittest.TestCase):
                          "version_check compares these two directly")
         self.assertEqual(plugin["version"], cowork,
                          "the Cowork package must not ship a stale version")
+
+
+class TestTargetIsRecommendedNotAskedCold(unittest.TestCase):
+    """Copilot Studio and Azure are both Microsoft; the choice follows from
+    the requirements rather than being a preference the user must hold."""
+
+    def test_the_skill_says_not_to_ask_the_platform_cold(self):
+        t = skill_text()
+        self.assertIn("Do not ask this cold", t)
+
+    def test_it_recommends_from_the_specification(self):
+        t = skill_text()
+        self.assertIn("read it and recommend", t)
+        self.assertIn("Signal in the requirements", t)
+
+    def test_the_harness_is_asked_as_a_preference_first(self):
+        t = skill_text()
+        self.assertIn("Ask this one as a preference first", t)
+
+    def test_the_harness_offers_a_recommendation_too(self):
+        t = skill_text()
+        self.assertIn("If you'd rather I recommend one", t)
+
+    def test_both_recommendations_are_on_fit_not_cost(self):
+        """The tool must not steer architecture with its own number."""
+        t = skill_text()
+        self.assertEqual(t.count("Recommend on fit, never on cost."), 2,
+                         "the rule belongs on both the platform and the "
+                         "harness recommendation")
+        self.assertIn("steering an architecture decision with its own number",
+                      t)
+
+    def test_harness_ai_recommend_is_refused_by_the_estimator(self):
+        import target_platform as tp
+        with self.assertRaises(tp.TargetPlatformError) as caught:
+            tp.validate_harness("ai-recommend")
+        self.assertIn("still `ai-recommend`", str(caught.exception))
+
+    def test_the_harness_error_says_to_decide_on_fit(self):
+        import target_platform as tp
+        with self.assertRaises(tp.TargetPlatformError) as caught:
+            tp.validate_harness("ai-recommend")
+        self.assertIn("Recommend on FIT, never on cost",
+                      str(caught.exception))
+
+    def test_real_harness_values_still_validate(self):
+        import target_platform as tp
+        self.assertEqual(tp.validate_harness("standard"), "standard")
+        self.assertEqual(tp.validate_harness("github-copilot"),
+                         "github-copilot")
+
+
+class TestItReportsProgress(unittest.TestCase):
+    """Silence is indistinguishable from nothing happening."""
+
+    def test_the_skill_says_to_announce_starting(self):
+        t = skill_text()
+        self.assertIn("Say that you have started", t)
+        self.assertIn("before the first slow step", t)
+
+    def test_it_reports_after_each_phase(self):
+        t = skill_text()
+        self.assertIn("One short line per phase", t)
+
+    def test_it_says_to_surface_a_slow_or_failing_step(self):
+        t = skill_text()
+        self.assertIn("If something is slow, say it is slow", t)

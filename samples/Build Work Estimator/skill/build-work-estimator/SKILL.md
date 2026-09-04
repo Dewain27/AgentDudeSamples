@@ -48,6 +48,32 @@ collects every input and produces no file has failed, however agreeable it was.
 If a command fails, show the error and what you are doing about it. Silence
 after "ready to run" is the worst outcome available.
 
+## Say that you have started, and keep saying where you are
+
+An estimate involves reading a specification, calibrating against history,
+drafting a breakdown and running two scripts. From the outside that is a long
+silence, and silence is indistinguishable from nothing happening.
+
+**Say you have started before the first slow step**, in one line:
+
+> Reading the specification and calibrating against your session history — I'll
+> come back with a draft breakdown and anything I still need.
+
+Then report as you go. One short line per phase, not a running commentary:
+
+| After | Say |
+| --- | --- |
+| Calibrating | whether it measured real history or fell back to published baselines, and the sample size |
+| Reading the specification | what it covers, and what you could not find in it |
+| Drafting the breakdown | how many items, and which parts you are least sure of |
+| Running the estimate | that it ran, and the headline figure |
+| Rendering | where the files are |
+
+If something is slow, say it is slow. If a step fails, say which one and what
+you are doing about it. A user who can see where you are will wait; a user
+staring at nothing assumes it is stuck — and in the session that prompted this
+rule, they were right.
+
 ## Run order
 
 ### 0. Version gate — always first
@@ -176,7 +202,16 @@ harnesses used to author Copilot Studio agent components.
 | `copilot-studio` | Deployed to Copilot Studio |
 | `azure` | Hosted on Azure services |
 | `both` | Agent surface in Copilot Studio, Azure services behind it |
-| `ai-recommend` | Run the requirements interview and propose one (below) |
+| `ai-recommend` | You analyse the requirements and recommend one (below) |
+
+**Do not ask this cold.** Copilot Studio and Azure are both Microsoft, and the
+choice between them is an architecture decision that follows from the
+requirements — not a preference the user should have to hold in their head
+before they can get an estimate.
+
+If you have a specification, **read it and recommend**. Only ask outright when
+there is nothing to reason from. If the user already knows, take their answer
+and move on; a recommendation nobody wanted is just another question.
 
 **Q3. Which TARGET HARNESS?** — `target.harness`, required when the target is
 Copilot Studio. This single answer moves the target-side figure between
@@ -186,6 +221,29 @@ effectively zero and the largest line in the estimate:
 | --- | --- |
 | `standard` | **Not billed.** Billing starts after publish; test chat does not count |
 | `github-copilot` | **Billed from the moment building starts** |
+
+**Ask this one as a preference first** — unlike the target platform, the
+harness is usually a decision the team has already made about how they author,
+and asking is faster than inferring. But offer the alternative in the same
+breath:
+
+> Which Copilot Studio harness — `standard` (the maker experience) or
+> `github-copilot` (code-first)? If you'd rather I recommend one from your
+> requirements, say so and I'll do that instead.
+
+If they ask for a recommendation, set `harness: ai-recommend`, decide from
+these signals, and agree it before estimating. The estimator refuses to price
+`ai-recommend`, so it cannot be left undecided:
+
+| Signal in the requirements | Points to |
+| --- | --- |
+| Makers author in the Copilot Studio interface; no source-control requirement for the agent definition; Power Platform ALM | `standard` |
+| Agent definitions belong in source control; code-first authoring; engineers building with GitHub Copilot; a pipeline promoting the definition across environments | `github-copilot` |
+
+**Recommend on fit, never on cost.** This is the input that swings the target
+figure the most, which is exactly why a cost-driven recommendation would be
+this tool steering an architecture decision with its own number. Decide on how
+the team authors, then state the cost consequence as information.
 
 Never guess it. A standard-harness target legitimately returns near-zero
 target-side cost — report that as correct, and show what the same work would
@@ -197,19 +255,32 @@ platform and the target platform at the same time. Report both.
 **GitHub AI Credits are not Copilot Studio Copilot Credits.** Both are $0.01 per
 credit; separate meters, separate products, separate allowances.
 
-### 1d. When `target_platform` is `ai-recommend`
+### 1d. Recommending the target platform
 
-Do not silently pick one. Interview for requirements, then recommend:
+Read the specification for these signals before asking anyone anything. Most
+specifications answer most of them.
+
+| Signal in the requirements | Points to |
+| --- | --- |
+| A conversational surface for M365 users; makers maintain it; M365, Dataverse or Power Platform connectors; Power Platform governance | `copilot-studio` |
+| A custom application or API surface rather than a chat one; engineers maintain it; line-of-business APIs, custom models, heavy data processing; network isolation, private endpoints, or residency controls | `azure` |
+| An agent surface **with** custom services behind it — the common enterprise shape | `both` |
+
+Where the specification is silent, ask only what is still undecided:
 
 - Where must the data live, and what are the residency constraints?
 - Is there an existing Power Platform estate, or an existing Azure estate?
-- What does it integrate with — M365 surfaces, or line-of-business APIs?
 - Who maintains it after delivery — makers, or engineers?
 - What governance and ALM process must it fit?
 
-State a recommendation **with its reasoning**, get the user's agreement, then set
-`target_platform` to the agreed value and estimate that one. The estimator
-refuses to run while the value is still `ai-recommend`.
+State the recommendation **with the requirements that drove it**, cite where in
+the specification, and get agreement before estimating. The estimator refuses
+to run while the value is still `ai-recommend`, so a silent pick is impossible.
+
+**Recommend on fit, never on cost.** The target decides which meters apply, so
+a cost-driven recommendation would be this tool steering an architecture
+decision with its own number. State the cost consequence *after* the
+recommendation, as information, not as the reason.
 
 ### 1e. Licensing — what the number means
 

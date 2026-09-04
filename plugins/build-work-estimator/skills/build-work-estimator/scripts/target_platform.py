@@ -106,9 +106,33 @@ def validate_harness(value):
             "not guessed."
         )
     key = str(value).strip().lower()
+
+    # `ai-recommend` is an explicit "I do not know, help me decide", and the
+    # estimator refuses to price it -- the same contract target_platform has.
+    # The alternative is a silent default on the input that swings the target
+    # figure the most, which is the worst possible thing to guess.
+    if key == "ai-recommend":
+        raise TargetPlatformError(
+            "target harness is still `ai-recommend`.\n\n"
+            "Recommend one from the REQUIREMENTS, agree it with the user, then "
+            "set it:\n\n"
+            "  standard        the maker authoring experience. Build, preview, "
+            "test chat and\n                  evaluation are NOT billed; "
+            "billing starts after publish\n"
+            "  github-copilot  code-first authoring with the GitHub Copilot "
+            "harness. Billed\n                  from the moment building "
+            "starts\n\n"
+            "Recommend on FIT, never on cost. How the team authors, whether "
+            "agent\ndefinitions need source control and ALM, and who "
+            "maintains it afterwards are\nthe deciding questions. State the "
+            "cost consequence after the recommendation,\nnot as its basis -- "
+            "this tool must not steer an architecture decision with its\nown "
+            "number.")
+
     if key not in rates.HARNESS_BUILD_BILLING:
         raise TargetPlatformError(
-            "harness must be one of: %s (got %r)"
+            "harness must be one of: %s, or `ai-recommend` to have the skill "
+            "recommend one (got %r)"
             % (", ".join(sorted(rates.HARNESS_BUILD_BILLING)), value))
     return key
 
