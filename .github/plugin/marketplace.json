@@ -2,7 +2,7 @@
   "name": "agentdude-samples",
   "metadata": {
     "description": "Sample Agent Skills and plugins you can install and try, each built around a fictional company so nothing exposes real data",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   "owner": {
     "name": "Dewain27",
@@ -22,7 +22,7 @@
       "name": "build-work-estimator",
       "source": "plugins/build-work-estimator",
       "description": "Estimates the work of BUILDING something with an AI coding agent -- turns, tokens, and cost -- calibrated from your own session history, with a required contingency reserve, build-time Copilot Credits for Microsoft work, and Markdown plus PDF reports. Estimates the build, never the run.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "Dewain Robinson",
         "url": "https://github.com/Dewain27"

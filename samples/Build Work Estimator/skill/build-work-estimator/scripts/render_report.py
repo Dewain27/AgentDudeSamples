@@ -239,6 +239,9 @@ def build_summary(result):
                    % (model_info["declared_label"], note))
     # Who decided the sizes belongs beside the dev tool and the target: it is a
     # key input by exactly the same test, and it is invisible in the figures.
+    for warning in result.get("coherence") or []:
+        out.append("| **Check inputs** | %s |" % warning)
+
     source = result.get("breakdown_source", "authored")
     if source == "drafted":
         out.append("| **Work breakdown** | drafted from the specification, "

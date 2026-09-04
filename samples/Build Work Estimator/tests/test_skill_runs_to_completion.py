@@ -381,3 +381,92 @@ class TestTheBreakdownIsFirstInTheReadinessList(unittest.TestCase):
     def test_the_omission_that_caused_it_is_recorded(self):
         t = skill_text()
         self.assertIn("mentioned the breakdown at all", t)
+
+
+class TestInputsAreCheckedForCoherence(unittest.TestCase):
+    """Every field can be individually valid while the manifest contradicts
+    itself. Instructions failed at this three times; this is the code check."""
+
+    def setUp(self):
+        import estimate
+        self.check = estimate.check_coherence
+
+    def test_a_claude_plan_on_a_github_build_is_flagged(self):
+        out = self.check({"build_platform": "github-copilot",
+                          "licensing": {"plan": "Claude Max"}})
+        self.assertTrue(any("does not pay for GitHub Copilot" in w
+                            for w in out))
+
+    def test_a_copilot_plan_on_a_claude_build_is_flagged(self):
+        out = self.check({"build_platform": "claude-code",
+                          "licensing": {"plan": "GitHub Copilot Business"}})
+        self.assertTrue(any("does not pay for Claude Code" in w for w in out))
+
+    def test_copilot_studio_fields_on_an_azure_target_are_flagged(self):
+        out = self.check({"build_platform": "claude-code",
+                          "target_platform": "azure",
+                          "target": {"harness": "standard",
+                                     "tier": "premium"}})
+        self.assertTrue(any("no Copilot Studio in it" in w for w in out))
+
+    def test_azure_spend_on_a_studio_only_target_is_flagged(self):
+        out = self.check({"target_platform": "copilot-studio",
+                          "target": {"azure_build_usd": 900}})
+        self.assertTrue(any("no Azure in it" in w for w in out))
+
+    def test_a_standard_harness_on_a_github_build_is_NOT_flagged(self):
+        """Deliberate in two shipped examples, and ungroundable as unusual."""
+        out = self.check({"build_platform": "github-copilot",
+                          "target_platform": "both",
+                          "target": {"harness": "standard"}})
+        self.assertEqual(out, [],
+                         "a check that fires on valid input teaches people to "
+                         "ignore checks")
+
+    def test_an_unused_github_block_is_flagged(self):
+        out = self.check({"build_platform": "claude-code",
+                          "github_copilot": {"billing_mode": "ai-credits"}})
+        self.assertTrue(any("none of it is used" in w for w in out))
+
+    def test_a_coherent_manifest_produces_no_noise(self):
+        out = self.check({"build_platform": "github-copilot",
+                          "target_platform": "both",
+                          "licensing": {"plan": "GitHub Copilot Business"},
+                          "target": {"harness": "github-copilot",
+                                     "tier": "premium"},
+                          "github_copilot": {"billing_mode": "ai-credits"}})
+        self.assertEqual(out, [], "a valid manifest must not be nagged")
+
+    def test_warnings_reach_the_report(self):
+        import estimate
+        import render_report as rr
+        from test_estimate import PROFILE, manifest
+        m = manifest()
+        m["build_platform"] = "github-copilot"
+        m["licensing"] = dict(m.get("licensing") or {}, plan="Claude Max")
+        # A GitHub build needs a model so its rates come from the table.
+        m["github_copilot"] = {"billing_mode": "ai-credits",
+                               "build_model": "gpt-5.4"}
+        result = estimate.compute_plan(m, PROFILE)
+        self.assertTrue(result["coherence"])
+        self.assertIn("Check inputs", rr.build_markdown(result))
+
+
+class TestNoGuessedDefaults(unittest.TestCase):
+    def test_the_harness_must_never_be_proposed(self):
+        t = skill_text()
+        self.assertIn("Never propose a `target.harness`", t)
+
+    def test_the_likely_github_pairing_is_named(self):
+        t = skill_text()
+        self.assertIn("usually means the `github-copilot` harness", t)
+
+    def test_example_values_must_not_be_proposed_as_drafted(self):
+        t = skill_text()
+        self.assertIn("Never propose a value copied from the manifest example",
+                      t)
+        self.assertIn("they were drafted from an example", t)
+
+    def test_tier_is_labelled_as_a_copilot_studio_field(self):
+        t = skill_text()
+        self.assertIn("**Copilot Studio fields**", t)

@@ -449,7 +449,7 @@ numbers.
 cd "samples/Build Work Estimator/tests" && python3 -m unittest discover -p 'test_*.py'
 ```
 
-434 tests. Fixtures are synthetic and committed; no test reads real history and
+446 tests. Fixtures are synthetic and committed; no test reads real history and
 no test makes a network call.
 
 The most important suite is `test_contribute.py`. It seeds a ledger entry with
