@@ -36,8 +36,9 @@ not wait to be told to proceed a second time.
 
 You are done when **all four** of these are true:
 
-1. `scripts/estimate.py` ran and wrote its JSON
-2. `scripts/render_report.py` ran and wrote the Markdown (and the PDF if asked)
+1. `scripts/estimate.py --report <name>` ran — one command that computes and
+   writes the report, so there is no half-finished sequence to forget
+2. The `.md` exists on disk (and the `.pdf` if asked for)
 3. You told the user where the files are
 4. You gave them the headline: likely, and likely-plus-reserve
 
@@ -47,6 +48,53 @@ collects every input and produces no file has failed, however agreeable it was.
 
 If a command fails, show the error and what you are doing about it. Silence
 after "ready to run" is the worst outcome available.
+
+### Never say you ran something you did not run
+
+**A status claim must be backed by output you can point at.** Do not say "I'm
+running it now", "yes, it's running", or "that's in progress" unless a command
+has actually executed and you can show what it printed. There is no background
+execution here — nothing runs between your messages, so anything you have not
+already done is not underway.
+
+This happened, verbatim, in a real session:
+
+> **User:** OK, so it is running now?
+> **Assistant:** Yes.
+> **User:** What is the status of it?
+> **Assistant:** It is not running yet — I have not executed the estimate
+> commands.
+
+That is worse than being slow. The user waited on a claim that was never true.
+
+If you are asked whether it is running and it is not: say so in one sentence,
+then **run it in that same reply** rather than promising again.
+
+## Say that you have started, and keep saying where you are
+
+An estimate involves reading a specification, calibrating against history,
+drafting a breakdown and running two scripts. From the outside that is a long
+silence, and silence is indistinguishable from nothing happening.
+
+**Say you have started before the first slow step**, in one line:
+
+> Reading the specification and calibrating against your session history — I'll
+> come back with a draft breakdown and anything I still need.
+
+Then report as you go. One short line per phase, not a running commentary:
+
+| After | Say |
+| --- | --- |
+| Calibrating | whether it measured real history or fell back to published baselines, and the sample size |
+| Reading the specification | what it covers, and what you could not find in it |
+| Drafting the breakdown | how many items, and which parts you are least sure of |
+| Running the estimate | that it ran, and the headline figure |
+| Rendering | where the files are |
+
+If something is slow, say it is slow. If a step fails, say which one and what
+you are doing about it. A user who can see where you are will wait; a user
+staring at nothing assumes it is stuck — and in the session that prompted this
+rule, they were right.
 
 ## Run order
 
@@ -123,10 +171,21 @@ Offer a sensible default for everything that has one, so the user can say
 | `other_workload_share` | Propose 0.0 if they say nothing is allocated |
 | `tier`, `reasoning_model` | Infer from the specification, and say what you inferred |
 
-`reserve_percent`, `specification`, `build_platform`, `target_platform`, the
-harness when the target includes Copilot Studio, and `seat_monthly_cost` for
-seat licensing genuinely cannot be defaulted. Everything else can start from a
-proposal.
+These genuinely cannot be defaulted, and **the work breakdown is the first of
+them**:
+
+1. **`items:` — the work breakdown.** Draft it from the specification (step
+   1a) or get it from the user. Without it there is nothing to estimate. Two
+   real sessions listed "required inputs" as six config fields and never
+   mentioned the breakdown at all, then could not run.
+2. `reserve_percent`
+3. `specification`
+4. `build_platform`
+5. `target_platform` — recommend it rather than asking cold
+6. `target.harness`, when the target includes Copilot Studio
+7. `seat_monthly_cost`, for seat licensing
+
+Everything else can start from a proposal.
 
 **Never ask for something the specification already answers.** If it names the
 platform, the integrations, or the environments, read them out and confirm
@@ -176,7 +235,16 @@ harnesses used to author Copilot Studio agent components.
 | `copilot-studio` | Deployed to Copilot Studio |
 | `azure` | Hosted on Azure services |
 | `both` | Agent surface in Copilot Studio, Azure services behind it |
-| `ai-recommend` | Run the requirements interview and propose one (below) |
+| `ai-recommend` | You analyse the requirements and recommend one (below) |
+
+**Do not ask this cold.** Copilot Studio and Azure are both Microsoft, and the
+choice between them is an architecture decision that follows from the
+requirements — not a preference the user should have to hold in their head
+before they can get an estimate.
+
+If you have a specification, **read it and recommend**. Only ask outright when
+there is nothing to reason from. If the user already knows, take their answer
+and move on; a recommendation nobody wanted is just another question.
 
 **Q3. Which TARGET HARNESS?** — `target.harness`, required when the target is
 Copilot Studio. This single answer moves the target-side figure between
@@ -186,6 +254,29 @@ effectively zero and the largest line in the estimate:
 | --- | --- |
 | `standard` | **Not billed.** Billing starts after publish; test chat does not count |
 | `github-copilot` | **Billed from the moment building starts** |
+
+**Ask this one as a preference first** — unlike the target platform, the
+harness is usually a decision the team has already made about how they author,
+and asking is faster than inferring. But offer the alternative in the same
+breath:
+
+> Which Copilot Studio harness — `standard` (the maker experience) or
+> `github-copilot` (code-first)? If you'd rather I recommend one from your
+> requirements, say so and I'll do that instead.
+
+If they ask for a recommendation, set `harness: ai-recommend`, decide from
+these signals, and agree it before estimating. The estimator refuses to price
+`ai-recommend`, so it cannot be left undecided:
+
+| Signal in the requirements | Points to |
+| --- | --- |
+| Makers author in the Copilot Studio interface; no source-control requirement for the agent definition; Power Platform ALM | `standard` |
+| Agent definitions belong in source control; code-first authoring; engineers building with GitHub Copilot; a pipeline promoting the definition across environments | `github-copilot` |
+
+**Recommend on fit, never on cost.** This is the input that swings the target
+figure the most, which is exactly why a cost-driven recommendation would be
+this tool steering an architecture decision with its own number. Decide on how
+the team authors, then state the cost consequence as information.
 
 Never guess it. A standard-harness target legitimately returns near-zero
 target-side cost — report that as correct, and show what the same work would
@@ -197,19 +288,32 @@ platform and the target platform at the same time. Report both.
 **GitHub AI Credits are not Copilot Studio Copilot Credits.** Both are $0.01 per
 credit; separate meters, separate products, separate allowances.
 
-### 1d. When `target_platform` is `ai-recommend`
+### 1d. Recommending the target platform
 
-Do not silently pick one. Interview for requirements, then recommend:
+Read the specification for these signals before asking anyone anything. Most
+specifications answer most of them.
+
+| Signal in the requirements | Points to |
+| --- | --- |
+| A conversational surface for M365 users; makers maintain it; M365, Dataverse or Power Platform connectors; Power Platform governance | `copilot-studio` |
+| A custom application or API surface rather than a chat one; engineers maintain it; line-of-business APIs, custom models, heavy data processing; network isolation, private endpoints, or residency controls | `azure` |
+| An agent surface **with** custom services behind it — the common enterprise shape | `both` |
+
+Where the specification is silent, ask only what is still undecided:
 
 - Where must the data live, and what are the residency constraints?
 - Is there an existing Power Platform estate, or an existing Azure estate?
-- What does it integrate with — M365 surfaces, or line-of-business APIs?
 - Who maintains it after delivery — makers, or engineers?
 - What governance and ALM process must it fit?
 
-State a recommendation **with its reasoning**, get the user's agreement, then set
-`target_platform` to the agreed value and estimate that one. The estimator
-refuses to run while the value is still `ai-recommend`.
+State the recommendation **with the requirements that drove it**, cite where in
+the specification, and get agreement before estimating. The estimator refuses
+to run while the value is still `ai-recommend`, so a silent pick is impossible.
+
+**Recommend on fit, never on cost.** The target decides which meters apply, so
+a cost-driven recommendation would be this tool steering an architecture
+decision with its own number. State the cost consequence *after* the
+recommendation, as information, not as the reason.
 
 ### 1e. Licensing — what the number means
 
@@ -349,6 +453,18 @@ Code completions and next edit suggestions consume nothing and are unlimited on
 paid plans — they never enter the estimate.
 
 ### 4. Report — actually produce it
+
+**Prefer the single command.** Estimating and rendering in one invocation
+means "run it" is one action with a file at the end, not a sequence whose
+second half keeps not happening:
+
+```bash
+python scripts/estimate.py --manifest estimate.yaml \
+    --report build-estimate --format both
+```
+
+It prints the paths written and the headline figure. The separate form still
+exists when you already have the JSON:
 
 ```bash
 python scripts/render_report.py estimate.json -o build-estimate --format both

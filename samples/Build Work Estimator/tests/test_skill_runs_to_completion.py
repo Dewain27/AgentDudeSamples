@@ -232,3 +232,152 @@ class TestVersionHasOneSource(unittest.TestCase):
                          "version_check compares these two directly")
         self.assertEqual(plugin["version"], cowork,
                          "the Cowork package must not ship a stale version")
+
+
+class TestTargetIsRecommendedNotAskedCold(unittest.TestCase):
+    """Copilot Studio and Azure are both Microsoft; the choice follows from
+    the requirements rather than being a preference the user must hold."""
+
+    def test_the_skill_says_not_to_ask_the_platform_cold(self):
+        t = skill_text()
+        self.assertIn("Do not ask this cold", t)
+
+    def test_it_recommends_from_the_specification(self):
+        t = skill_text()
+        self.assertIn("read it and recommend", t)
+        self.assertIn("Signal in the requirements", t)
+
+    def test_the_harness_is_asked_as_a_preference_first(self):
+        t = skill_text()
+        self.assertIn("Ask this one as a preference first", t)
+
+    def test_the_harness_offers_a_recommendation_too(self):
+        t = skill_text()
+        self.assertIn("If you'd rather I recommend one", t)
+
+    def test_both_recommendations_are_on_fit_not_cost(self):
+        """The tool must not steer architecture with its own number."""
+        t = skill_text()
+        self.assertEqual(t.count("Recommend on fit, never on cost."), 2,
+                         "the rule belongs on both the platform and the "
+                         "harness recommendation")
+        self.assertIn("steering an architecture decision with its own number",
+                      t)
+
+    def test_harness_ai_recommend_is_refused_by_the_estimator(self):
+        import target_platform as tp
+        with self.assertRaises(tp.TargetPlatformError) as caught:
+            tp.validate_harness("ai-recommend")
+        self.assertIn("still `ai-recommend`", str(caught.exception))
+
+    def test_the_harness_error_says_to_decide_on_fit(self):
+        import target_platform as tp
+        with self.assertRaises(tp.TargetPlatformError) as caught:
+            tp.validate_harness("ai-recommend")
+        self.assertIn("Recommend on FIT, never on cost",
+                      str(caught.exception))
+
+    def test_real_harness_values_still_validate(self):
+        import target_platform as tp
+        self.assertEqual(tp.validate_harness("standard"), "standard")
+        self.assertEqual(tp.validate_harness("github-copilot"),
+                         "github-copilot")
+
+
+class TestItReportsProgress(unittest.TestCase):
+    """Silence is indistinguishable from nothing happening."""
+
+    def test_the_skill_says_to_announce_starting(self):
+        t = skill_text()
+        self.assertIn("Say that you have started", t)
+        self.assertIn("before the first slow step", t)
+
+    def test_it_reports_after_each_phase(self):
+        t = skill_text()
+        self.assertIn("One short line per phase", t)
+
+    def test_it_says_to_surface_a_slow_or_failing_step(self):
+        t = skill_text()
+        self.assertIn("If something is slow, say it is slow", t)
+
+
+class TestOneCommandProducesTheDeliverable(unittest.TestCase):
+    """Estimating and rendering were two commands, so "run it" was a sequence
+    whose second half kept not happening while the assistant narrated as
+    though it had."""
+
+    def test_estimate_can_render_in_one_invocation(self):
+        import subprocess
+        import tempfile
+        out = os.path.join(tempfile.mkdtemp(), "e")
+        scripts = os.path.join(SAMPLE, "skill", "build-work-estimator",
+                               "scripts")
+        proc = subprocess.run(
+            [__import__("sys").executable,
+             os.path.join(scripts, "estimate.py"),
+             "--manifest", os.path.join(SAMPLE, "examples",
+                                        "harbor-line-manifest.yaml"),
+             "--profile", os.path.join(SAMPLE, "examples",
+                                       "calibration-profile.json"),
+             "--no-ledger", "--report", out],
+            capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertTrue(os.path.exists(out + ".md"),
+                        "one command must leave a report behind")
+
+    def test_it_prints_the_headline_so_the_run_is_visible(self):
+        import subprocess
+        import tempfile
+        out = os.path.join(tempfile.mkdtemp(), "e")
+        scripts = os.path.join(SAMPLE, "skill", "build-work-estimator",
+                               "scripts")
+        proc = subprocess.run(
+            [__import__("sys").executable,
+             os.path.join(scripts, "estimate.py"),
+             "--manifest", os.path.join(SAMPLE, "examples",
+                                        "harbor-line-manifest.yaml"),
+             "--profile", os.path.join(SAMPLE, "examples",
+                                       "calibration-profile.json"),
+             "--no-ledger", "--report", out],
+            capture_output=True, text=True)
+        self.assertIn("Likely $", proc.stdout)
+        self.assertIn("with reserve $", proc.stdout)
+
+    def test_render_write_is_shared_not_duplicated(self):
+        import render_report
+        self.assertTrue(callable(getattr(render_report, "write", None)),
+                        "estimate --report and the CLI must share one writer")
+
+    def test_the_skill_prefers_the_single_command(self):
+        t = skill_text()
+        self.assertIn("Prefer the single command", t)
+
+
+class TestItDoesNotClaimToBeRunning(unittest.TestCase):
+    """The worst failure yet: asserting it was running when it was not."""
+
+    def test_the_rule_exists(self):
+        t = skill_text()
+        self.assertIn("Never say you ran something you did not run", t)
+
+    def test_a_status_claim_must_be_backed_by_output(self):
+        t = skill_text()
+        self.assertIn("must be backed by output you can point at", t)
+
+    def test_it_says_nothing_runs_between_messages(self):
+        t = skill_text()
+        self.assertIn("nothing runs between your messages", t)
+
+    def test_it_says_to_run_in_the_same_reply_when_caught(self):
+        t = skill_text()
+        self.assertIn("run it in that same reply", t)
+
+
+class TestTheBreakdownIsFirstInTheReadinessList(unittest.TestCase):
+    def test_items_is_named_as_a_required_input(self):
+        t = skill_text()
+        self.assertIn("**`items:` — the work breakdown.**", t)
+
+    def test_the_omission_that_caused_it_is_recorded(self):
+        t = skill_text()
+        self.assertIn("mentioned the breakdown at all", t)
